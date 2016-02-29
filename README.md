@@ -10,4 +10,7 @@ Hello.
    ambigious, a comment will help. 
 3. Use Vim.
 
+## Suggestions for  Testing
+
+* http://hspec.github.io/
 
