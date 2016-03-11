@@ -87,62 +87,62 @@ let yyact = [|
 ; (fun __caml_parser_env ->
     let _1 = (Parsing.peek_val __caml_parser_env 1 : 'expr) in
     Obj.repr(
-# 12 "src/parser.mly"
+# 12 "parser.mly"
                          ( _1 )
-# 93 "src/parser.ml"
+# 93 "parser.ml"
                : int))
 ; (fun __caml_parser_env ->
     let _1 = (Parsing.peek_val __caml_parser_env 0 : int) in
     Obj.repr(
-# 15 "src/parser.mly"
+# 15 "parser.mly"
                          ( _1 )
-# 100 "src/parser.ml"
+# 100 "parser.ml"
                : 'expr))
 ; (fun __caml_parser_env ->
     let _2 = (Parsing.peek_val __caml_parser_env 1 : 'expr) in
     Obj.repr(
-# 16 "src/parser.mly"
+# 16 "parser.mly"
                             ( _2 )
-# 107 "src/parser.ml"
+# 107 "parser.ml"
                : 'expr))
 ; (fun __caml_parser_env ->
     let _1 = (Parsing.peek_val __caml_parser_env 2 : 'expr) in
     let _3 = (Parsing.peek_val __caml_parser_env 0 : 'expr) in
     Obj.repr(
-# 17 "src/parser.mly"
+# 17 "parser.mly"
                             ( _1 + _3 )
-# 115 "src/parser.ml"
+# 115 "parser.ml"
                : 'expr))
 ; (fun __caml_parser_env ->
     let _1 = (Parsing.peek_val __caml_parser_env 2 : 'expr) in
     let _3 = (Parsing.peek_val __caml_parser_env 0 : 'expr) in
     Obj.repr(
-# 18 "src/parser.mly"
+# 18 "parser.mly"
                             ( _1 - _3 )
-# 123 "src/parser.ml"
+# 123 "parser.ml"
                : 'expr))
 ; (fun __caml_parser_env ->
     let _1 = (Parsing.peek_val __caml_parser_env 2 : 'expr) in
     let _3 = (Parsing.peek_val __caml_parser_env 0 : 'expr) in
     Obj.repr(
-# 19 "src/parser.mly"
+# 19 "parser.mly"
                             ( _1 * _3 )
-# 131 "src/parser.ml"
+# 131 "parser.ml"
                : 'expr))
 ; (fun __caml_parser_env ->
     let _1 = (Parsing.peek_val __caml_parser_env 2 : 'expr) in
     let _3 = (Parsing.peek_val __caml_parser_env 0 : 'expr) in
     Obj.repr(
-# 20 "src/parser.mly"
+# 20 "parser.mly"
                             ( _1 / _3 )
-# 139 "src/parser.ml"
+# 139 "parser.ml"
                : 'expr))
 ; (fun __caml_parser_env ->
     let _2 = (Parsing.peek_val __caml_parser_env 0 : 'expr) in
     Obj.repr(
-# 21 "src/parser.mly"
+# 21 "parser.mly"
                             ( - _2 )
-# 146 "src/parser.ml"
+# 146 "parser.ml"
                : 'expr))
 (* Entry main *)
 ; (fun __caml_parser_env -> raise (Parsing.YYexit (Parsing.peek_val __caml_parser_env 0)))

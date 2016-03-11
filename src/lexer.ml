@@ -1,9 +1,9 @@
-# 5 "src/lexer.mll"
-  
+# 1 "lexer.mll"
+ 
 open Parser        (* The type token is defined in parser.mli *)
 exception Eof
 
-# 7 "src/lexer.ml"
+# 7 "lexer.ml"
 let __ocaml_lex_tables = {
   Lexing.lex_base = 
    "\000\000\246\255\247\255\248\255\249\255\250\255\251\255\252\255\
@@ -103,59 +103,59 @@ let rec token lexbuf =
 and __ocaml_lex_token_rec lexbuf __ocaml_lex_state =
   match Lexing.engine __ocaml_lex_tables __ocaml_lex_state lexbuf with
       | 0 ->
-# 12 "src/lexer.mll"
+# 6 "lexer.mll"
                   ( token lexbuf )
-# 109 "src/lexer.ml"
+# 109 "lexer.ml"
 
   | 1 ->
-# 13 "src/lexer.mll"
+# 7 "lexer.mll"
                      ( EOL )
-# 114 "src/lexer.ml"
+# 114 "lexer.ml"
 
   | 2 ->
 let
-# 14 "src/lexer.mll"
+# 8 "lexer.mll"
                     lxm
-# 120 "src/lexer.ml"
+# 120 "lexer.ml"
 = Lexing.sub_lexeme lexbuf lexbuf.Lexing.lex_start_pos lexbuf.Lexing.lex_curr_pos in
-# 14 "src/lexer.mll"
+# 8 "lexer.mll"
                         ( INT(int_of_string lxm) )
-# 124 "src/lexer.ml"
+# 124 "lexer.ml"
 
   | 3 ->
-# 15 "src/lexer.mll"
+# 9 "lexer.mll"
                      ( PLUS )
-# 129 "src/lexer.ml"
+# 129 "lexer.ml"
 
   | 4 ->
-# 16 "src/lexer.mll"
+# 10 "lexer.mll"
                      ( MINUS )
-# 134 "src/lexer.ml"
+# 134 "lexer.ml"
 
   | 5 ->
-# 17 "src/lexer.mll"
+# 11 "lexer.mll"
                      ( TIMES )
-# 139 "src/lexer.ml"
+# 139 "lexer.ml"
 
   | 6 ->
-# 18 "src/lexer.mll"
+# 12 "lexer.mll"
                      ( DIV )
-# 144 "src/lexer.ml"
+# 144 "lexer.ml"
 
   | 7 ->
-# 19 "src/lexer.mll"
+# 13 "lexer.mll"
                      ( LPAREN )
-# 149 "src/lexer.ml"
+# 149 "lexer.ml"
 
   | 8 ->
-# 20 "src/lexer.mll"
+# 14 "lexer.mll"
                      ( RPAREN )
-# 154 "src/lexer.ml"
+# 154 "lexer.ml"
 
   | 9 ->
-# 21 "src/lexer.mll"
+# 15 "lexer.mll"
                      ( raise Eof )
-# 159 "src/lexer.ml"
+# 159 "lexer.ml"
 
   | __ocaml_lex_state -> lexbuf.Lexing.refill_buff lexbuf; __ocaml_lex_token_rec lexbuf __ocaml_lex_state
 
