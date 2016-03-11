@@ -11,6 +11,7 @@ main: lexer parser
 	ocamlc -o $(EXE) $(LEXER).cmo $(PARSER).cmo $(EXE).cmo
 	mkdir -p bin
 	mv ${EXE} bin/
+	rm *.cmi *.mli *.cmo $(LEXER).ml $(PARSER).ml
 
 lexer:
 	ocamllex $(LEXER).mll
