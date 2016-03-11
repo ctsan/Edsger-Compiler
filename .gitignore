@@ -1,1 +1,6 @@
 *.swp
+*bin/*
+*.cmo
+*.cmi
+*.mli
+

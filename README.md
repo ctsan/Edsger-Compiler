@@ -4,13 +4,10 @@ Hello.
 
 ## Conventions
 
-1. Do not COMMIT any shit, if TESTS aren't passed.
-2. TODOs are great. So put them in Comments. A:TODO, X:TODO for who will
-   proably implement the feature. If the feature for implementation is
-   ambigious, a comment will help. 
+2. Use TODOs
 3. Use Vim.
 
-## Suggestions for  Testing
+## Useful Links
 
-* http://hspec.github.io/
+* [Lexing/Parsing][http://caml.inria.fr/pub/docs/manual-ocaml-4.00/manual026.html]
 
