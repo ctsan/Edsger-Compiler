@@ -1,6 +1,6 @@
 # 1 "lexer.mll"
  
-open Parser        (* The type token is defined in parser.mli *)
+open Parser      
 exception Eof
 
 # 7 "lexer.ml"

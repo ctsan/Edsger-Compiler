@@ -19,5 +19,5 @@ parser:
 	ocamlyacc $(PARSER).mly
 
 clean: 
-	rm *.ml *.cmi *.mli *.cmo $(LEXER).ml $(PARSER).ml
+	rm *.cmi *.mli *.cmo $(LEXER).ml $(PARSER).ml
 
