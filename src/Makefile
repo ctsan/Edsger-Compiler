@@ -4,6 +4,7 @@ else
    EXE=
 endif
 
+EXENAME=lexer$(EXE)
 OCAMLC_FLAGS=-g
 OCAMLC=ocamlc
 
@@ -16,10 +17,10 @@ OCAMLC=ocamlc
 %.cmo %.cmi: %.ml
 	$(OCAMLC) $(OCAMLC_FLAGS) -c $<
 
-lexer$(EXE): Lexer.cmo
+$(EXENAME): Lexer.cmo
 	$(OCAMLC) $(OCAMLC_FLAGS) -o $@ $^
 	mkdir -p ../bin
-	mv lexer$(EXE) ../bin/
+	mv $(EXENAME) ../bin/
 
 Lexer.ml: Lexer.mll
 	ocamllex -o $@ $<
@@ -30,4 +31,4 @@ clean:
 	$(RM) Lexer.ml *.cmo *.cmi *~
 
 distclean: clean
-	$(RM) minibasic$(EXE)
+	$(RM) $(EXENAME)
