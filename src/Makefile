@@ -18,6 +18,7 @@ OCAMLC=ocamlc
 
 lexer$(EXE): Lexer.cmo
 	$(OCAMLC) $(OCAMLC_FLAGS) -o $@ $^
+	mkdir -p ../bin
 	mv lexer$(EXE) ../bin/
 
 Lexer.ml: Lexer.mll
