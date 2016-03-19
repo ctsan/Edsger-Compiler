@@ -1,24 +1,32 @@
-.PHONY: clean
-LEXER=lexer
-PARSER=parser
-EXE=calc
+ifdef OS
+   EXE=.exe
+else
+   EXE=
+endif
 
-main: lexer parser 
-	ocamlc -c $(PARSER).mli
-	ocamlc -c $(LEXER).ml
-	ocamlc -c $(PARSER).ml
-	ocamlc -c ${EXE}.ml
-	ocamlc -o $(EXE) $(LEXER).cmo $(PARSER).cmo $(EXE).cmo
-	mkdir -p bin
-	mv ${EXE} bin/
-	rm *.cmi *.mli *.cmo $(LEXER).ml $(PARSER).ml
+OCAMLC_FLAGS=-g
+OCAMLC=ocamlc
 
-lexer:
-	ocamllex $(LEXER).mll
+%.cmo: %.ml %.mli
+	$(OCAMLC) $(OCAMLC_FLAGS) -c $<
 
-parser:
-	ocamlyacc $(PARSER).mly
+%.cmi: %.mli
+	$(OCAMLC) $(OCAMLC_FLAGS) -c $<
 
-clean: 
-	rm *.cmi *.mli *.cmo $(LEXER).ml $(PARSER).ml
+%.cmo %.cmi: %.ml
+	$(OCAMLC) $(OCAMLC_FLAGS) -c $<
 
+lexer$(EXE): Lexer.cmo
+	$(OCAMLC) $(OCAMLC_FLAGS) -o $@ $^
+	mv lexer$(EXE) ../bin/
+
+Lexer.ml: Lexer.mll
+	ocamllex -o $@ $<
+
+.PHONY: clean distclean
+
+clean:
+	$(RM) Lexer.ml *.cmo *.cmi *~
+
+distclean: clean
+	$(RM) minibasic$(EXE)

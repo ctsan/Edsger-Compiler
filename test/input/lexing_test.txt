@@ -1,0 +1,28 @@
+bool break byref char 
+continue delete double else
+for false if int new NULL return true void
+int*
+
+idone _idone id23932 ID34932dL_ds23
+
+0 42 1284*00200
+42.0 4.2e1 0.420e+2 42000.0e-3
+'a' 'b' '3' '\'' '\x1d' 
+
+;;; 
+"dsauhidas disaidasid sadsa"
+"abc"
+"Route66"
+"Hi\n"
+"Name\t" 
+" \" HO HO HO \" "
+
+id=9;
+32==956+99;
+my_id++;
+33!=33;99>23;
+33<=33;99<23; 
+>=
+<=
+
+;()[]{},

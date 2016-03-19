@@ -1,0 +1,7 @@
+for(i=0;i<10;i++) {
+	int test=0;
+	int mvar=0;
+	int *mvar=0;
+	if (i%2==0) 
+		printf("HelloWorld \" 34223 fsdfsd\" ");
+}
