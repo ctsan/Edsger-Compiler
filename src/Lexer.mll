@@ -1,6 +1,6 @@
 {
 type token =
-  | T_eof | T_const 
+  | T_eof | T_int_const  | T_float_const | T_char_const
   | T_print | T_let | T_for | T_do | T_begin | T_end | T_if | T_then
   | T_assign | T_lparen | T_rparen | T_plus | T_minus | T_times
   | T_lteq | T_gteq | T_gt | T_lt | T_neq | T_eq
@@ -12,6 +12,9 @@ type token =
   | T_id
 } 
 let digit    = ['0'-'9']
+let int_const   = digit+
+let float_const   = digit* '.'? digit* ('e' ['+' '-'] digit+)?
+let char_const   = 'a'
 let letter   = ['A'-'Z''a'-'z']
 let white    = [' ' '\t' '\r' '\n']
 let special  = "\\n"
@@ -33,7 +36,9 @@ rule lexer = parse
 
   | '"' ([^'"']|'\\' '"')* '"'  { T_string }
 
-  | digit+   { T_const }
+  | int_const  { T_int_const }
+  | float_const  { T_float_const }
+  | char_const    { T_char_const }
 
   | '='      { T_assign }
   | '('      { T_lparen }
@@ -70,7 +75,9 @@ rule lexer = parse
   let string_of_token token =
     match token with
       | T_eof       -> "T_eof"
-      | T_const     -> "T_const"
+      | T_int_const     -> "T_int_const"
+      | T_float_const     -> "T_float_const"
+      | T_char_const     -> "T_char_const"
       | T_print     -> "T_print"
       | T_let       -> "T_let"
       | T_for       -> "T_for"
