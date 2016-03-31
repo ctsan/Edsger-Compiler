@@ -17,7 +17,7 @@ type token =
 } 
 let digit    = ['0'-'9']
 let int_const   = '-'? digit+
-let float_const   = digit* '.'? digit* ('e' ['+' '-'] digit+)?
+let float_const   = digit* '.'? digit* (['e' 'E'] ['+' '-'] digit+)?
 let char_const   = 'a'
 let letter   = ['A'-'Z''a'-'z']
 let white    = [' ' '\t' '\r' '\n']
@@ -166,7 +166,8 @@ rule lexer = parse
     let lexbuf = Lexing.from_channel stdin in
         let rec loop () =
           let token = lexer lexbuf in
-          Printf.printf "token=%s, lexeme=\"%s\"\n" (string_of_token token) (Lexing.lexeme lexbuf);
+          if token <> T_comment then 
+              Printf.printf "token=%s, lexeme=\"%s\"\n" (string_of_token token) (Lexing.lexeme lexbuf);
           if token <> T_eof then loop () in
         loop ()
 }

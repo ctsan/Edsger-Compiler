@@ -11,7 +11,7 @@ TEST4=../test/input/lexer4.txt
 
 EXEFOLDER=../bin
 EXENAME=lexer$(EXE)
-FULLEXE=$(EXEFOLDER)/final_lexer
+FULLEXE=$(EXEFOLDER)/$(EXENAME)
 OCAMLC_FLAGS=-g
 OCAMLC=ocamlc
 
