@@ -17,6 +17,12 @@ void main ()
 		int *mvar=0;
 		if (i%2==0) 
 			printf("HelloWorld \" 34223 fsdfsd\" ");
+		printf('h');
+		printf('a');
+		printf('z');
+		printf('\n');
+		printf('\r');
+		printf('\x19');
 	}
 	/* Multi /* Line
 	* Comment

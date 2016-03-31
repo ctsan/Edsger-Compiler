@@ -13,20 +13,21 @@ type token =
   | T_and   | T_int | T_float | T_char | T_bool
   | T_addr  | T_break | T_byref | T_continue | T_new | T_delete | T_else
   | T_comma | T_true | T_false | T_null | T_return | T_void
-  | T_colon | T_id | T_comment 
+  | T_colon | T_id | DISCARD
 } 
 let digit    = ['0'-'9']
-let int_const   = '-'? digit+
-let float_const   = digit* '.'? digit* (['e' 'E'] ['+' '-'] digit+)?
-let char_const   = 'a'
+let int_const   = digit+
+let float_const   = digit+ '.' digit+ (['e' 'E'] ['+' '-']? digit+)?
+let char_const   = '\'' [^'\'']* '\''
 let letter   = ['A'-'Z''a'-'z']
 let white    = [' ' '\t' '\r' '\n']
 let newline    = '\r' | '\n' | "\r\n"
 let notnewline  = [^ '\r' '\n' ]
-let special  = "\\n"
+
 
 rule lexer = parse
-  | "//" notnewline*  { T_comment }
+  | "//" notnewline*  { DISCARD }
+  | "/*" { consume_comment lexbuf }
   | "for"    { T_for }
   | "do"     { T_do }
   | "begin"  { T_begin }
@@ -49,9 +50,9 @@ rule lexer = parse
   | "bool"   { T_bool }
   | "char"   { T_char }
   | '"' ([^'"']|'\\' '"')* '"'  { T_string }
+  | '\'' ([^'\'']|'\\' '\'')* '\''  { T_char_const }
   | int_const  { T_int_const }
   | float_const  { T_float_const }
-  | char_const    { T_char_const }
   | '='      { T_assign }
   | "+="     { T_plu_assign }
   | "-="     { T_min_assign }
@@ -96,6 +97,11 @@ rule lexer = parse
   |  _ as chr     { Printf.eprintf "invalid character: '%c' (ascii: %d)"
                       chr (Char.code chr);
                     lexer lexbuf }
+
+and consume_comment = 
+    parse
+    | "*/" { DISCARD }
+    | _ { consume_comment lexbuf}
 
 {
   let string_of_token token =
@@ -160,13 +166,13 @@ rule lexer = parse
       | T_continue   -> "T_continue"
       | T_negate   -> "T_negate"
       | T_qmark   -> "T_qmark"
-      | T_comment   -> "T_comment"
+      | _   -> "NO MAPPING"
 
   let main =
     let lexbuf = Lexing.from_channel stdin in
         let rec loop () =
           let token = lexer lexbuf in
-          if token <> T_comment then 
+          if token <> DISCARD then 
               Printf.printf "token=%s, lexeme=\"%s\"\n" (string_of_token token) (Lexing.lexeme lexbuf);
           if token <> T_eof then loop () in
         loop ()

@@ -1,15 +1,14 @@
-# Compiler
+# Edsger
 
-Hello. 
+## How To Compile it
 
-## OCAML traits
+	cd src
+	make 
 
-* ocaml 
+## How To Test it
 
-## Conventions
-
-2. Use TODOs
-3. Use Vim.
+	cd src
+	make test1
 
 ## Tools
 * opam (package manager)
