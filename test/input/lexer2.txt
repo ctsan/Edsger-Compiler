@@ -2,7 +2,10 @@ bool break byref char
 continue delete double else //fdsfdos fodsfods ofidso/fdsafads\fasdfadsfasd
 for false if int new NULL return true void //fadsfads fadsfsadf adsfadsfads
 int*
-
+/*  This is
+* a Multi
+* Super
+* Duper  COMMENT */ 
 idone _idone id23932 ID34932dL_ds23
 
 0 42 1284*00200

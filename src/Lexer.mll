@@ -13,7 +13,7 @@ type token =
   | T_and   | T_int | T_float | T_char | T_bool
   | T_addr  | T_break | T_byref | T_continue | T_new | T_delete | T_else
   | T_comma | T_true | T_false | T_null | T_return | T_void
-  | T_colon | T_id | T_comment
+  | T_colon | T_id | T_comment 
 } 
 let digit    = ['0'-'9']
 let int_const   = '-'? digit+
@@ -164,10 +164,9 @@ rule lexer = parse
 
   let main =
     let lexbuf = Lexing.from_channel stdin in
-    let rec loop () =
-      let token = lexer lexbuf in
-      Printf.printf "token=%s, lexeme=\"%s\"\n"
-        (string_of_token token) (Lexing.lexeme lexbuf);
-      if token <> T_eof then loop () in
-    loop ()
+        let rec loop () =
+          let token = lexer lexbuf in
+          Printf.printf "token=%s, lexeme=\"%s\"\n" (string_of_token token) (Lexing.lexeme lexbuf);
+          if token <> T_eof then loop () in
+        loop ()
 }
