@@ -1,6 +1,6 @@
 bool break byref char 
-continue delete double else
-for false if int new NULL return true void
+continue delete double else //fdsfdos fodsfods ofidso/fdsafads\fasdfadsfasd
+for false if int new NULL return true void //fadsfads fadsfsadf adsfadsfads
 int*
 
 idone _idone id23932 ID34932dL_ds23

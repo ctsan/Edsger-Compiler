@@ -13,17 +13,20 @@ type token =
   | T_and   | T_int | T_float | T_char | T_bool
   | T_addr  | T_break | T_byref | T_continue | T_new | T_delete | T_else
   | T_comma | T_true | T_false | T_null | T_return | T_void
-  | T_colon | T_id
+  | T_colon | T_id | T_comment
 } 
 let digit    = ['0'-'9']
-let int_const   = digit+
+let int_const   = '-'? digit+
 let float_const   = digit* '.'? digit* ('e' ['+' '-'] digit+)?
 let char_const   = 'a'
 let letter   = ['A'-'Z''a'-'z']
 let white    = [' ' '\t' '\r' '\n']
+let newline    = '\r' | '\n' | "\r\n"
+let notnewline  = [^ '\r' '\n' ]
 let special  = "\\n"
 
 rule lexer = parse
+  | "//" notnewline*  { T_comment }
   | "for"    { T_for }
   | "do"     { T_do }
   | "begin"  { T_begin }
@@ -41,18 +44,14 @@ rule lexer = parse
   | "return"   { T_return }
   | "new"   { T_new }
   | "continue"   { T_continue }
-
   | "int"    { T_int }
   | "float"  { T_float }
   | "bool"   { T_bool }
   | "char"   { T_char }
-
   | '"' ([^'"']|'\\' '"')* '"'  { T_string }
-
   | int_const  { T_int_const }
   | float_const  { T_float_const }
   | char_const    { T_char_const }
-
   | '='      { T_assign }
   | "+="     { T_plu_assign }
   | "-="     { T_min_assign }
@@ -153,7 +152,7 @@ rule lexer = parse
       | T_false   -> "T_false"
       | T_byref   -> "T_byref"
       | T_break   -> "T_break"
-      | T_NULL   -> "T_null"
+      | T_null   -> "T_null"
       | T_void   -> "T_void"
       | T_delete   -> "T_delete"
       | T_return   -> "T_return"
@@ -161,7 +160,7 @@ rule lexer = parse
       | T_continue   -> "T_continue"
       | T_negate   -> "T_negate"
       | T_qmark   -> "T_qmark"
-
+      | T_comment   -> "T_comment"
 
   let main =
     let lexbuf = Lexing.from_channel stdin in
