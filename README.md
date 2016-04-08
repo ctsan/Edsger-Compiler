@@ -9,6 +9,7 @@
 
 	cd src
 	make test1
+	make test2
 
 ## Tools
 * opam (package manager)

@@ -1,4 +1,5 @@
 {
+(*
 type token =
   | T_eof | T_negate
   | T_plu_assign | T_int_const  | T_float_const | T_char_const
@@ -13,11 +14,14 @@ type token =
   | T_and   | T_int | T_float | T_char | T_bool
   | T_addr  | T_break | T_byref | T_continue | T_new | T_delete | T_else
   | T_comma | T_true | T_false | T_null | T_return | T_void
-  | T_colon | T_id | DISCARD
+  | T_colon | T_id  
+  *)
+open Parser
 } 
+
 let digit    = ['0'-'9']
 let int_const   = digit+
-let float_const   = digit+ '.' digit+ (['e' 'E'] ['+' '-']? digit+)?
+let double_const   = digit+ '.' digit+ (['e' 'E'] ['+' '-']? digit+)?
 let char_const   = '\'' [^'\'']* '\''
 let letter   = ['A'-'Z''a'-'z']
 let white    = [' ' '\t' '\r' '\n']
@@ -26,7 +30,7 @@ let notnewline  = [^ '\r' '\n' ]
 
 
 rule lexer = parse
-  | "//" notnewline*  { DISCARD }
+  | "//" notnewline*  { lexer lexbuf }
   | "/*" { consume_comment lexbuf }
   | "for"    { T_for }
   | "do"     { T_do }
@@ -46,13 +50,13 @@ rule lexer = parse
   | "new"   { T_new }
   | "continue"   { T_continue }
   | "int"    { T_int }
-  | "float"  { T_float }
+  | "double"  { T_double }
   | "bool"   { T_bool }
   | "char"   { T_char }
   | '"' ([^'"']|'\\' '"')* '"'  { T_string }
   | '\'' ([^'\'']|'\\' '\'')* '\''  { T_char_const }
   | int_const  { T_int_const }
-  | float_const  { T_float_const }
+  | double_const  { T_double_const }
   | '='      { T_assign }
   | "+="     { T_plu_assign }
   | "-="     { T_min_assign }
@@ -77,10 +81,8 @@ rule lexer = parse
   | '?'      { T_qmark }
   | ','      { T_comma }
   | ':'      { T_colon }
-
   | white+               { lexer lexbuf }
   | "'" [^ '\n']* "\n"   { lexer lexbuf }
-
   | ';'      { T_semicolon }
   | '<'      { T_lt        }
   | '>'      { T_gt        }
@@ -90,9 +92,7 @@ rule lexer = parse
   | "=="     { T_eq       }
   | "++"     { T_incr      }
   | "--"     { T_dcr       }
-
   | letter (letter|digit|'_')*   { T_id }
-
   |  eof          { T_eof }
   |  _ as chr     { Printf.eprintf "invalid character: '%c' (ascii: %d)"
                       chr (Char.code chr);
@@ -100,80 +100,5 @@ rule lexer = parse
 
 and consume_comment = 
     parse
-    | "*/" { DISCARD }
+    | "*/" { lexer lexbuf }
     | _ { consume_comment lexbuf}
-
-{
-  let string_of_token token =
-    match token with
-      | T_eof       -> "T_eof"
-      | T_int_const     -> "T_int_const"
-      | T_float_const     -> "T_float_const"
-      | T_char_const     -> "T_char_const"
-      | T_for       -> "T_for"
-      | T_do        -> "T_do"
-      | T_begin     -> "T_begin"
-      | T_end       -> "T_end"
-      | T_if        -> "T_if"
-      | T_then      -> "T_then"
-      | T_assign        -> "T_assign"
-      | T_plu_assign-> "T_plu_assign"
-      | T_min_assign-> "T_min_assign"
-      | T_mul_assign-> "T_mul_assign"
-      | T_div_assign-> "T_div_assign"
-      | T_mod_assign-> "T_mod_assign"
-      | T_or        -> "T_or"
-      | T_and       -> "T_and"
-      | T_addr      -> "T_addr"
-      | T_comma     -> "T_comma"
-      | T_colon     -> "T_colon"
-      | T_lparen    -> "T_lparen"
-      | T_rparen    -> "T_rparen"
-      | T_plus      -> "T_plus"
-      | T_minus     -> "T_minus"
-      | T_times     -> "T_times"
-      | T_div       -> "T_div"
-      | T_mod       -> "T_mod"
-      | T_semicolon -> "T_semicolon"
-      | T_lt        -> "T_lt"
-      | T_gt        -> "T_gt"
-      | T_gteq      -> "T_gteq"
-      | T_lteq      -> "T_lteq"
-      | T_neq       -> "T_neq"
-      | T_eq        -> "T_eq"
-      | T_incr      -> "T_incr"
-      | T_dcr       -> "T_dcr"
-      | T_lbrack    -> "T_lbrack" 
-      | T_rbrack    -> "T_rbrack" 
-      | T_lbrace    -> "T_lbrace" 
-      | T_rbrace    -> "T_rbrace" 
-      | T_string    -> "T_string" 
-      | T_id       -> "T_id" 
-      | T_int       -> "T_int" 
-      | T_float    -> "T_float" 
-      | T_char    -> "T_char" 
-      | T_bool    -> "T_bool" 
-      | T_else   -> "T_else"
-      | T_true   -> "T_true"
-      | T_false   -> "T_false"
-      | T_byref   -> "T_byref"
-      | T_break   -> "T_break"
-      | T_null   -> "T_null"
-      | T_void   -> "T_void"
-      | T_delete   -> "T_delete"
-      | T_return   -> "T_return"
-      | T_new   -> "T_new"
-      | T_continue   -> "T_continue"
-      | T_negate   -> "T_negate"
-      | T_qmark   -> "T_qmark"
-      | _   -> "NO MAPPING"
-
-  let main =
-    let lexbuf = Lexing.from_channel stdin in
-        let rec loop () =
-          let token = lexer lexbuf in
-          if token <> DISCARD then 
-              Printf.printf "token=%s, lexeme=\"%s\"\n" (string_of_token token) (Lexing.lexeme lexbuf);
-          if token <> T_eof then loop () in
-        loop ()
-}
