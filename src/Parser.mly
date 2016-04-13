@@ -30,7 +30,7 @@
 %%
 
 program:
-      declaration_list T_eof { Printf.printf "A Program Runs"; () }
+      declaration_list T_eof { printf "A Program Runs"; () }
     ; 
 
 declaration_list:
