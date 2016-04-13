@@ -30,9 +30,9 @@
 %type <unit> declaration_list_e
 %type <unit> declaration
 %type <unit> variable_declaration
-%type <unit> more_declarators
+%type <unit> more_declarators_e
 %type <unit> type
-%type <unit> pointer_asterisk
+%type <unit> pointer_asterisk_e
 %type <unit> basic_type
 %type <unit> declarator
 %type <unit> function_declaration
@@ -42,7 +42,13 @@
 %type <unit> parameter_list_e
 %type <unit> function_definition
 %type <unit> statement
+%type <unit> statement_e
+%type <unit> else_part_e
+%type <unit> label_e
+%type <unit> id_e
+%type <unit> array_expr_index_e
 %type <unit> expression
+%type <unit> expression_list
 %type <unit> expression_list_e
 %type <unit> constant_expression
 %type <unit> unary_operator
@@ -51,6 +57,11 @@
 %type <unit> binary_assignment
 
 %%
+
+/* We Need Left-Recursions since we have a LR (L stands for Left)
+* LEFT:  R(n) = R(n-1) b 
+* RIGHT: R(n) = b R(n-1) 
+*/
 
 program:
       declaration_list T_eof { printf "A Program Runs"; () }
@@ -62,9 +73,8 @@ declaration_list:
      ;
 
 declaration_list_e:
-       declaration_list declaration { () }
-     | declaration { () }
-     | {()}
+       {()}
+     | declaration_list {()} 
      ;
 
 declaration:
@@ -74,22 +84,22 @@ declaration:
     ;
 
 variable_declaration:
-    | type declarator more_declarators T_semicolon  {()}
-    | type declarator T_semicolon {()}
+    | type declarator more_declarators_e T_semicolon  {()}
     ;
-more_declarators:
-    | more_declarators T_comma declarator {()}
+
+more_declarators_e:
+      {()}
+    | more_declarators_e T_comma declarator {()}
     | T_comma declarator  {()}
     ;
 
 type: 
-     basic_type pointer_asterisk {()}
-    | basic_type                  {()}
+     basic_type pointer_asterisk_e {()}
     ;
 
-pointer_asterisk: 
-     pointer_asterisk T_times    {()}
-    | T_times                     {()}
+pointer_asterisk_e: 
+      {()}
+    | pointer_asterisk_e T_times    {()}
     ;
 
 basic_type: T_int {()}
@@ -99,7 +109,7 @@ basic_type: T_int {()}
    ; 
 
 declarator:
-    T_id T_lbrack constant-expression T_rbrack {()}
+      T_id T_lbrack constant-expression T_rbrack {()}
     | T_id {()}
     ;
 
@@ -108,12 +118,12 @@ function_declaration:
     ;
 
 result_type:
-    type {()}
+      type {()}
     | T_void {()}
     ;
 
 parameter_list:
-    | parameter_list T_comma parameter {()}
+      parameter_list T_comma parameter {()}
     | parameter {()}
     ;
 
@@ -132,18 +142,14 @@ function_definition:
     ;
 
 statement:
-      T_semicolon {()}
-    | expression T_semicolon {()}
+     expression_e T_semicolon {()}
     | T_lbrace statement_list_e T_rbrace {()}
     | T_if T_lparen expression T_rparen statement else_part_e {()}
     | label_e T_for T_lparen expression_e T_semicolon expression_e T_semicolon
         expression_e T_rparen statement_e T_semicolon {()}
-    | T_continue T_id T_semicolon {()}
-    | T_continue T_semicolon {()}
-    | T_break T_id T_semicolon {()}
-    | T_break T_semicolon {()}
-    | T_return expression T_semicolon {()}
-    | T_return T_semicolon {()}
+    | T_continue id_e T_semicolon {()}
+    | T_break id_e T_semicolon {()}
+    | T_return expression_e T_semicolon {()}
     ;
 
 statement_e:
@@ -161,9 +167,12 @@ label_e:
        {()} 
     | T_id T_colon {()}
     ;
+
+id_e:
+       {()}
+    | T_id
+    ;
     
-
-
 expression:
       T_id {()}
     | T_lparen expression T_rparen {()}
@@ -175,7 +184,6 @@ expression:
     | T_double_const {()}
     | T_string {()}
     | T_id T_lparen expression_list_e T_rparen {()}
-    | T_id T_lparen T_rparen {()}
     | expression T_lbrack expression T_rbrack {()}
     | unary_operator expression {()}
     | expression binary_operator expression {()}
@@ -184,20 +192,30 @@ expression:
     | expression binary_assignment expression {()}
     | T_lparen result_type T_paren expression {()}
     | expression T_qmark expression T_colon expression {()}
-    | T_new result_type T_lbrack expression T_rbrack {()}
-    | T_new result_type {()}
+    | T_new result_type array_expr_index_e {()}
     | T_delete expression {()}
     ;
+
+array_expr_index_e:
+        {()}
+      | T_lbrack expression T_rbrack {()}
+      ;
 
 expression_e:
      {()}
      | expression
      ;
 
+/* Notice Left Recursion here : (experssion_list is placed in the left) */
+
+expression_list:
+      expression_list T_comma expression {()}
+    | expression {()}
+    ;
 
 expression_list_e:
-      expression T_comma expression_list_e {()}
-    | expression {()}
+      {()} 
+    | expression_list {()} 
     ;
 
 constant_expression:
