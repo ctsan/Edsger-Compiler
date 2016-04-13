@@ -111,12 +111,96 @@ function_definition:
 statement:
       T_semicolon {()}
     | expression T_semicolon {()}
-    | T_rbrace statement_list_e T_lbrace {()}
-    | 
+    | T_lbrace statement_list_e T_rbrace {()}
+    | T_if T_lparen expression T_rparen statement {()}
+    | T_if T_lparen expression T_rparen statement T_else statement {()}
+    | T_id T_colon T_for T_lparen expression T_semicolon expression T_semicolon
+        expression T_rparen statement {()}
+    /* Find solution for empty expressions */
+    | T_continue T_id T_semicolon {()}
+    | T_continue T_semicolon {()}
+    | T_break T_id T_semicolon {()}
+    | T_break T_semicolon {()}
+    | T_return expression T_semicolon {()}
+    | T_return T_semicolon {()}
     ;
 
+expression:
+      T_id {()}
+    | T_lparen expression T_rparen {()}
+    | T_true {()}
+    | T_false {()}
+    | T_null {()}
+    | T_int_const {()}
+    | T_char_const {()}
+    | T_double_const {()}
+    | T_string {()}
+    | T_id T_lparen expression_list_e T_rparen {()}
+    | T_id T_lparen T_rparen {()}
+    | expression T_lbrack expression T_rbrack {()}
+    | unary_operator expression {()}
+    | expression binary_operator expression {()}
+    | unary_assignment expression {()}
+    | expression unary_assignment {()}
+    | expression binary_assignment expression {()}
+    | T_lparen result_type T_paren expression {()}
+    | expression T_qmark expression T_colon expression {()}
+    | T_new result_type T_lbrack expression T_rbrack {()}
+    | T_new result_type {()}
+    | T_delete expression {()}
+    ;
+
+expression_list_e:
+      expression T_comma expression_list_e {()}
+    | expression {()}
+    ;
+
+constant_expression:
+    expression {()}
+    ;
+
+unary_operator:
+      T_addr {()}
+    | T_times {()}
+    | T_plus {()}
+    | T_minus {()}
+    | T_negate {()}
+    ;
+
+binary_operator:
+      T_times {()}
+    | T_div {()}
+    | T_mod {()}
+    | T_plus {()}
+    | T_minus {()}
+    | T_lt {()}
+    | T_rt {()}
+    | T_lteq {()}
+    | T_gteq {()}
+    | T_eq {()}
+    | T_neq {()}
+    | T_and {()}
+    | T_or {()}
+    | T_comma {()}
+    ;
+
+unary_assignment:
+      T_incr {()}
+    | T_decr {()}
+    /* pdf shows T_minus but I guess it's T_decr */
+    ;
+
+binary_assignment:
+      T_assign {()}
+    | T_mul_assign {()}
+    | T_div_assign {()}
+    | T_mod_assign {()}
+    | T_plu_assign {()}
+    | T_min_assign {()}
+    ;
+/*
 if_construct:
     T_if T_lparen expression T_rparen statement else_part {()}
     ;
-
+*/
 
