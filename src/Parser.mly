@@ -83,8 +83,8 @@ more_declarators:
     ;
 
 type: 
-     basic-type pointer_asterisk {()}
-    | basic-type                  {()}
+     basic_type pointer_asterisk {()}
+    | basic_type                  {()}
     ;
 
 pointer_asterisk: 
