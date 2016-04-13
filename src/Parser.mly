@@ -26,6 +26,29 @@
 
 %start program
 %type <unit> program
+%type <unit> declaration_list
+%type <unit> declaration_list_e
+%type <unit> declaration
+%type <unit> variable_declaration
+%type <unit> more_declarators
+%type <unit> type
+%type <unit> pointer_asterisk
+%type <unit> basic_type
+%type <unit> declarator
+%type <unit> function_declaration
+%type <unit> result_type
+%type <unit> parameter_list
+%type <unit> parameter
+%type <unit> parameter_list_e
+%type <unit> function_definition
+%type <unit> statement
+%type <unit> expression
+%type <unit> expression_list_e
+%type <unit> constant_expression
+%type <unit> unary_operator
+%type <unit> binary_operator
+%type <unit> unary_assignment
+%type <unit> binary_assignment
 
 %%
 
@@ -81,7 +104,7 @@ declarator:
     ;
 
 function_declaration:
-    result-type T_id T_lparen parameter_list T_rparen T_semicolon {()}
+    result-type T_id T_lparen parameter_list_e T_rparen T_semicolon {()}
     ;
 
 result_type:
@@ -112,11 +135,9 @@ statement:
       T_semicolon {()}
     | expression T_semicolon {()}
     | T_lbrace statement_list_e T_rbrace {()}
-    | T_if T_lparen expression T_rparen statement {()}
-    | T_if T_lparen expression T_rparen statement T_else statement {()}
-    | T_id T_colon T_for T_lparen expression T_semicolon expression T_semicolon
-        expression T_rparen statement {()}
-    /* Find solution for empty expressions */
+    | T_if T_lparen expression T_rparen statement else_part_e {()}
+    | label_e T_for T_lparen expression_e T_semicolon expression_e T_semicolon
+        expression_e T_rparen statement_e T_semicolon {()}
     | T_continue T_id T_semicolon {()}
     | T_continue T_semicolon {()}
     | T_break T_id T_semicolon {()}
@@ -124,6 +145,24 @@ statement:
     | T_return expression T_semicolon {()}
     | T_return T_semicolon {()}
     ;
+
+statement_e:
+     {()}
+    | statement
+    ;
+
+
+else_part_e:
+      {()}
+    | T_else statement {()} 
+    ;
+
+label_e:
+       {()} 
+    | T_id T_colon {()}
+    ;
+    
+
 
 expression:
       T_id {()}
@@ -149,6 +188,12 @@ expression:
     | T_new result_type {()}
     | T_delete expression {()}
     ;
+
+expression_e:
+     {()}
+     | expression
+     ;
+
 
 expression_list_e:
       expression T_comma expression_list_e {()}
@@ -187,7 +232,6 @@ binary_operator:
 unary_assignment:
       T_incr {()}
     | T_decr {()}
-    /* pdf shows T_minus but I guess it's T_decr */
     ;
 
 binary_assignment:
@@ -198,9 +242,3 @@ binary_assignment:
     | T_plu_assign {()}
     | T_min_assign {()}
     ;
-/*
-if_construct:
-    T_if T_lparen expression T_rparen statement else_part {()}
-    ;
-*/
-
