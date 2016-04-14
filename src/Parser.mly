@@ -5,7 +5,7 @@
 %token T_plu_assign T_min_assign T_mul_assign T_div_assign T_mod_assign
 %token T_assign
 %token T_incr T_dcr
-%token T_lteq T_gtwq T_gt T_lt T_neq T_eq
+%token T_lteq T_gteq T_gt T_lt T_neq T_eq
 %token T_lbrace T_rbrace
 %token T_lbrack T_rbrack
 %token T_lparen T_rparen
@@ -21,8 +21,19 @@
 %token T_return T_void
 %token T_eof
 %token T_for T_do T_begin T_end T_if T_then 
+%token T_paren
+%token T_mod T_div
+
+%left T_comma
+%right T_assign T_plu_assign T_min_assign T_mul_assign T_div_assign T_mod_assign
+%left T_or
+%left T_and
+%left T_eq T_neq
+%left T_lteq T_lt T_gt T_gteq
 %left T_plus T_minus
 %left T_times T_div
+%right T_addr
+%left T_incr T_dcr
 
 %start program
 %type <unit> program
@@ -31,7 +42,7 @@
 %type <unit> declaration
 %type <unit> variable_declaration
 %type <unit> more_declarators_e
-%type <unit> type
+%type <unit> ctype
 %type <unit> pointer_asterisk_e
 %type <unit> basic_type
 %type <unit> declarator
@@ -42,6 +53,7 @@
 %type <unit> parameter_list_e
 %type <unit> function_definition
 %type <unit> statement
+%type <unit> statement_list_e
 %type <unit> statement_e
 %type <unit> else_part_e
 %type <unit> label_e
@@ -84,7 +96,7 @@ declaration:
     ;
 
 variable_declaration:
-    | type declarator more_declarators_e T_semicolon  {()}
+    | ctype declarator more_declarators_e T_semicolon  {()}
     ;
 
 more_declarators_e:
@@ -93,7 +105,7 @@ more_declarators_e:
     | T_comma declarator  {()}
     ;
 
-type: 
+ctype: 
      basic_type pointer_asterisk_e {()}
     ;
 
@@ -109,16 +121,16 @@ basic_type: T_int {()}
    ; 
 
 declarator:
-      T_id T_lbrack constant-expression T_rbrack {()}
+      T_id T_lbrack constant_expression T_rbrack {()}
     | T_id {()}
     ;
 
 function_declaration:
-    result-type T_id T_lparen parameter_list_e T_rparen T_semicolon {()}
+    result_type T_id T_lparen parameter_list_e T_rparen T_semicolon {()}
     ;
 
 result_type:
-      type {()}
+      ctype {()}
     | T_void {()}
     ;
 
@@ -128,8 +140,8 @@ parameter_list:
     ;
 
 parameter:
-     byref type T_id {()}
-    | type T_id {()}
+     T_byref ctype T_id {()}
+    | ctype T_id {()}
     ;
 
 parameter_list_e:
@@ -152,9 +164,15 @@ statement:
     | T_return expression_e T_semicolon {()}
     ;
 
+statement_list_e:
+     {()}
+    | statement_list_e statement {()}
+    ;
+
+
 statement_e:
      {()}
-    | statement
+    | statement {()}
     ;
 
 
@@ -170,7 +188,7 @@ label_e:
 
 id_e:
        {()}
-    | T_id
+    | T_id {()}
     ;
     
 expression:
@@ -203,7 +221,7 @@ array_expr_index_e:
 
 expression_e:
      {()}
-     | expression
+     | expression {()}
      ;
 
 /* Notice Left Recursion here : (experssion_list is placed in the left) */
@@ -237,7 +255,7 @@ binary_operator:
     | T_plus {()}
     | T_minus {()}
     | T_lt {()}
-    | T_rt {()}
+    | T_gt {()}
     | T_lteq {()}
     | T_gteq {()}
     | T_eq {()}
@@ -249,7 +267,7 @@ binary_operator:
 
 unary_assignment:
       T_incr {()}
-    | T_decr {()}
+    | T_dcr {()}
     ;
 
 binary_assignment:

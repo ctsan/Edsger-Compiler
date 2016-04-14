@@ -1,0 +1,454 @@
+
+** Conflict (shift/reduce) in state 145.
+** Token involved: T_comma
+** This state is reached from program after reading:
+
+ctype declarator 
+
+** The derivations that appear below have the following common factor:
+** (The question mark symbol (?) represents the spot where the derivations begin to differ.)
+
+program 
+declaration_list T_eof 
+declaration 
+variable_declaration 
+ctype declarator more_declarators_e T_semicolon 
+                 (?)
+
+** In state 145, looking ahead at T_comma, reducing production
+** more_declarators_e -> 
+** is permitted because of the following sub-derivation:
+
+more_declarators_e T_comma declarator // lookahead token appears
+. 
+
+** In state 145, looking ahead at T_comma, shifting is permitted
+** because of the following sub-derivation:
+
+. T_comma declarator 
+
+** Conflict (shift/reduce) in state 139.
+** Token involved: T_id
+** This state is reached from program after reading:
+
+ctype 
+
+** The derivations that appear below have the following common factor:
+** (The question mark symbol (?) represents the spot where the derivations begin to differ.)
+
+program 
+declaration_list T_eof 
+declaration 
+(?)
+
+** In state 139, looking ahead at T_id, shifting is permitted
+** because of the following sub-derivation:
+
+variable_declaration 
+ctype declarator more_declarators_e T_semicolon 
+      . T_id T_lbrack constant_expression T_rbrack 
+
+** In state 139, looking ahead at T_id, reducing production
+** result_type -> ctype 
+** is permitted because of the following sub-derivation:
+
+function_declaration 
+result_type T_id T_lparen parameter_list_e T_rparen T_semicolon // lookahead token appears
+ctype . 
+
+** Conflict (reduce/reduce) in state 129.
+** Token involved: T_semicolon
+** This state is reached from program after reading:
+
+result_type T_id T_lparen parameter_list_e T_rparen T_lbrace declaration_list_e statement_list_e label_e T_for T_lparen expression_e T_semicolon expression_e T_semicolon expression_e T_rparen 
+
+** The derivations that appear below have the following common factor:
+** (The question mark symbol (?) represents the spot where the derivations begin to differ.)
+
+program 
+declaration_list T_eof 
+declaration 
+function_definition 
+result_type T_id T_lparen parameter_list_e T_rparen T_lbrace declaration_list_e statement_list_e T_rbrace 
+                                                                                statement_list_e statement 
+                                                                                                 (?)
+
+** In state 129, looking ahead at T_semicolon, reducing production
+** expression_e -> 
+** is permitted because of the following sub-derivation:
+
+label_e T_for T_lparen expression_e T_semicolon expression_e T_semicolon expression_e T_rparen statement_e T_semicolon 
+                                                                                               statement 
+                                                                                               expression_e T_semicolon // lookahead token appears
+                                                                                               . 
+
+** In state 129, looking ahead at T_semicolon, reducing production
+** statement_e -> 
+** is permitted because of the following sub-derivation:
+
+label_e T_for T_lparen expression_e T_semicolon expression_e T_semicolon expression_e T_rparen statement_e T_semicolon // lookahead token appears
+                                                                                               . 
+
+** Conflict (shift/reduce) in state 118.
+** Token involved: T_else
+** This state is reached from program after reading:
+
+result_type T_id T_lparen parameter_list_e T_rparen T_lbrace declaration_list_e statement_list_e T_if T_lparen expression T_rparen T_if T_lparen expression T_rparen statement 
+
+** The derivations that appear below have the following common factor:
+** (The question mark symbol (?) represents the spot where the derivations begin to differ.)
+
+program 
+declaration_list T_eof 
+declaration 
+function_definition 
+result_type T_id T_lparen parameter_list_e T_rparen T_lbrace declaration_list_e statement_list_e T_rbrace 
+                                                                                statement_list_e statement 
+                                                                                                 (?)
+
+** In state 118, looking ahead at T_else, reducing production
+** else_part_e -> 
+** is permitted because of the following sub-derivation:
+
+T_if T_lparen expression T_rparen statement else_part_e // lookahead token appears because else_part_e can begin with T_else
+                                  T_if T_lparen expression T_rparen statement else_part_e // lookahead token is inherited
+                                                                              . 
+
+** In state 118, looking ahead at T_else, shifting is permitted
+** because of the following sub-derivation:
+
+T_if T_lparen expression T_rparen statement else_part_e 
+                                  T_if T_lparen expression T_rparen statement else_part_e 
+                                                                              . T_else statement 
+
+** Conflict (shift/reduce) in state 91.
+** Tokens involved: T_times T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_assign T_and
+** The following explanations concentrate on token T_times.
+** This state is reached from program after reading:
+
+ctype T_id T_lbrack T_lparen result_type T_paren expression 
+
+** The derivations that appear below have the following common factor:
+** (The question mark symbol (?) represents the spot where the derivations begin to differ.)
+
+program 
+declaration_list T_eof 
+declaration 
+variable_declaration 
+ctype declarator more_declarators_e T_semicolon 
+      T_id T_lbrack constant_expression T_rbrack 
+                    expression 
+                    (?)
+
+** In state 91, looking ahead at T_times, shifting is permitted
+** because of the following sub-derivation:
+
+T_lparen result_type T_paren expression 
+                             expression binary_operator expression 
+                                        . T_times 
+
+** In state 91, looking ahead at T_times, reducing production
+** expression -> T_lparen result_type T_paren expression 
+** is permitted because of the following sub-derivation:
+
+expression binary_operator expression // lookahead token appears because binary_operator can begin with T_times
+T_lparen result_type T_paren expression . 
+
+** Conflict (shift/reduce) in state 88.
+** Token involved: T_comma
+** This state is reached from program after reading:
+
+ctype T_id T_lbrack T_id T_lparen expression 
+
+** The derivations that appear below have the following common factor:
+** (The question mark symbol (?) represents the spot where the derivations begin to differ.)
+
+program 
+declaration_list T_eof 
+declaration 
+variable_declaration 
+ctype declarator more_declarators_e T_semicolon 
+      T_id T_lbrack constant_expression T_rbrack 
+                    expression 
+                    T_id T_lparen expression_list_e T_rparen 
+                                  expression_list 
+                                  (?)
+
+** In state 88, looking ahead at T_comma, shifting is permitted
+** because of the following sub-derivation:
+
+expression 
+expression binary_operator expression 
+           . T_comma 
+
+** In state 88, looking ahead at T_comma, reducing production
+** expression_list -> expression 
+** is permitted because of the following sub-derivation:
+
+expression_list T_comma expression // lookahead token appears
+expression . 
+
+** Conflict (shift/reduce) in state 82.
+** Tokens involved: T_times T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_assign T_and
+** The following explanations concentrate on token T_times.
+** This state is reached from program after reading:
+
+ctype T_id T_lbrack T_delete expression 
+
+** The derivations that appear below have the following common factor:
+** (The question mark symbol (?) represents the spot where the derivations begin to differ.)
+
+program 
+declaration_list T_eof 
+declaration 
+variable_declaration 
+ctype declarator more_declarators_e T_semicolon 
+      T_id T_lbrack constant_expression T_rbrack 
+                    expression 
+                    (?)
+
+** In state 82, looking ahead at T_times, shifting is permitted
+** because of the following sub-derivation:
+
+T_delete expression 
+         expression binary_operator expression 
+                    . T_times 
+
+** In state 82, looking ahead at T_times, reducing production
+** expression -> T_delete expression 
+** is permitted because of the following sub-derivation:
+
+expression binary_operator expression // lookahead token appears because binary_operator can begin with T_times
+T_delete expression . 
+
+** Conflict (shift/reduce) in state 81.
+** Tokens involved: T_times T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_assign T_and
+** The following explanations concentrate on token T_times.
+** This state is reached from program after reading:
+
+ctype T_id T_lbrack unary_operator expression 
+
+** The derivations that appear below have the following common factor:
+** (The question mark symbol (?) represents the spot where the derivations begin to differ.)
+
+program 
+declaration_list T_eof 
+declaration 
+variable_declaration 
+ctype declarator more_declarators_e T_semicolon 
+      T_id T_lbrack constant_expression T_rbrack 
+                    expression 
+                    (?)
+
+** In state 81, looking ahead at T_times, shifting is permitted
+** because of the following sub-derivation:
+
+unary_operator expression 
+               expression binary_operator expression 
+                          . T_times 
+
+** In state 81, looking ahead at T_times, reducing production
+** expression -> unary_operator expression 
+** is permitted because of the following sub-derivation:
+
+expression binary_operator expression // lookahead token appears because binary_operator can begin with T_times
+unary_operator expression . 
+
+** Conflict (shift/reduce) in state 80.
+** Tokens involved: T_times T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_assign T_and
+** The following explanations concentrate on token T_times.
+** This state is reached from program after reading:
+
+ctype T_id T_lbrack expression T_qmark expression T_colon expression 
+
+** The derivations that appear below have the following common factor:
+** (The question mark symbol (?) represents the spot where the derivations begin to differ.)
+
+program 
+declaration_list T_eof 
+declaration 
+variable_declaration 
+ctype declarator more_declarators_e T_semicolon 
+      T_id T_lbrack constant_expression T_rbrack 
+                    expression 
+                    (?)
+
+** In state 80, looking ahead at T_times, shifting is permitted
+** because of the following sub-derivation:
+
+expression T_qmark expression T_colon expression 
+                                      expression binary_operator expression 
+                                                 . T_times 
+
+** In state 80, looking ahead at T_times, reducing production
+** expression -> expression T_qmark expression T_colon expression 
+** is permitted because of the following sub-derivation:
+
+expression binary_operator expression // lookahead token appears because binary_operator can begin with T_times
+expression T_qmark expression T_colon expression . 
+
+** Conflict (shift/reduce) in state 78.
+** Tokens involved: T_times T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_assign T_and
+** The following explanations concentrate on token T_times.
+** This state is reached from program after reading:
+
+ctype T_id T_lbrack expression binary_assignment expression 
+
+** The derivations that appear below have the following common factor:
+** (The question mark symbol (?) represents the spot where the derivations begin to differ.)
+
+program 
+declaration_list T_eof 
+declaration 
+variable_declaration 
+ctype declarator more_declarators_e T_semicolon 
+      T_id T_lbrack constant_expression T_rbrack 
+                    expression 
+                    (?)
+
+** In state 78, looking ahead at T_times, shifting is permitted
+** because of the following sub-derivation:
+
+expression binary_assignment expression 
+                             expression binary_operator expression 
+                                        . T_times 
+
+** In state 78, looking ahead at T_times, reducing production
+** expression -> expression binary_assignment expression 
+** is permitted because of the following sub-derivation:
+
+expression binary_operator expression // lookahead token appears because binary_operator can begin with T_times
+expression binary_assignment expression . 
+
+** Conflict (shift/reduce) in state 76.
+** Tokens involved: T_times T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_assign T_and
+** The following explanations concentrate on token T_times.
+** This state is reached from program after reading:
+
+ctype T_id T_lbrack expression binary_operator expression 
+
+** The derivations that appear below have the following common factor:
+** (The question mark symbol (?) represents the spot where the derivations begin to differ.)
+
+program 
+declaration_list T_eof 
+declaration 
+variable_declaration 
+ctype declarator more_declarators_e T_semicolon 
+      T_id T_lbrack constant_expression T_rbrack 
+                    expression 
+                    (?)
+
+** In state 76, looking ahead at T_times, shifting is permitted
+** because of the following sub-derivation:
+
+expression binary_operator expression 
+                           expression binary_operator expression 
+                                      . T_times 
+
+** In state 76, looking ahead at T_times, reducing production
+** expression -> expression binary_operator expression 
+** is permitted because of the following sub-derivation:
+
+expression binary_operator expression // lookahead token appears because binary_operator can begin with T_times
+expression binary_operator expression . 
+
+** Conflict (shift/reduce) in state 48.
+** Tokens involved: T_times T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_assign T_and
+** The following explanations concentrate on token T_times.
+** This state is reached from program after reading:
+
+ctype T_id T_lbrack unary_assignment expression 
+
+** The derivations that appear below have the following common factor:
+** (The question mark symbol (?) represents the spot where the derivations begin to differ.)
+
+program 
+declaration_list T_eof 
+declaration 
+variable_declaration 
+ctype declarator more_declarators_e T_semicolon 
+      T_id T_lbrack constant_expression T_rbrack 
+                    expression 
+                    (?)
+
+** In state 48, looking ahead at T_times, shifting is permitted
+** because of the following sub-derivation:
+
+unary_assignment expression 
+                 expression binary_operator expression 
+                            . T_times 
+
+** In state 48, looking ahead at T_times, reducing production
+** expression -> unary_assignment expression 
+** is permitted because of the following sub-derivation:
+
+expression binary_operator expression // lookahead token appears because binary_operator can begin with T_times
+unary_assignment expression . 
+
+** Conflict (shift/reduce) in state 31.
+** Token involved: T_lbrack
+** This state is reached from program after reading:
+
+ctype T_id T_lbrack T_new result_type 
+
+** The derivations that appear below have the following common factor:
+** (The question mark symbol (?) represents the spot where the derivations begin to differ.)
+
+program 
+declaration_list T_eof 
+declaration 
+variable_declaration 
+ctype declarator more_declarators_e T_semicolon 
+      T_id T_lbrack constant_expression T_rbrack 
+                    expression 
+                    (?)
+
+** In state 31, looking ahead at T_lbrack, reducing production
+** array_expr_index_e -> 
+** is permitted because of the following sub-derivation:
+
+expression T_lbrack expression T_rbrack // lookahead token appears
+T_new result_type array_expr_index_e // lookahead token is inherited
+                  . 
+
+** In state 31, looking ahead at T_lbrack, shifting is permitted
+** because of the following sub-derivation:
+
+T_new result_type array_expr_index_e 
+                  . T_lbrack expression T_rbrack 
+
+** Conflict (shift/reduce) in state 14.
+** Token involved: T_times
+** This state is reached from program after reading:
+
+ctype T_id T_lbrack T_new basic_type pointer_asterisk_e 
+
+** The derivations that appear below have the following common factor:
+** (The question mark symbol (?) represents the spot where the derivations begin to differ.)
+
+program 
+declaration_list T_eof 
+declaration 
+variable_declaration 
+ctype declarator more_declarators_e T_semicolon 
+      T_id T_lbrack constant_expression T_rbrack 
+                    expression 
+                    (?)
+
+** In state 14, looking ahead at T_times, reducing production
+** ctype -> basic_type pointer_asterisk_e 
+** is permitted because of the following sub-derivation:
+
+expression binary_operator expression // lookahead token appears because binary_operator can begin with T_times
+T_new result_type array_expr_index_e // lookahead token is inherited because array_expr_index_e can vanish
+      ctype // lookahead token is inherited
+      basic_type pointer_asterisk_e . 
+
+** In state 14, looking ahead at T_times, shifting is permitted
+** because of the following sub-derivation:
+
+T_new result_type array_expr_index_e 
+      ctype 
+      basic_type pointer_asterisk_e 
+                 pointer_asterisk_e . T_times 
