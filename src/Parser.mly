@@ -33,8 +33,8 @@
 %left T_plus T_minus
 %left T_times T_div
 %right T_addr
+%left UNARY
 %left T_incr T_dcr
-%left MEGALO
 
 %start program
 %type <unit> program
@@ -204,7 +204,7 @@ expression:
     | T_string {()}
     | T_id T_lparen expression_list_e T_rparen {()}
     | expression T_lbrack expression T_rbrack {()}
-    | unary_operator expression %prec MEGALO {()}
+    | unary_operator expression %prec UNARY {()}
     | expression binary_operator expression {()}
     | unary_assignment expression {()}
     | expression unary_assignment {()}
