@@ -20,28 +20,32 @@
 %token T_addr T_break T_byref T_continue T_new T_delete T_else
 %token T_return T_void
 %token T_eof
-%token T_for T_do T_begin T_end T_if T_then 
+%token T_for T_if 
 %token T_paren
 %token T_mod T_div
 
+%left LOWEST
+%left T_lbrack 
 %right BAD_CHOICE
 %left T_comma
 %left COMMAND
 %right T_assign T_plu_assign T_min_assign T_mul_assign T_div_assign T_mod_assign
-%right TERNARY
+%right TERNARY T_qmark T_colon
 %left T_or
 %left T_and
 %left T_eq T_neq
 %left T_lteq T_lt T_gt T_gteq
 %left T_plus T_minus
-%left T_times T_div
+%left T_times T_div T_mod
 %right T_addr
 %left UNARY
 %right CHOOSE_LONGER
-%right T_incr T_dcr
+%right T_incr T_dcr CAST
 %left SUFFIX_DCR
 %right INDEXING
 %left LARGEST
+%left DEREFERENCE
+%left T_else
 
 
 %start program
@@ -51,6 +55,7 @@
 %type <unit> declaration
 %type <unit> variable_declaration
 %type <unit> more_declarators_e
+%type <unit> more_declarators
 %type <unit> ctype
 %type <unit> pointer_asterisk_e
 %type <unit> basic_type
@@ -105,9 +110,13 @@ declaration:
     ;
 
 variable_declaration:
-    | ctype declarator more_declarators_e T_semicolon  {()}
+    | ctype more_declarators T_semicolon  {()}
     ;
 
+more_declarators:
+    declarator {()} 
+    | declarator T_comma more_declarators {()}
+    
 more_declarators_e:
       {()}
     | more_declarators_e T_comma declarator {()}
@@ -119,8 +128,8 @@ ctype:
     ;
 
 pointer_asterisk_e: 
-      {()}
-    | pointer_asterisk_e T_times    {()}
+      %prec LOWEST {()}
+    | T_times pointer_asterisk_e %prec LARGEST {()}
     ;
 
 basic_type: T_int {()}
@@ -131,7 +140,7 @@ basic_type: T_int {()}
 
 declarator:
       T_id T_lbrack constant_expression T_rbrack {()}
-    | T_id {()}
+    | T_id %prec LOWEST {()}
     ;
 
 function_declaration:
@@ -163,11 +172,12 @@ function_definition:
     ;
 
 statement:
-     expression_e T_semicolon {()}
+     T_semicolon {()}
+    | expression T_semicolon {()}
     | T_lbrace statement_list_e T_rbrace {()}
     | T_if T_lparen expression T_rparen statement else_part_e {()}
     | label_e T_for T_lparen expression_e T_semicolon expression_e T_semicolon
-        expression_e T_rparen statement_e T_semicolon {()}
+        expression_e T_rparen statement {()}
     | T_continue id_e T_semicolon {()}
     | T_break id_e T_semicolon {()}
     | T_return expression_e T_semicolon {()}
@@ -186,7 +196,7 @@ statement_e:
 
 
 else_part_e:
-      {()}
+      %prec LOWEST {()}
     | T_else statement {()} 
     ;
 
@@ -217,12 +227,13 @@ expression:
     | unary_assignment expression %prec T_dcr {()}
     | expression unary_assignment {()}
     | expression binary_assignment expression %prec T_assign {()}
-    | T_lparen result_type T_paren expression {()}
+    | T_lparen ctype T_rparen expression %prec CAST {()}
     | expression T_qmark expression T_colon expression %prec TERNARY {()}
-    | T_new result_type {()}
-    | T_new result_type T_lbrack expression T_rbrack %prec INDEXING {()}
+    | T_new ctype %prec LOWEST {()}
+    | T_new ctype T_lbrack expression T_rbrack {()}
     | T_delete expression %prec COMMAND {()}
     ;
+
 
 array_expr_index_e:
         {()}
@@ -256,7 +267,7 @@ unary_operator:
     | T_negate {()}
     ;
 
-binary_operator:
+%inline binary_operator:
       T_times {()}
     | T_div {()}
     | T_mod {()}
