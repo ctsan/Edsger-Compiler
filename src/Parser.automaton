@@ -7,12 +7,12 @@ program' -> . program [ # ]
 -- On T_bool shift to state 5
 -- On variable_declaration shift to state 6
 -- On result_type shift to state 7
--- On program shift to state 167
+-- On program shift to state 163
 -- On function_definition shift to state 21
 -- On function_declaration shift to state 22
--- On declaration_list shift to state 168
--- On declaration shift to state 160
--- On ctype shift to state 149
+-- On declaration_list shift to state 164
+-- On declaration shift to state 162
+-- On ctype shift to state 151
 -- On basic_type shift to state 13
 
 State 1:
@@ -201,9 +201,9 @@ function_definition -> result_type T_id T_lparen . parameter_list_e T_rparen T_l
 -- On T_byref shift to state 10
 -- On T_bool shift to state 5
 -- On parameter_list_e shift to state 17
--- On parameter_list shift to state 161
--- On parameter shift to state 166
--- On ctype shift to state 164
+-- On parameter_list shift to state 44
+-- On parameter shift to state 49
+-- On ctype shift to state 47
 -- On basic_type shift to state 13
 -- On T_rparen reduce production parameter_list_e -> 
 
@@ -413,9 +413,9 @@ function_definition -> result_type T_id T_lparen parameter_list_e T_rparen T_lbr
 -- On function_definition shift to state 21
 -- On function_declaration shift to state 22
 -- On declaration_list_e shift to state 23
--- On declaration_list shift to state 147
--- On declaration shift to state 160
--- On ctype shift to state 149
+-- On declaration_list shift to state 149
+-- On declaration shift to state 162
+-- On ctype shift to state 151
 -- On basic_type shift to state 13
 -- On T_true reduce production declaration_list_e -> 
 -- On T_times reduce production declaration_list_e -> 
@@ -552,31 +552,31 @@ statement_list_e -> statement_list_e . statement [ T_true T_times T_string T_sem
 -- On T_string shift to state 27
 -- On T_semicolon shift to state 28
 -- On T_return shift to state 29
--- On T_rbrace shift to state 113
+-- On T_rbrace shift to state 115
 -- On T_plus shift to state 30
 -- On T_null shift to state 31
 -- On T_new shift to state 32
 -- On T_negate shift to state 35
 -- On T_minus shift to state 36
 -- On T_lparen shift to state 37
--- On T_lbrace shift to state 114
+-- On T_lbrace shift to state 116
 -- On T_int_const shift to state 38
 -- On T_incr shift to state 39
--- On T_if shift to state 117
--- On T_id shift to state 121
--- On T_false shift to state 42
--- On T_double_const shift to state 43
--- On T_delete shift to state 44
--- On T_dcr shift to state 45
--- On T_continue shift to state 123
--- On T_char_const shift to state 46
--- On T_break shift to state 127
--- On T_addr shift to state 47
--- On unary_operator shift to state 48
--- On unary_assignment shift to state 49
--- On statement shift to state 146
--- On label_e shift to state 133
--- On expression shift to state 143
+-- On T_if shift to state 119
+-- On T_id shift to state 123
+-- On T_false shift to state 50
+-- On T_double_const shift to state 51
+-- On T_delete shift to state 52
+-- On T_dcr shift to state 53
+-- On T_continue shift to state 125
+-- On T_char_const shift to state 54
+-- On T_break shift to state 129
+-- On T_addr shift to state 55
+-- On unary_operator shift to state 56
+-- On unary_assignment shift to state 57
+-- On statement shift to state 148
+-- On label_e shift to state 135
+-- On expression shift to state 145
 -- On T_for reduce production label_e -> 
 
 State 25:
@@ -706,16 +706,16 @@ statement -> T_return . expression_e T_semicolon [ T_true T_times T_string T_sem
 -- On T_int_const shift to state 38
 -- On T_incr shift to state 39
 -- On T_id shift to state 40
--- On T_false shift to state 42
--- On T_double_const shift to state 43
--- On T_delete shift to state 44
--- On T_dcr shift to state 45
--- On T_char_const shift to state 46
--- On T_addr shift to state 47
--- On unary_operator shift to state 48
--- On unary_assignment shift to state 49
--- On expression_e shift to state 110
--- On expression shift to state 112
+-- On T_false shift to state 50
+-- On T_double_const shift to state 51
+-- On T_delete shift to state 52
+-- On T_dcr shift to state 53
+-- On T_char_const shift to state 54
+-- On T_addr shift to state 55
+-- On unary_operator shift to state 56
+-- On unary_assignment shift to state 57
+-- On expression_e shift to state 112
+-- On expression shift to state 114
 -- On T_semicolon reduce production expression_e -> 
 
 State 30:
@@ -826,15 +826,15 @@ expression -> T_new ctype T_lbrack . expression T_rbrack [ T_times T_semicolon T
 -- On T_int_const shift to state 38
 -- On T_incr shift to state 39
 -- On T_id shift to state 40
--- On T_false shift to state 42
--- On T_double_const shift to state 43
--- On T_delete shift to state 44
--- On T_dcr shift to state 45
--- On T_char_const shift to state 46
--- On T_addr shift to state 47
--- On unary_operator shift to state 48
--- On unary_assignment shift to state 49
--- On expression shift to state 108
+-- On T_false shift to state 50
+-- On T_double_const shift to state 51
+-- On T_delete shift to state 52
+-- On T_dcr shift to state 53
+-- On T_char_const shift to state 54
+-- On T_addr shift to state 55
+-- On unary_operator shift to state 56
+-- On unary_assignment shift to state 57
+-- On expression shift to state 110
 
 State 35:
 unary_operator -> T_negate . [ T_true T_times T_string T_plus T_null T_new T_negate T_minus T_lparen T_int_const T_incr T_id T_false T_double_const T_delete T_dcr T_char_const T_addr ]
@@ -894,19 +894,19 @@ expression -> T_lparen . ctype T_rparen expression [ T_times T_semicolon T_rpare
 -- On T_int shift to state 2
 -- On T_incr shift to state 39
 -- On T_id shift to state 40
--- On T_false shift to state 42
--- On T_double_const shift to state 43
+-- On T_false shift to state 50
+-- On T_double_const shift to state 51
 -- On T_double shift to state 3
--- On T_delete shift to state 44
--- On T_dcr shift to state 45
--- On T_char_const shift to state 46
+-- On T_delete shift to state 52
+-- On T_dcr shift to state 53
+-- On T_char_const shift to state 54
 -- On T_char shift to state 4
 -- On T_bool shift to state 5
--- On T_addr shift to state 47
--- On unary_operator shift to state 48
--- On unary_assignment shift to state 49
--- On expression shift to state 103
--- On ctype shift to state 105
+-- On T_addr shift to state 55
+-- On unary_operator shift to state 56
+-- On unary_assignment shift to state 57
+-- On expression shift to state 105
+-- On ctype shift to state 107
 -- On basic_type shift to state 13
 
 State 38:
@@ -986,7 +986,7 @@ unary_assignment -> T_incr . [ T_true T_times T_string T_semicolon T_rparen T_rb
 
 State 40:
 expression -> T_id . [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
-expression -> T_id . T_lparen expression_list_e T_rparen [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
+expression -> T_id . T_lparen parameter_list_e T_rparen [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
 -- On T_lparen shift to state 41
 -- On T_times reduce production expression -> T_id 
 -- On T_semicolon reduce production expression -> T_id 
@@ -1018,33 +1018,91 @@ expression -> T_id . T_lparen expression_list_e T_rparen [ T_times T_semicolon T
 -- On T_and reduce production expression -> T_id 
 
 State 41:
-expression -> T_id T_lparen . expression_list_e T_rparen [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
--- On T_true shift to state 25
--- On T_times shift to state 26
--- On T_string shift to state 27
--- On T_plus shift to state 30
--- On T_null shift to state 31
--- On T_new shift to state 32
--- On T_negate shift to state 35
--- On T_minus shift to state 36
--- On T_lparen shift to state 37
--- On T_int_const shift to state 38
--- On T_incr shift to state 39
--- On T_id shift to state 40
--- On T_false shift to state 42
--- On T_double_const shift to state 43
--- On T_delete shift to state 44
--- On T_dcr shift to state 45
--- On T_char_const shift to state 46
--- On T_addr shift to state 47
--- On unary_operator shift to state 48
--- On unary_assignment shift to state 49
--- On expression_list_e shift to state 97
--- On expression_list shift to state 99
--- On expression shift to state 102
--- On T_rparen reduce production expression_list_e -> 
+expression -> T_id T_lparen . parameter_list_e T_rparen [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
+-- On T_int shift to state 2
+-- On T_double shift to state 3
+-- On T_char shift to state 4
+-- On T_byref shift to state 10
+-- On T_bool shift to state 5
+-- On parameter_list_e shift to state 42
+-- On parameter_list shift to state 44
+-- On parameter shift to state 49
+-- On ctype shift to state 47
+-- On basic_type shift to state 13
+-- On T_rparen reduce production parameter_list_e -> 
 
 State 42:
+expression -> T_id T_lparen parameter_list_e . T_rparen [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
+-- On T_rparen shift to state 43
+
+State 43:
+expression -> T_id T_lparen parameter_list_e T_rparen . [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
+-- On T_times reduce production expression -> T_id T_lparen parameter_list_e T_rparen 
+-- On T_semicolon reduce production expression -> T_id T_lparen parameter_list_e T_rparen 
+-- On T_rparen reduce production expression -> T_id T_lparen parameter_list_e T_rparen 
+-- On T_rbrack reduce production expression -> T_id T_lparen parameter_list_e T_rparen 
+-- On T_qmark reduce production expression -> T_id T_lparen parameter_list_e T_rparen 
+-- On T_plus reduce production expression -> T_id T_lparen parameter_list_e T_rparen 
+-- On T_plu_assign reduce production expression -> T_id T_lparen parameter_list_e T_rparen 
+-- On T_or reduce production expression -> T_id T_lparen parameter_list_e T_rparen 
+-- On T_neq reduce production expression -> T_id T_lparen parameter_list_e T_rparen 
+-- On T_mul_assign reduce production expression -> T_id T_lparen parameter_list_e T_rparen 
+-- On T_mod_assign reduce production expression -> T_id T_lparen parameter_list_e T_rparen 
+-- On T_mod reduce production expression -> T_id T_lparen parameter_list_e T_rparen 
+-- On T_minus reduce production expression -> T_id T_lparen parameter_list_e T_rparen 
+-- On T_min_assign reduce production expression -> T_id T_lparen parameter_list_e T_rparen 
+-- On T_lteq reduce production expression -> T_id T_lparen parameter_list_e T_rparen 
+-- On T_lt reduce production expression -> T_id T_lparen parameter_list_e T_rparen 
+-- On T_lbrack reduce production expression -> T_id T_lparen parameter_list_e T_rparen 
+-- On T_incr reduce production expression -> T_id T_lparen parameter_list_e T_rparen 
+-- On T_gteq reduce production expression -> T_id T_lparen parameter_list_e T_rparen 
+-- On T_gt reduce production expression -> T_id T_lparen parameter_list_e T_rparen 
+-- On T_eq reduce production expression -> T_id T_lparen parameter_list_e T_rparen 
+-- On T_div_assign reduce production expression -> T_id T_lparen parameter_list_e T_rparen 
+-- On T_div reduce production expression -> T_id T_lparen parameter_list_e T_rparen 
+-- On T_dcr reduce production expression -> T_id T_lparen parameter_list_e T_rparen 
+-- On T_comma reduce production expression -> T_id T_lparen parameter_list_e T_rparen 
+-- On T_colon reduce production expression -> T_id T_lparen parameter_list_e T_rparen 
+-- On T_assign reduce production expression -> T_id T_lparen parameter_list_e T_rparen 
+-- On T_and reduce production expression -> T_id T_lparen parameter_list_e T_rparen 
+
+State 44:
+parameter_list -> parameter_list . T_comma parameter [ T_rparen T_comma ]
+parameter_list_e -> parameter_list . [ T_rparen ]
+-- On T_comma shift to state 45
+-- On T_rparen reduce production parameter_list_e -> parameter_list 
+
+State 45:
+parameter_list -> parameter_list T_comma . parameter [ T_rparen T_comma ]
+-- On T_int shift to state 2
+-- On T_double shift to state 3
+-- On T_char shift to state 4
+-- On T_byref shift to state 10
+-- On T_bool shift to state 5
+-- On parameter shift to state 46
+-- On ctype shift to state 47
+-- On basic_type shift to state 13
+
+State 46:
+parameter_list -> parameter_list T_comma parameter . [ T_rparen T_comma ]
+-- On T_rparen reduce production parameter_list -> parameter_list T_comma parameter 
+-- On T_comma reduce production parameter_list -> parameter_list T_comma parameter 
+
+State 47:
+parameter -> ctype . T_id [ T_rparen T_comma ]
+-- On T_id shift to state 48
+
+State 48:
+parameter -> ctype T_id . [ T_rparen T_comma ]
+-- On T_rparen reduce production parameter -> ctype T_id 
+-- On T_comma reduce production parameter -> ctype T_id 
+
+State 49:
+parameter_list -> parameter . [ T_rparen T_comma ]
+-- On T_rparen reduce production parameter_list -> parameter 
+-- On T_comma reduce production parameter_list -> parameter 
+
+State 50:
 expression -> T_false . [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
 -- On T_times reduce production expression -> T_false 
 -- On T_semicolon reduce production expression -> T_false 
@@ -1075,7 +1133,7 @@ expression -> T_false . [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T
 -- On T_assign reduce production expression -> T_false 
 -- On T_and reduce production expression -> T_false 
 
-State 43:
+State 51:
 expression -> T_double_const . [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
 -- On T_times reduce production expression -> T_double_const 
 -- On T_semicolon reduce production expression -> T_double_const 
@@ -1106,7 +1164,7 @@ expression -> T_double_const . [ T_times T_semicolon T_rparen T_rbrack T_qmark T
 -- On T_assign reduce production expression -> T_double_const 
 -- On T_and reduce production expression -> T_double_const 
 
-State 44:
+State 52:
 expression -> T_delete . expression [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
 -- On T_true shift to state 25
 -- On T_times shift to state 26
@@ -1120,17 +1178,17 @@ expression -> T_delete . expression [ T_times T_semicolon T_rparen T_rbrack T_qm
 -- On T_int_const shift to state 38
 -- On T_incr shift to state 39
 -- On T_id shift to state 40
--- On T_false shift to state 42
--- On T_double_const shift to state 43
--- On T_delete shift to state 44
--- On T_dcr shift to state 45
--- On T_char_const shift to state 46
--- On T_addr shift to state 47
--- On unary_operator shift to state 48
--- On unary_assignment shift to state 49
--- On expression shift to state 96
+-- On T_false shift to state 50
+-- On T_double_const shift to state 51
+-- On T_delete shift to state 52
+-- On T_dcr shift to state 53
+-- On T_char_const shift to state 54
+-- On T_addr shift to state 55
+-- On unary_operator shift to state 56
+-- On unary_assignment shift to state 57
+-- On expression shift to state 104
 
-State 45:
+State 53:
 unary_assignment -> T_dcr . [ T_true T_times T_string T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_null T_new T_neq T_negate T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lparen T_lbrack T_int_const T_incr T_id T_gteq T_gt T_false T_eq T_double_const T_div_assign T_div T_delete T_dcr T_comma T_colon T_char_const T_assign T_and T_addr ]
 -- On T_true reduce production unary_assignment -> T_dcr 
 -- On T_times reduce production unary_assignment -> T_dcr 
@@ -1174,7 +1232,7 @@ unary_assignment -> T_dcr . [ T_true T_times T_string T_semicolon T_rparen T_rbr
 -- On T_and reduce production unary_assignment -> T_dcr 
 -- On T_addr reduce production unary_assignment -> T_dcr 
 
-State 46:
+State 54:
 expression -> T_char_const . [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
 -- On T_times reduce production expression -> T_char_const 
 -- On T_semicolon reduce production expression -> T_char_const 
@@ -1205,7 +1263,7 @@ expression -> T_char_const . [ T_times T_semicolon T_rparen T_rbrack T_qmark T_p
 -- On T_assign reduce production expression -> T_char_const 
 -- On T_and reduce production expression -> T_char_const 
 
-State 47:
+State 55:
 unary_operator -> T_addr . [ T_true T_times T_string T_plus T_null T_new T_negate T_minus T_lparen T_int_const T_incr T_id T_false T_double_const T_delete T_dcr T_char_const T_addr ]
 -- On T_true reduce production unary_operator -> T_addr 
 -- On T_times reduce production unary_operator -> T_addr 
@@ -1226,7 +1284,7 @@ unary_operator -> T_addr . [ T_true T_times T_string T_plus T_null T_new T_negat
 -- On T_char_const reduce production unary_operator -> T_addr 
 -- On T_addr reduce production unary_operator -> T_addr 
 
-State 48:
+State 56:
 expression -> unary_operator . expression [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
 -- On T_true shift to state 25
 -- On T_times shift to state 26
@@ -1240,17 +1298,17 @@ expression -> unary_operator . expression [ T_times T_semicolon T_rparen T_rbrac
 -- On T_int_const shift to state 38
 -- On T_incr shift to state 39
 -- On T_id shift to state 40
--- On T_false shift to state 42
--- On T_double_const shift to state 43
--- On T_delete shift to state 44
--- On T_dcr shift to state 45
--- On T_char_const shift to state 46
--- On T_addr shift to state 47
--- On unary_operator shift to state 48
--- On unary_assignment shift to state 49
--- On expression shift to state 95
+-- On T_false shift to state 50
+-- On T_double_const shift to state 51
+-- On T_delete shift to state 52
+-- On T_dcr shift to state 53
+-- On T_char_const shift to state 54
+-- On T_addr shift to state 55
+-- On unary_operator shift to state 56
+-- On unary_assignment shift to state 57
+-- On expression shift to state 103
 
-State 49:
+State 57:
 expression -> unary_assignment . expression [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
 -- On T_true shift to state 25
 -- On T_times shift to state 26
@@ -1264,17 +1322,17 @@ expression -> unary_assignment . expression [ T_times T_semicolon T_rparen T_rbr
 -- On T_int_const shift to state 38
 -- On T_incr shift to state 39
 -- On T_id shift to state 40
--- On T_false shift to state 42
--- On T_double_const shift to state 43
--- On T_delete shift to state 44
--- On T_dcr shift to state 45
--- On T_char_const shift to state 46
--- On T_addr shift to state 47
--- On unary_operator shift to state 48
--- On unary_assignment shift to state 49
--- On expression shift to state 50
+-- On T_false shift to state 50
+-- On T_double_const shift to state 51
+-- On T_delete shift to state 52
+-- On T_dcr shift to state 53
+-- On T_char_const shift to state 54
+-- On T_addr shift to state 55
+-- On unary_operator shift to state 56
+-- On unary_assignment shift to state 57
+-- On expression shift to state 58
 
-State 50:
+State 58:
 expression -> expression . T_lbrack expression T_rbrack [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
 expression -> expression . T_times expression [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
 expression -> expression . T_div expression [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
@@ -1295,9 +1353,9 @@ expression -> expression . unary_assignment [ T_times T_semicolon T_rparen T_rbr
 expression -> expression . binary_assignment expression [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
 expression -> expression . T_qmark expression T_colon expression [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
 -- On T_incr shift to state 39
--- On T_dcr shift to state 45
--- On unary_assignment shift to state 51
--- On binary_assignment shift to state 52
+-- On T_dcr shift to state 53
+-- On unary_assignment shift to state 59
+-- On binary_assignment shift to state 60
 -- On T_times reduce production expression -> unary_assignment expression 
 -- On T_semicolon reduce production expression -> unary_assignment expression 
 -- On T_rparen reduce production expression -> unary_assignment expression 
@@ -1325,7 +1383,7 @@ expression -> expression . T_qmark expression T_colon expression [ T_times T_sem
 -- On T_assign reduce production expression -> unary_assignment expression 
 -- On T_and reduce production expression -> unary_assignment expression 
 
-State 51:
+State 59:
 expression -> expression unary_assignment . [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
 -- On T_times reduce production expression -> expression unary_assignment 
 -- On T_semicolon reduce production expression -> expression unary_assignment 
@@ -1356,7 +1414,7 @@ expression -> expression unary_assignment . [ T_times T_semicolon T_rparen T_rbr
 -- On T_assign reduce production expression -> expression unary_assignment 
 -- On T_and reduce production expression -> expression unary_assignment 
 
-State 52:
+State 60:
 expression -> expression binary_assignment . expression [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
 -- On T_true shift to state 25
 -- On T_times shift to state 26
@@ -1370,17 +1428,17 @@ expression -> expression binary_assignment . expression [ T_times T_semicolon T_
 -- On T_int_const shift to state 38
 -- On T_incr shift to state 39
 -- On T_id shift to state 40
--- On T_false shift to state 42
--- On T_double_const shift to state 43
--- On T_delete shift to state 44
--- On T_dcr shift to state 45
--- On T_char_const shift to state 46
--- On T_addr shift to state 47
--- On unary_operator shift to state 48
--- On unary_assignment shift to state 49
--- On expression shift to state 53
+-- On T_false shift to state 50
+-- On T_double_const shift to state 51
+-- On T_delete shift to state 52
+-- On T_dcr shift to state 53
+-- On T_char_const shift to state 54
+-- On T_addr shift to state 55
+-- On unary_operator shift to state 56
+-- On unary_assignment shift to state 57
+-- On expression shift to state 61
 
-State 53:
+State 61:
 expression -> expression . T_lbrack expression T_rbrack [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
 expression -> expression . T_times expression [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
 expression -> expression . T_div expression [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
@@ -1400,30 +1458,30 @@ expression -> expression . unary_assignment [ T_times T_semicolon T_rparen T_rbr
 expression -> expression . binary_assignment expression [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
 expression -> expression binary_assignment expression . [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
 expression -> expression . T_qmark expression T_colon expression [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
--- On T_times shift to state 54
--- On T_qmark shift to state 56
--- On T_plus shift to state 58
--- On T_plu_assign shift to state 60
--- On T_or shift to state 61
--- On T_neq shift to state 63
--- On T_mul_assign shift to state 65
--- On T_mod_assign shift to state 66
--- On T_mod shift to state 67
--- On T_minus shift to state 69
--- On T_min_assign shift to state 71
--- On T_lteq shift to state 72
--- On T_lt shift to state 74
+-- On T_times shift to state 62
+-- On T_qmark shift to state 64
+-- On T_plus shift to state 66
+-- On T_plu_assign shift to state 68
+-- On T_or shift to state 69
+-- On T_neq shift to state 71
+-- On T_mul_assign shift to state 73
+-- On T_mod_assign shift to state 74
+-- On T_mod shift to state 75
+-- On T_minus shift to state 77
+-- On T_min_assign shift to state 79
+-- On T_lteq shift to state 80
+-- On T_lt shift to state 82
 -- On T_incr shift to state 39
--- On T_gteq shift to state 79
--- On T_gt shift to state 81
--- On T_eq shift to state 83
--- On T_div_assign shift to state 85
--- On T_div shift to state 86
--- On T_dcr shift to state 45
--- On T_assign shift to state 90
--- On T_and shift to state 91
--- On unary_assignment shift to state 51
--- On binary_assignment shift to state 52
+-- On T_gteq shift to state 87
+-- On T_gt shift to state 89
+-- On T_eq shift to state 91
+-- On T_div_assign shift to state 93
+-- On T_div shift to state 94
+-- On T_dcr shift to state 53
+-- On T_assign shift to state 98
+-- On T_and shift to state 99
+-- On unary_assignment shift to state 59
+-- On binary_assignment shift to state 60
 -- On T_semicolon reduce production expression -> expression binary_assignment expression 
 -- On T_rparen reduce production expression -> expression binary_assignment expression 
 -- On T_rbrack reduce production expression -> expression binary_assignment expression 
@@ -1431,7 +1489,7 @@ expression -> expression . T_qmark expression T_colon expression [ T_times T_sem
 -- On T_comma reduce production expression -> expression binary_assignment expression 
 -- On T_colon reduce production expression -> expression binary_assignment expression 
 
-State 54:
+State 62:
 expression -> expression T_times . expression [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
 -- On T_true shift to state 25
 -- On T_times shift to state 26
@@ -1445,17 +1503,17 @@ expression -> expression T_times . expression [ T_times T_semicolon T_rparen T_r
 -- On T_int_const shift to state 38
 -- On T_incr shift to state 39
 -- On T_id shift to state 40
--- On T_false shift to state 42
--- On T_double_const shift to state 43
--- On T_delete shift to state 44
--- On T_dcr shift to state 45
--- On T_char_const shift to state 46
--- On T_addr shift to state 47
--- On unary_operator shift to state 48
--- On unary_assignment shift to state 49
--- On expression shift to state 55
+-- On T_false shift to state 50
+-- On T_double_const shift to state 51
+-- On T_delete shift to state 52
+-- On T_dcr shift to state 53
+-- On T_char_const shift to state 54
+-- On T_addr shift to state 55
+-- On unary_operator shift to state 56
+-- On unary_assignment shift to state 57
+-- On expression shift to state 63
 
-State 55:
+State 63:
 expression -> expression . T_lbrack expression T_rbrack [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
 expression -> expression . T_times expression [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
 expression -> expression T_times expression . [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
@@ -1475,8 +1533,8 @@ expression -> expression . T_comma expression [ T_times T_semicolon T_rparen T_r
 expression -> expression . unary_assignment [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
 expression -> expression . binary_assignment expression [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
 expression -> expression . T_qmark expression T_colon expression [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
--- On unary_assignment shift to state 51
--- On binary_assignment shift to state 52
+-- On unary_assignment shift to state 59
+-- On binary_assignment shift to state 60
 -- On T_times reduce production expression -> expression T_times expression 
 -- On T_semicolon reduce production expression -> expression T_times expression 
 -- On T_rparen reduce production expression -> expression T_times expression 
@@ -1506,7 +1564,7 @@ expression -> expression . T_qmark expression T_colon expression [ T_times T_sem
 -- On T_assign reduce production expression -> expression T_times expression 
 -- On T_and reduce production expression -> expression T_times expression 
 
-State 56:
+State 64:
 expression -> expression T_qmark . expression T_colon expression [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
 -- On T_true shift to state 25
 -- On T_times shift to state 26
@@ -1520,17 +1578,17 @@ expression -> expression T_qmark . expression T_colon expression [ T_times T_sem
 -- On T_int_const shift to state 38
 -- On T_incr shift to state 39
 -- On T_id shift to state 40
--- On T_false shift to state 42
--- On T_double_const shift to state 43
--- On T_delete shift to state 44
--- On T_dcr shift to state 45
--- On T_char_const shift to state 46
--- On T_addr shift to state 47
--- On unary_operator shift to state 48
--- On unary_assignment shift to state 49
--- On expression shift to state 57
+-- On T_false shift to state 50
+-- On T_double_const shift to state 51
+-- On T_delete shift to state 52
+-- On T_dcr shift to state 53
+-- On T_char_const shift to state 54
+-- On T_addr shift to state 55
+-- On unary_operator shift to state 56
+-- On unary_assignment shift to state 57
+-- On expression shift to state 65
 
-State 57:
+State 65:
 expression -> expression . T_lbrack expression T_rbrack [ T_times T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
 expression -> expression . T_times expression [ T_times T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
 expression -> expression . T_div expression [ T_times T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
@@ -1550,35 +1608,35 @@ expression -> expression . unary_assignment [ T_times T_qmark T_plus T_plu_assig
 expression -> expression . binary_assignment expression [ T_times T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
 expression -> expression . T_qmark expression T_colon expression [ T_times T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
 expression -> expression T_qmark expression . T_colon expression [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
--- On T_times shift to state 54
--- On T_qmark shift to state 56
--- On T_plus shift to state 58
--- On T_plu_assign shift to state 60
--- On T_or shift to state 61
--- On T_neq shift to state 63
--- On T_mul_assign shift to state 65
--- On T_mod_assign shift to state 66
--- On T_mod shift to state 67
--- On T_minus shift to state 69
--- On T_min_assign shift to state 71
--- On T_lteq shift to state 72
--- On T_lt shift to state 74
--- On T_lbrack shift to state 76
+-- On T_times shift to state 62
+-- On T_qmark shift to state 64
+-- On T_plus shift to state 66
+-- On T_plu_assign shift to state 68
+-- On T_or shift to state 69
+-- On T_neq shift to state 71
+-- On T_mul_assign shift to state 73
+-- On T_mod_assign shift to state 74
+-- On T_mod shift to state 75
+-- On T_minus shift to state 77
+-- On T_min_assign shift to state 79
+-- On T_lteq shift to state 80
+-- On T_lt shift to state 82
+-- On T_lbrack shift to state 84
 -- On T_incr shift to state 39
--- On T_gteq shift to state 79
--- On T_gt shift to state 81
--- On T_eq shift to state 83
--- On T_div_assign shift to state 85
--- On T_div shift to state 86
--- On T_dcr shift to state 45
--- On T_comma shift to state 88
--- On T_colon shift to state 93
--- On T_assign shift to state 90
--- On T_and shift to state 91
--- On unary_assignment shift to state 51
--- On binary_assignment shift to state 52
+-- On T_gteq shift to state 87
+-- On T_gt shift to state 89
+-- On T_eq shift to state 91
+-- On T_div_assign shift to state 93
+-- On T_div shift to state 94
+-- On T_dcr shift to state 53
+-- On T_comma shift to state 96
+-- On T_colon shift to state 101
+-- On T_assign shift to state 98
+-- On T_and shift to state 99
+-- On unary_assignment shift to state 59
+-- On binary_assignment shift to state 60
 
-State 58:
+State 66:
 expression -> expression T_plus . expression [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
 -- On T_true shift to state 25
 -- On T_times shift to state 26
@@ -1592,17 +1650,17 @@ expression -> expression T_plus . expression [ T_times T_semicolon T_rparen T_rb
 -- On T_int_const shift to state 38
 -- On T_incr shift to state 39
 -- On T_id shift to state 40
--- On T_false shift to state 42
--- On T_double_const shift to state 43
--- On T_delete shift to state 44
--- On T_dcr shift to state 45
--- On T_char_const shift to state 46
--- On T_addr shift to state 47
--- On unary_operator shift to state 48
--- On unary_assignment shift to state 49
--- On expression shift to state 59
+-- On T_false shift to state 50
+-- On T_double_const shift to state 51
+-- On T_delete shift to state 52
+-- On T_dcr shift to state 53
+-- On T_char_const shift to state 54
+-- On T_addr shift to state 55
+-- On unary_operator shift to state 56
+-- On unary_assignment shift to state 57
+-- On expression shift to state 67
 
-State 59:
+State 67:
 expression -> expression . T_lbrack expression T_rbrack [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
 expression -> expression . T_times expression [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
 expression -> expression . T_div expression [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
@@ -1622,8 +1680,8 @@ expression -> expression . T_comma expression [ T_times T_semicolon T_rparen T_r
 expression -> expression . unary_assignment [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
 expression -> expression . binary_assignment expression [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
 expression -> expression . T_qmark expression T_colon expression [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
--- On unary_assignment shift to state 51
--- On binary_assignment shift to state 52
+-- On unary_assignment shift to state 59
+-- On binary_assignment shift to state 60
 -- On T_times reduce production expression -> expression T_plus expression 
 -- On T_semicolon reduce production expression -> expression T_plus expression 
 -- On T_rparen reduce production expression -> expression T_plus expression 
@@ -1653,7 +1711,7 @@ expression -> expression . T_qmark expression T_colon expression [ T_times T_sem
 -- On T_assign reduce production expression -> expression T_plus expression 
 -- On T_and reduce production expression -> expression T_plus expression 
 
-State 60:
+State 68:
 binary_assignment -> T_plu_assign . [ T_true T_times T_string T_plus T_null T_new T_negate T_minus T_lparen T_int_const T_incr T_id T_false T_double_const T_delete T_dcr T_char_const T_addr ]
 -- On T_true reduce production binary_assignment -> T_plu_assign 
 -- On T_times reduce production binary_assignment -> T_plu_assign 
@@ -1674,7 +1732,7 @@ binary_assignment -> T_plu_assign . [ T_true T_times T_string T_plus T_null T_ne
 -- On T_char_const reduce production binary_assignment -> T_plu_assign 
 -- On T_addr reduce production binary_assignment -> T_plu_assign 
 
-State 61:
+State 69:
 expression -> expression T_or . expression [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
 -- On T_true shift to state 25
 -- On T_times shift to state 26
@@ -1688,17 +1746,17 @@ expression -> expression T_or . expression [ T_times T_semicolon T_rparen T_rbra
 -- On T_int_const shift to state 38
 -- On T_incr shift to state 39
 -- On T_id shift to state 40
--- On T_false shift to state 42
--- On T_double_const shift to state 43
--- On T_delete shift to state 44
--- On T_dcr shift to state 45
--- On T_char_const shift to state 46
--- On T_addr shift to state 47
--- On unary_operator shift to state 48
--- On unary_assignment shift to state 49
--- On expression shift to state 62
+-- On T_false shift to state 50
+-- On T_double_const shift to state 51
+-- On T_delete shift to state 52
+-- On T_dcr shift to state 53
+-- On T_char_const shift to state 54
+-- On T_addr shift to state 55
+-- On unary_operator shift to state 56
+-- On unary_assignment shift to state 57
+-- On expression shift to state 70
 
-State 62:
+State 70:
 expression -> expression . T_lbrack expression T_rbrack [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
 expression -> expression . T_times expression [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
 expression -> expression . T_div expression [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
@@ -1718,8 +1776,8 @@ expression -> expression . T_comma expression [ T_times T_semicolon T_rparen T_r
 expression -> expression . unary_assignment [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
 expression -> expression . binary_assignment expression [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
 expression -> expression . T_qmark expression T_colon expression [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
--- On unary_assignment shift to state 51
--- On binary_assignment shift to state 52
+-- On unary_assignment shift to state 59
+-- On binary_assignment shift to state 60
 -- On T_times reduce production expression -> expression T_or expression 
 -- On T_semicolon reduce production expression -> expression T_or expression 
 -- On T_rparen reduce production expression -> expression T_or expression 
@@ -1749,7 +1807,7 @@ expression -> expression . T_qmark expression T_colon expression [ T_times T_sem
 -- On T_assign reduce production expression -> expression T_or expression 
 -- On T_and reduce production expression -> expression T_or expression 
 
-State 63:
+State 71:
 expression -> expression T_neq . expression [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
 -- On T_true shift to state 25
 -- On T_times shift to state 26
@@ -1763,17 +1821,17 @@ expression -> expression T_neq . expression [ T_times T_semicolon T_rparen T_rbr
 -- On T_int_const shift to state 38
 -- On T_incr shift to state 39
 -- On T_id shift to state 40
--- On T_false shift to state 42
--- On T_double_const shift to state 43
--- On T_delete shift to state 44
--- On T_dcr shift to state 45
--- On T_char_const shift to state 46
--- On T_addr shift to state 47
--- On unary_operator shift to state 48
--- On unary_assignment shift to state 49
--- On expression shift to state 64
+-- On T_false shift to state 50
+-- On T_double_const shift to state 51
+-- On T_delete shift to state 52
+-- On T_dcr shift to state 53
+-- On T_char_const shift to state 54
+-- On T_addr shift to state 55
+-- On unary_operator shift to state 56
+-- On unary_assignment shift to state 57
+-- On expression shift to state 72
 
-State 64:
+State 72:
 expression -> expression . T_lbrack expression T_rbrack [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
 expression -> expression . T_times expression [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
 expression -> expression . T_div expression [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
@@ -1793,8 +1851,8 @@ expression -> expression . T_comma expression [ T_times T_semicolon T_rparen T_r
 expression -> expression . unary_assignment [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
 expression -> expression . binary_assignment expression [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
 expression -> expression . T_qmark expression T_colon expression [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
--- On unary_assignment shift to state 51
--- On binary_assignment shift to state 52
+-- On unary_assignment shift to state 59
+-- On binary_assignment shift to state 60
 -- On T_times reduce production expression -> expression T_neq expression 
 -- On T_semicolon reduce production expression -> expression T_neq expression 
 -- On T_rparen reduce production expression -> expression T_neq expression 
@@ -1824,7 +1882,7 @@ expression -> expression . T_qmark expression T_colon expression [ T_times T_sem
 -- On T_assign reduce production expression -> expression T_neq expression 
 -- On T_and reduce production expression -> expression T_neq expression 
 
-State 65:
+State 73:
 binary_assignment -> T_mul_assign . [ T_true T_times T_string T_plus T_null T_new T_negate T_minus T_lparen T_int_const T_incr T_id T_false T_double_const T_delete T_dcr T_char_const T_addr ]
 -- On T_true reduce production binary_assignment -> T_mul_assign 
 -- On T_times reduce production binary_assignment -> T_mul_assign 
@@ -1845,7 +1903,7 @@ binary_assignment -> T_mul_assign . [ T_true T_times T_string T_plus T_null T_ne
 -- On T_char_const reduce production binary_assignment -> T_mul_assign 
 -- On T_addr reduce production binary_assignment -> T_mul_assign 
 
-State 66:
+State 74:
 binary_assignment -> T_mod_assign . [ T_true T_times T_string T_plus T_null T_new T_negate T_minus T_lparen T_int_const T_incr T_id T_false T_double_const T_delete T_dcr T_char_const T_addr ]
 -- On T_true reduce production binary_assignment -> T_mod_assign 
 -- On T_times reduce production binary_assignment -> T_mod_assign 
@@ -1866,7 +1924,7 @@ binary_assignment -> T_mod_assign . [ T_true T_times T_string T_plus T_null T_ne
 -- On T_char_const reduce production binary_assignment -> T_mod_assign 
 -- On T_addr reduce production binary_assignment -> T_mod_assign 
 
-State 67:
+State 75:
 expression -> expression T_mod . expression [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
 -- On T_true shift to state 25
 -- On T_times shift to state 26
@@ -1880,17 +1938,17 @@ expression -> expression T_mod . expression [ T_times T_semicolon T_rparen T_rbr
 -- On T_int_const shift to state 38
 -- On T_incr shift to state 39
 -- On T_id shift to state 40
--- On T_false shift to state 42
--- On T_double_const shift to state 43
--- On T_delete shift to state 44
--- On T_dcr shift to state 45
--- On T_char_const shift to state 46
--- On T_addr shift to state 47
--- On unary_operator shift to state 48
--- On unary_assignment shift to state 49
--- On expression shift to state 68
+-- On T_false shift to state 50
+-- On T_double_const shift to state 51
+-- On T_delete shift to state 52
+-- On T_dcr shift to state 53
+-- On T_char_const shift to state 54
+-- On T_addr shift to state 55
+-- On unary_operator shift to state 56
+-- On unary_assignment shift to state 57
+-- On expression shift to state 76
 
-State 68:
+State 76:
 expression -> expression . T_lbrack expression T_rbrack [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
 expression -> expression . T_times expression [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
 expression -> expression . T_div expression [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
@@ -1910,8 +1968,8 @@ expression -> expression . T_comma expression [ T_times T_semicolon T_rparen T_r
 expression -> expression . unary_assignment [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
 expression -> expression . binary_assignment expression [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
 expression -> expression . T_qmark expression T_colon expression [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
--- On unary_assignment shift to state 51
--- On binary_assignment shift to state 52
+-- On unary_assignment shift to state 59
+-- On binary_assignment shift to state 60
 -- On T_times reduce production expression -> expression T_mod expression 
 -- On T_semicolon reduce production expression -> expression T_mod expression 
 -- On T_rparen reduce production expression -> expression T_mod expression 
@@ -1941,7 +1999,7 @@ expression -> expression . T_qmark expression T_colon expression [ T_times T_sem
 -- On T_assign reduce production expression -> expression T_mod expression 
 -- On T_and reduce production expression -> expression T_mod expression 
 
-State 69:
+State 77:
 expression -> expression T_minus . expression [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
 -- On T_true shift to state 25
 -- On T_times shift to state 26
@@ -1955,17 +2013,17 @@ expression -> expression T_minus . expression [ T_times T_semicolon T_rparen T_r
 -- On T_int_const shift to state 38
 -- On T_incr shift to state 39
 -- On T_id shift to state 40
--- On T_false shift to state 42
--- On T_double_const shift to state 43
--- On T_delete shift to state 44
--- On T_dcr shift to state 45
--- On T_char_const shift to state 46
--- On T_addr shift to state 47
--- On unary_operator shift to state 48
--- On unary_assignment shift to state 49
--- On expression shift to state 70
+-- On T_false shift to state 50
+-- On T_double_const shift to state 51
+-- On T_delete shift to state 52
+-- On T_dcr shift to state 53
+-- On T_char_const shift to state 54
+-- On T_addr shift to state 55
+-- On unary_operator shift to state 56
+-- On unary_assignment shift to state 57
+-- On expression shift to state 78
 
-State 70:
+State 78:
 expression -> expression . T_lbrack expression T_rbrack [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
 expression -> expression . T_times expression [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
 expression -> expression . T_div expression [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
@@ -1985,8 +2043,8 @@ expression -> expression . T_comma expression [ T_times T_semicolon T_rparen T_r
 expression -> expression . unary_assignment [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
 expression -> expression . binary_assignment expression [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
 expression -> expression . T_qmark expression T_colon expression [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
--- On unary_assignment shift to state 51
--- On binary_assignment shift to state 52
+-- On unary_assignment shift to state 59
+-- On binary_assignment shift to state 60
 -- On T_times reduce production expression -> expression T_minus expression 
 -- On T_semicolon reduce production expression -> expression T_minus expression 
 -- On T_rparen reduce production expression -> expression T_minus expression 
@@ -2016,7 +2074,7 @@ expression -> expression . T_qmark expression T_colon expression [ T_times T_sem
 -- On T_assign reduce production expression -> expression T_minus expression 
 -- On T_and reduce production expression -> expression T_minus expression 
 
-State 71:
+State 79:
 binary_assignment -> T_min_assign . [ T_true T_times T_string T_plus T_null T_new T_negate T_minus T_lparen T_int_const T_incr T_id T_false T_double_const T_delete T_dcr T_char_const T_addr ]
 -- On T_true reduce production binary_assignment -> T_min_assign 
 -- On T_times reduce production binary_assignment -> T_min_assign 
@@ -2037,7 +2095,7 @@ binary_assignment -> T_min_assign . [ T_true T_times T_string T_plus T_null T_ne
 -- On T_char_const reduce production binary_assignment -> T_min_assign 
 -- On T_addr reduce production binary_assignment -> T_min_assign 
 
-State 72:
+State 80:
 expression -> expression T_lteq . expression [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
 -- On T_true shift to state 25
 -- On T_times shift to state 26
@@ -2051,17 +2109,17 @@ expression -> expression T_lteq . expression [ T_times T_semicolon T_rparen T_rb
 -- On T_int_const shift to state 38
 -- On T_incr shift to state 39
 -- On T_id shift to state 40
--- On T_false shift to state 42
--- On T_double_const shift to state 43
--- On T_delete shift to state 44
--- On T_dcr shift to state 45
--- On T_char_const shift to state 46
--- On T_addr shift to state 47
--- On unary_operator shift to state 48
--- On unary_assignment shift to state 49
--- On expression shift to state 73
+-- On T_false shift to state 50
+-- On T_double_const shift to state 51
+-- On T_delete shift to state 52
+-- On T_dcr shift to state 53
+-- On T_char_const shift to state 54
+-- On T_addr shift to state 55
+-- On unary_operator shift to state 56
+-- On unary_assignment shift to state 57
+-- On expression shift to state 81
 
-State 73:
+State 81:
 expression -> expression . T_lbrack expression T_rbrack [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
 expression -> expression . T_times expression [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
 expression -> expression . T_div expression [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
@@ -2081,8 +2139,8 @@ expression -> expression . T_comma expression [ T_times T_semicolon T_rparen T_r
 expression -> expression . unary_assignment [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
 expression -> expression . binary_assignment expression [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
 expression -> expression . T_qmark expression T_colon expression [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
--- On unary_assignment shift to state 51
--- On binary_assignment shift to state 52
+-- On unary_assignment shift to state 59
+-- On binary_assignment shift to state 60
 -- On T_times reduce production expression -> expression T_lteq expression 
 -- On T_semicolon reduce production expression -> expression T_lteq expression 
 -- On T_rparen reduce production expression -> expression T_lteq expression 
@@ -2112,7 +2170,7 @@ expression -> expression . T_qmark expression T_colon expression [ T_times T_sem
 -- On T_assign reduce production expression -> expression T_lteq expression 
 -- On T_and reduce production expression -> expression T_lteq expression 
 
-State 74:
+State 82:
 expression -> expression T_lt . expression [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
 -- On T_true shift to state 25
 -- On T_times shift to state 26
@@ -2126,17 +2184,17 @@ expression -> expression T_lt . expression [ T_times T_semicolon T_rparen T_rbra
 -- On T_int_const shift to state 38
 -- On T_incr shift to state 39
 -- On T_id shift to state 40
--- On T_false shift to state 42
--- On T_double_const shift to state 43
--- On T_delete shift to state 44
--- On T_dcr shift to state 45
--- On T_char_const shift to state 46
--- On T_addr shift to state 47
--- On unary_operator shift to state 48
--- On unary_assignment shift to state 49
--- On expression shift to state 75
+-- On T_false shift to state 50
+-- On T_double_const shift to state 51
+-- On T_delete shift to state 52
+-- On T_dcr shift to state 53
+-- On T_char_const shift to state 54
+-- On T_addr shift to state 55
+-- On unary_operator shift to state 56
+-- On unary_assignment shift to state 57
+-- On expression shift to state 83
 
-State 75:
+State 83:
 expression -> expression . T_lbrack expression T_rbrack [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
 expression -> expression . T_times expression [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
 expression -> expression . T_div expression [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
@@ -2156,8 +2214,8 @@ expression -> expression . T_comma expression [ T_times T_semicolon T_rparen T_r
 expression -> expression . unary_assignment [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
 expression -> expression . binary_assignment expression [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
 expression -> expression . T_qmark expression T_colon expression [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
--- On unary_assignment shift to state 51
--- On binary_assignment shift to state 52
+-- On unary_assignment shift to state 59
+-- On binary_assignment shift to state 60
 -- On T_times reduce production expression -> expression T_lt expression 
 -- On T_semicolon reduce production expression -> expression T_lt expression 
 -- On T_rparen reduce production expression -> expression T_lt expression 
@@ -2187,7 +2245,7 @@ expression -> expression . T_qmark expression T_colon expression [ T_times T_sem
 -- On T_assign reduce production expression -> expression T_lt expression 
 -- On T_and reduce production expression -> expression T_lt expression 
 
-State 76:
+State 84:
 expression -> expression T_lbrack . expression T_rbrack [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
 -- On T_true shift to state 25
 -- On T_times shift to state 26
@@ -2201,17 +2259,17 @@ expression -> expression T_lbrack . expression T_rbrack [ T_times T_semicolon T_
 -- On T_int_const shift to state 38
 -- On T_incr shift to state 39
 -- On T_id shift to state 40
--- On T_false shift to state 42
--- On T_double_const shift to state 43
--- On T_delete shift to state 44
--- On T_dcr shift to state 45
--- On T_char_const shift to state 46
--- On T_addr shift to state 47
--- On unary_operator shift to state 48
--- On unary_assignment shift to state 49
--- On expression shift to state 77
+-- On T_false shift to state 50
+-- On T_double_const shift to state 51
+-- On T_delete shift to state 52
+-- On T_dcr shift to state 53
+-- On T_char_const shift to state 54
+-- On T_addr shift to state 55
+-- On unary_operator shift to state 56
+-- On unary_assignment shift to state 57
+-- On expression shift to state 85
 
-State 77:
+State 85:
 expression -> expression . T_lbrack expression T_rbrack [ T_times T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_assign T_and ]
 expression -> expression T_lbrack expression . T_rbrack [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
 expression -> expression . T_times expression [ T_times T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_assign T_and ]
@@ -2231,35 +2289,35 @@ expression -> expression . T_comma expression [ T_times T_rbrack T_qmark T_plus 
 expression -> expression . unary_assignment [ T_times T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_assign T_and ]
 expression -> expression . binary_assignment expression [ T_times T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_assign T_and ]
 expression -> expression . T_qmark expression T_colon expression [ T_times T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_assign T_and ]
--- On T_times shift to state 54
--- On T_rbrack shift to state 78
--- On T_qmark shift to state 56
--- On T_plus shift to state 58
--- On T_plu_assign shift to state 60
--- On T_or shift to state 61
--- On T_neq shift to state 63
--- On T_mul_assign shift to state 65
--- On T_mod_assign shift to state 66
--- On T_mod shift to state 67
--- On T_minus shift to state 69
--- On T_min_assign shift to state 71
--- On T_lteq shift to state 72
--- On T_lt shift to state 74
--- On T_lbrack shift to state 76
+-- On T_times shift to state 62
+-- On T_rbrack shift to state 86
+-- On T_qmark shift to state 64
+-- On T_plus shift to state 66
+-- On T_plu_assign shift to state 68
+-- On T_or shift to state 69
+-- On T_neq shift to state 71
+-- On T_mul_assign shift to state 73
+-- On T_mod_assign shift to state 74
+-- On T_mod shift to state 75
+-- On T_minus shift to state 77
+-- On T_min_assign shift to state 79
+-- On T_lteq shift to state 80
+-- On T_lt shift to state 82
+-- On T_lbrack shift to state 84
 -- On T_incr shift to state 39
--- On T_gteq shift to state 79
--- On T_gt shift to state 81
--- On T_eq shift to state 83
--- On T_div_assign shift to state 85
--- On T_div shift to state 86
--- On T_dcr shift to state 45
--- On T_comma shift to state 88
--- On T_assign shift to state 90
--- On T_and shift to state 91
--- On unary_assignment shift to state 51
--- On binary_assignment shift to state 52
+-- On T_gteq shift to state 87
+-- On T_gt shift to state 89
+-- On T_eq shift to state 91
+-- On T_div_assign shift to state 93
+-- On T_div shift to state 94
+-- On T_dcr shift to state 53
+-- On T_comma shift to state 96
+-- On T_assign shift to state 98
+-- On T_and shift to state 99
+-- On unary_assignment shift to state 59
+-- On binary_assignment shift to state 60
 
-State 78:
+State 86:
 expression -> expression T_lbrack expression T_rbrack . [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
 -- On T_times reduce production expression -> expression T_lbrack expression T_rbrack 
 -- On T_semicolon reduce production expression -> expression T_lbrack expression T_rbrack 
@@ -2290,7 +2348,7 @@ expression -> expression T_lbrack expression T_rbrack . [ T_times T_semicolon T_
 -- On T_assign reduce production expression -> expression T_lbrack expression T_rbrack 
 -- On T_and reduce production expression -> expression T_lbrack expression T_rbrack 
 
-State 79:
+State 87:
 expression -> expression T_gteq . expression [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
 -- On T_true shift to state 25
 -- On T_times shift to state 26
@@ -2304,17 +2362,17 @@ expression -> expression T_gteq . expression [ T_times T_semicolon T_rparen T_rb
 -- On T_int_const shift to state 38
 -- On T_incr shift to state 39
 -- On T_id shift to state 40
--- On T_false shift to state 42
--- On T_double_const shift to state 43
--- On T_delete shift to state 44
--- On T_dcr shift to state 45
--- On T_char_const shift to state 46
--- On T_addr shift to state 47
--- On unary_operator shift to state 48
--- On unary_assignment shift to state 49
--- On expression shift to state 80
+-- On T_false shift to state 50
+-- On T_double_const shift to state 51
+-- On T_delete shift to state 52
+-- On T_dcr shift to state 53
+-- On T_char_const shift to state 54
+-- On T_addr shift to state 55
+-- On unary_operator shift to state 56
+-- On unary_assignment shift to state 57
+-- On expression shift to state 88
 
-State 80:
+State 88:
 expression -> expression . T_lbrack expression T_rbrack [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
 expression -> expression . T_times expression [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
 expression -> expression . T_div expression [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
@@ -2334,8 +2392,8 @@ expression -> expression . T_comma expression [ T_times T_semicolon T_rparen T_r
 expression -> expression . unary_assignment [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
 expression -> expression . binary_assignment expression [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
 expression -> expression . T_qmark expression T_colon expression [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
--- On unary_assignment shift to state 51
--- On binary_assignment shift to state 52
+-- On unary_assignment shift to state 59
+-- On binary_assignment shift to state 60
 -- On T_times reduce production expression -> expression T_gteq expression 
 -- On T_semicolon reduce production expression -> expression T_gteq expression 
 -- On T_rparen reduce production expression -> expression T_gteq expression 
@@ -2365,7 +2423,7 @@ expression -> expression . T_qmark expression T_colon expression [ T_times T_sem
 -- On T_assign reduce production expression -> expression T_gteq expression 
 -- On T_and reduce production expression -> expression T_gteq expression 
 
-State 81:
+State 89:
 expression -> expression T_gt . expression [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
 -- On T_true shift to state 25
 -- On T_times shift to state 26
@@ -2379,17 +2437,17 @@ expression -> expression T_gt . expression [ T_times T_semicolon T_rparen T_rbra
 -- On T_int_const shift to state 38
 -- On T_incr shift to state 39
 -- On T_id shift to state 40
--- On T_false shift to state 42
--- On T_double_const shift to state 43
--- On T_delete shift to state 44
--- On T_dcr shift to state 45
--- On T_char_const shift to state 46
--- On T_addr shift to state 47
--- On unary_operator shift to state 48
--- On unary_assignment shift to state 49
--- On expression shift to state 82
+-- On T_false shift to state 50
+-- On T_double_const shift to state 51
+-- On T_delete shift to state 52
+-- On T_dcr shift to state 53
+-- On T_char_const shift to state 54
+-- On T_addr shift to state 55
+-- On unary_operator shift to state 56
+-- On unary_assignment shift to state 57
+-- On expression shift to state 90
 
-State 82:
+State 90:
 expression -> expression . T_lbrack expression T_rbrack [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
 expression -> expression . T_times expression [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
 expression -> expression . T_div expression [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
@@ -2409,8 +2467,8 @@ expression -> expression . T_comma expression [ T_times T_semicolon T_rparen T_r
 expression -> expression . unary_assignment [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
 expression -> expression . binary_assignment expression [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
 expression -> expression . T_qmark expression T_colon expression [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
--- On unary_assignment shift to state 51
--- On binary_assignment shift to state 52
+-- On unary_assignment shift to state 59
+-- On binary_assignment shift to state 60
 -- On T_times reduce production expression -> expression T_gt expression 
 -- On T_semicolon reduce production expression -> expression T_gt expression 
 -- On T_rparen reduce production expression -> expression T_gt expression 
@@ -2440,7 +2498,7 @@ expression -> expression . T_qmark expression T_colon expression [ T_times T_sem
 -- On T_assign reduce production expression -> expression T_gt expression 
 -- On T_and reduce production expression -> expression T_gt expression 
 
-State 83:
+State 91:
 expression -> expression T_eq . expression [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
 -- On T_true shift to state 25
 -- On T_times shift to state 26
@@ -2454,17 +2512,17 @@ expression -> expression T_eq . expression [ T_times T_semicolon T_rparen T_rbra
 -- On T_int_const shift to state 38
 -- On T_incr shift to state 39
 -- On T_id shift to state 40
--- On T_false shift to state 42
--- On T_double_const shift to state 43
--- On T_delete shift to state 44
--- On T_dcr shift to state 45
--- On T_char_const shift to state 46
--- On T_addr shift to state 47
--- On unary_operator shift to state 48
--- On unary_assignment shift to state 49
--- On expression shift to state 84
+-- On T_false shift to state 50
+-- On T_double_const shift to state 51
+-- On T_delete shift to state 52
+-- On T_dcr shift to state 53
+-- On T_char_const shift to state 54
+-- On T_addr shift to state 55
+-- On unary_operator shift to state 56
+-- On unary_assignment shift to state 57
+-- On expression shift to state 92
 
-State 84:
+State 92:
 expression -> expression . T_lbrack expression T_rbrack [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
 expression -> expression . T_times expression [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
 expression -> expression . T_div expression [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
@@ -2484,8 +2542,8 @@ expression -> expression . T_comma expression [ T_times T_semicolon T_rparen T_r
 expression -> expression . unary_assignment [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
 expression -> expression . binary_assignment expression [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
 expression -> expression . T_qmark expression T_colon expression [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
--- On unary_assignment shift to state 51
--- On binary_assignment shift to state 52
+-- On unary_assignment shift to state 59
+-- On binary_assignment shift to state 60
 -- On T_times reduce production expression -> expression T_eq expression 
 -- On T_semicolon reduce production expression -> expression T_eq expression 
 -- On T_rparen reduce production expression -> expression T_eq expression 
@@ -2515,7 +2573,7 @@ expression -> expression . T_qmark expression T_colon expression [ T_times T_sem
 -- On T_assign reduce production expression -> expression T_eq expression 
 -- On T_and reduce production expression -> expression T_eq expression 
 
-State 85:
+State 93:
 binary_assignment -> T_div_assign . [ T_true T_times T_string T_plus T_null T_new T_negate T_minus T_lparen T_int_const T_incr T_id T_false T_double_const T_delete T_dcr T_char_const T_addr ]
 -- On T_true reduce production binary_assignment -> T_div_assign 
 -- On T_times reduce production binary_assignment -> T_div_assign 
@@ -2536,7 +2594,7 @@ binary_assignment -> T_div_assign . [ T_true T_times T_string T_plus T_null T_ne
 -- On T_char_const reduce production binary_assignment -> T_div_assign 
 -- On T_addr reduce production binary_assignment -> T_div_assign 
 
-State 86:
+State 94:
 expression -> expression T_div . expression [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
 -- On T_true shift to state 25
 -- On T_times shift to state 26
@@ -2550,17 +2608,17 @@ expression -> expression T_div . expression [ T_times T_semicolon T_rparen T_rbr
 -- On T_int_const shift to state 38
 -- On T_incr shift to state 39
 -- On T_id shift to state 40
--- On T_false shift to state 42
--- On T_double_const shift to state 43
--- On T_delete shift to state 44
--- On T_dcr shift to state 45
--- On T_char_const shift to state 46
--- On T_addr shift to state 47
--- On unary_operator shift to state 48
--- On unary_assignment shift to state 49
--- On expression shift to state 87
+-- On T_false shift to state 50
+-- On T_double_const shift to state 51
+-- On T_delete shift to state 52
+-- On T_dcr shift to state 53
+-- On T_char_const shift to state 54
+-- On T_addr shift to state 55
+-- On unary_operator shift to state 56
+-- On unary_assignment shift to state 57
+-- On expression shift to state 95
 
-State 87:
+State 95:
 expression -> expression . T_lbrack expression T_rbrack [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
 expression -> expression . T_times expression [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
 expression -> expression . T_div expression [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
@@ -2580,8 +2638,8 @@ expression -> expression . T_comma expression [ T_times T_semicolon T_rparen T_r
 expression -> expression . unary_assignment [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
 expression -> expression . binary_assignment expression [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
 expression -> expression . T_qmark expression T_colon expression [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
--- On unary_assignment shift to state 51
--- On binary_assignment shift to state 52
+-- On unary_assignment shift to state 59
+-- On binary_assignment shift to state 60
 -- On T_times reduce production expression -> expression T_div expression 
 -- On T_semicolon reduce production expression -> expression T_div expression 
 -- On T_rparen reduce production expression -> expression T_div expression 
@@ -2611,7 +2669,7 @@ expression -> expression . T_qmark expression T_colon expression [ T_times T_sem
 -- On T_assign reduce production expression -> expression T_div expression 
 -- On T_and reduce production expression -> expression T_div expression 
 
-State 88:
+State 96:
 expression -> expression T_comma . expression [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
 -- On T_true shift to state 25
 -- On T_times shift to state 26
@@ -2625,17 +2683,17 @@ expression -> expression T_comma . expression [ T_times T_semicolon T_rparen T_r
 -- On T_int_const shift to state 38
 -- On T_incr shift to state 39
 -- On T_id shift to state 40
--- On T_false shift to state 42
--- On T_double_const shift to state 43
--- On T_delete shift to state 44
--- On T_dcr shift to state 45
--- On T_char_const shift to state 46
--- On T_addr shift to state 47
--- On unary_operator shift to state 48
--- On unary_assignment shift to state 49
--- On expression shift to state 89
+-- On T_false shift to state 50
+-- On T_double_const shift to state 51
+-- On T_delete shift to state 52
+-- On T_dcr shift to state 53
+-- On T_char_const shift to state 54
+-- On T_addr shift to state 55
+-- On unary_operator shift to state 56
+-- On unary_assignment shift to state 57
+-- On expression shift to state 97
 
-State 89:
+State 97:
 expression -> expression . T_lbrack expression T_rbrack [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
 expression -> expression . T_times expression [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
 expression -> expression . T_div expression [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
@@ -2655,8 +2713,8 @@ expression -> expression T_comma expression . [ T_times T_semicolon T_rparen T_r
 expression -> expression . unary_assignment [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
 expression -> expression . binary_assignment expression [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
 expression -> expression . T_qmark expression T_colon expression [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
--- On unary_assignment shift to state 51
--- On binary_assignment shift to state 52
+-- On unary_assignment shift to state 59
+-- On binary_assignment shift to state 60
 -- On T_times reduce production expression -> expression T_comma expression 
 -- On T_semicolon reduce production expression -> expression T_comma expression 
 -- On T_rparen reduce production expression -> expression T_comma expression 
@@ -2686,7 +2744,7 @@ expression -> expression . T_qmark expression T_colon expression [ T_times T_sem
 -- On T_assign reduce production expression -> expression T_comma expression 
 -- On T_and reduce production expression -> expression T_comma expression 
 
-State 90:
+State 98:
 binary_assignment -> T_assign . [ T_true T_times T_string T_plus T_null T_new T_negate T_minus T_lparen T_int_const T_incr T_id T_false T_double_const T_delete T_dcr T_char_const T_addr ]
 -- On T_true reduce production binary_assignment -> T_assign 
 -- On T_times reduce production binary_assignment -> T_assign 
@@ -2707,7 +2765,7 @@ binary_assignment -> T_assign . [ T_true T_times T_string T_plus T_null T_new T_
 -- On T_char_const reduce production binary_assignment -> T_assign 
 -- On T_addr reduce production binary_assignment -> T_assign 
 
-State 91:
+State 99:
 expression -> expression T_and . expression [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
 -- On T_true shift to state 25
 -- On T_times shift to state 26
@@ -2721,17 +2779,17 @@ expression -> expression T_and . expression [ T_times T_semicolon T_rparen T_rbr
 -- On T_int_const shift to state 38
 -- On T_incr shift to state 39
 -- On T_id shift to state 40
--- On T_false shift to state 42
--- On T_double_const shift to state 43
--- On T_delete shift to state 44
--- On T_dcr shift to state 45
--- On T_char_const shift to state 46
--- On T_addr shift to state 47
--- On unary_operator shift to state 48
--- On unary_assignment shift to state 49
--- On expression shift to state 92
+-- On T_false shift to state 50
+-- On T_double_const shift to state 51
+-- On T_delete shift to state 52
+-- On T_dcr shift to state 53
+-- On T_char_const shift to state 54
+-- On T_addr shift to state 55
+-- On unary_operator shift to state 56
+-- On unary_assignment shift to state 57
+-- On expression shift to state 100
 
-State 92:
+State 100:
 expression -> expression . T_lbrack expression T_rbrack [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
 expression -> expression . T_times expression [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
 expression -> expression . T_div expression [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
@@ -2751,8 +2809,8 @@ expression -> expression . T_comma expression [ T_times T_semicolon T_rparen T_r
 expression -> expression . unary_assignment [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
 expression -> expression . binary_assignment expression [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
 expression -> expression . T_qmark expression T_colon expression [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
--- On unary_assignment shift to state 51
--- On binary_assignment shift to state 52
+-- On unary_assignment shift to state 59
+-- On binary_assignment shift to state 60
 -- On T_times reduce production expression -> expression T_and expression 
 -- On T_semicolon reduce production expression -> expression T_and expression 
 -- On T_rparen reduce production expression -> expression T_and expression 
@@ -2782,7 +2840,7 @@ expression -> expression . T_qmark expression T_colon expression [ T_times T_sem
 -- On T_assign reduce production expression -> expression T_and expression 
 -- On T_and reduce production expression -> expression T_and expression 
 
-State 93:
+State 101:
 expression -> expression T_qmark expression T_colon . expression [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
 -- On T_true shift to state 25
 -- On T_times shift to state 26
@@ -2796,17 +2854,17 @@ expression -> expression T_qmark expression T_colon . expression [ T_times T_sem
 -- On T_int_const shift to state 38
 -- On T_incr shift to state 39
 -- On T_id shift to state 40
--- On T_false shift to state 42
--- On T_double_const shift to state 43
--- On T_delete shift to state 44
--- On T_dcr shift to state 45
--- On T_char_const shift to state 46
--- On T_addr shift to state 47
--- On unary_operator shift to state 48
--- On unary_assignment shift to state 49
--- On expression shift to state 94
+-- On T_false shift to state 50
+-- On T_double_const shift to state 51
+-- On T_delete shift to state 52
+-- On T_dcr shift to state 53
+-- On T_char_const shift to state 54
+-- On T_addr shift to state 55
+-- On unary_operator shift to state 56
+-- On unary_assignment shift to state 57
+-- On expression shift to state 102
 
-State 94:
+State 102:
 expression -> expression . T_lbrack expression T_rbrack [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
 expression -> expression . T_times expression [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
 expression -> expression . T_div expression [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
@@ -2826,24 +2884,24 @@ expression -> expression . unary_assignment [ T_times T_semicolon T_rparen T_rbr
 expression -> expression . binary_assignment expression [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
 expression -> expression . T_qmark expression T_colon expression [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
 expression -> expression T_qmark expression T_colon expression . [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
--- On T_times shift to state 54
--- On T_qmark shift to state 56
--- On T_plus shift to state 58
--- On T_or shift to state 61
--- On T_neq shift to state 63
--- On T_mod shift to state 67
--- On T_minus shift to state 69
--- On T_lteq shift to state 72
--- On T_lt shift to state 74
+-- On T_times shift to state 62
+-- On T_qmark shift to state 64
+-- On T_plus shift to state 66
+-- On T_or shift to state 69
+-- On T_neq shift to state 71
+-- On T_mod shift to state 75
+-- On T_minus shift to state 77
+-- On T_lteq shift to state 80
+-- On T_lt shift to state 82
 -- On T_incr shift to state 39
--- On T_gteq shift to state 79
--- On T_gt shift to state 81
--- On T_eq shift to state 83
--- On T_div shift to state 86
--- On T_dcr shift to state 45
--- On T_and shift to state 91
--- On unary_assignment shift to state 51
--- On binary_assignment shift to state 52
+-- On T_gteq shift to state 87
+-- On T_gt shift to state 89
+-- On T_eq shift to state 91
+-- On T_div shift to state 94
+-- On T_dcr shift to state 53
+-- On T_and shift to state 99
+-- On unary_assignment shift to state 59
+-- On binary_assignment shift to state 60
 -- On T_semicolon reduce production expression -> expression T_qmark expression T_colon expression 
 -- On T_rparen reduce production expression -> expression T_qmark expression T_colon expression 
 -- On T_rbrack reduce production expression -> expression T_qmark expression T_colon expression 
@@ -2857,7 +2915,7 @@ expression -> expression T_qmark expression T_colon expression . [ T_times T_sem
 -- On T_colon reduce production expression -> expression T_qmark expression T_colon expression 
 -- On T_assign reduce production expression -> expression T_qmark expression T_colon expression 
 
-State 95:
+State 103:
 expression -> expression . T_lbrack expression T_rbrack [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
 expression -> unary_operator expression . [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
 expression -> expression . T_times expression [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
@@ -2878,9 +2936,9 @@ expression -> expression . unary_assignment [ T_times T_semicolon T_rparen T_rbr
 expression -> expression . binary_assignment expression [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
 expression -> expression . T_qmark expression T_colon expression [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
 -- On T_incr shift to state 39
--- On T_dcr shift to state 45
--- On unary_assignment shift to state 51
--- On binary_assignment shift to state 52
+-- On T_dcr shift to state 53
+-- On unary_assignment shift to state 59
+-- On binary_assignment shift to state 60
 -- On T_times reduce production expression -> unary_operator expression 
 -- On T_semicolon reduce production expression -> unary_operator expression 
 -- On T_rparen reduce production expression -> unary_operator expression 
@@ -2908,7 +2966,7 @@ expression -> expression . T_qmark expression T_colon expression [ T_times T_sem
 -- On T_assign reduce production expression -> unary_operator expression 
 -- On T_and reduce production expression -> unary_operator expression 
 
-State 96:
+State 104:
 expression -> expression . T_lbrack expression T_rbrack [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
 expression -> expression . T_times expression [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
 expression -> expression . T_div expression [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
@@ -2928,30 +2986,30 @@ expression -> expression . unary_assignment [ T_times T_semicolon T_rparen T_rbr
 expression -> expression . binary_assignment expression [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
 expression -> expression . T_qmark expression T_colon expression [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
 expression -> T_delete expression . [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
--- On T_times shift to state 54
--- On T_qmark shift to state 56
--- On T_plus shift to state 58
--- On T_plu_assign shift to state 60
--- On T_or shift to state 61
--- On T_neq shift to state 63
--- On T_mul_assign shift to state 65
--- On T_mod_assign shift to state 66
--- On T_mod shift to state 67
--- On T_minus shift to state 69
--- On T_min_assign shift to state 71
--- On T_lteq shift to state 72
--- On T_lt shift to state 74
+-- On T_times shift to state 62
+-- On T_qmark shift to state 64
+-- On T_plus shift to state 66
+-- On T_plu_assign shift to state 68
+-- On T_or shift to state 69
+-- On T_neq shift to state 71
+-- On T_mul_assign shift to state 73
+-- On T_mod_assign shift to state 74
+-- On T_mod shift to state 75
+-- On T_minus shift to state 77
+-- On T_min_assign shift to state 79
+-- On T_lteq shift to state 80
+-- On T_lt shift to state 82
 -- On T_incr shift to state 39
--- On T_gteq shift to state 79
--- On T_gt shift to state 81
--- On T_eq shift to state 83
--- On T_div_assign shift to state 85
--- On T_div shift to state 86
--- On T_dcr shift to state 45
--- On T_assign shift to state 90
--- On T_and shift to state 91
--- On unary_assignment shift to state 51
--- On binary_assignment shift to state 52
+-- On T_gteq shift to state 87
+-- On T_gt shift to state 89
+-- On T_eq shift to state 91
+-- On T_div_assign shift to state 93
+-- On T_div shift to state 94
+-- On T_dcr shift to state 53
+-- On T_assign shift to state 98
+-- On T_and shift to state 99
+-- On unary_assignment shift to state 59
+-- On binary_assignment shift to state 60
 -- On T_semicolon reduce production expression -> T_delete expression 
 -- On T_rparen reduce production expression -> T_delete expression 
 -- On T_rbrack reduce production expression -> T_delete expression 
@@ -2959,170 +3017,7 @@ expression -> T_delete expression . [ T_times T_semicolon T_rparen T_rbrack T_qm
 -- On T_comma reduce production expression -> T_delete expression 
 -- On T_colon reduce production expression -> T_delete expression 
 
-State 97:
-expression -> T_id T_lparen expression_list_e . T_rparen [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
--- On T_rparen shift to state 98
-
-State 98:
-expression -> T_id T_lparen expression_list_e T_rparen . [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
--- On T_times reduce production expression -> T_id T_lparen expression_list_e T_rparen 
--- On T_semicolon reduce production expression -> T_id T_lparen expression_list_e T_rparen 
--- On T_rparen reduce production expression -> T_id T_lparen expression_list_e T_rparen 
--- On T_rbrack reduce production expression -> T_id T_lparen expression_list_e T_rparen 
--- On T_qmark reduce production expression -> T_id T_lparen expression_list_e T_rparen 
--- On T_plus reduce production expression -> T_id T_lparen expression_list_e T_rparen 
--- On T_plu_assign reduce production expression -> T_id T_lparen expression_list_e T_rparen 
--- On T_or reduce production expression -> T_id T_lparen expression_list_e T_rparen 
--- On T_neq reduce production expression -> T_id T_lparen expression_list_e T_rparen 
--- On T_mul_assign reduce production expression -> T_id T_lparen expression_list_e T_rparen 
--- On T_mod_assign reduce production expression -> T_id T_lparen expression_list_e T_rparen 
--- On T_mod reduce production expression -> T_id T_lparen expression_list_e T_rparen 
--- On T_minus reduce production expression -> T_id T_lparen expression_list_e T_rparen 
--- On T_min_assign reduce production expression -> T_id T_lparen expression_list_e T_rparen 
--- On T_lteq reduce production expression -> T_id T_lparen expression_list_e T_rparen 
--- On T_lt reduce production expression -> T_id T_lparen expression_list_e T_rparen 
--- On T_lbrack reduce production expression -> T_id T_lparen expression_list_e T_rparen 
--- On T_incr reduce production expression -> T_id T_lparen expression_list_e T_rparen 
--- On T_gteq reduce production expression -> T_id T_lparen expression_list_e T_rparen 
--- On T_gt reduce production expression -> T_id T_lparen expression_list_e T_rparen 
--- On T_eq reduce production expression -> T_id T_lparen expression_list_e T_rparen 
--- On T_div_assign reduce production expression -> T_id T_lparen expression_list_e T_rparen 
--- On T_div reduce production expression -> T_id T_lparen expression_list_e T_rparen 
--- On T_dcr reduce production expression -> T_id T_lparen expression_list_e T_rparen 
--- On T_comma reduce production expression -> T_id T_lparen expression_list_e T_rparen 
--- On T_colon reduce production expression -> T_id T_lparen expression_list_e T_rparen 
--- On T_assign reduce production expression -> T_id T_lparen expression_list_e T_rparen 
--- On T_and reduce production expression -> T_id T_lparen expression_list_e T_rparen 
-
-State 99:
-expression_list -> expression_list . T_comma expression [ T_rparen T_comma ]
-expression_list_e -> expression_list . [ T_rparen ]
--- On T_comma shift to state 100
--- On T_rparen reduce production expression_list_e -> expression_list 
-
-State 100:
-expression_list -> expression_list T_comma . expression [ T_rparen T_comma ]
--- On T_true shift to state 25
--- On T_times shift to state 26
--- On T_string shift to state 27
--- On T_plus shift to state 30
--- On T_null shift to state 31
--- On T_new shift to state 32
--- On T_negate shift to state 35
--- On T_minus shift to state 36
--- On T_lparen shift to state 37
--- On T_int_const shift to state 38
--- On T_incr shift to state 39
--- On T_id shift to state 40
--- On T_false shift to state 42
--- On T_double_const shift to state 43
--- On T_delete shift to state 44
--- On T_dcr shift to state 45
--- On T_char_const shift to state 46
--- On T_addr shift to state 47
--- On unary_operator shift to state 48
--- On unary_assignment shift to state 49
--- On expression shift to state 101
-
-State 101:
-expression -> expression . T_lbrack expression T_rbrack [ T_times T_rparen T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_assign T_and ]
-expression -> expression . T_times expression [ T_times T_rparen T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_assign T_and ]
-expression -> expression . T_div expression [ T_times T_rparen T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_assign T_and ]
-expression -> expression . T_mod expression [ T_times T_rparen T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_assign T_and ]
-expression -> expression . T_plus expression [ T_times T_rparen T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_assign T_and ]
-expression -> expression . T_minus expression [ T_times T_rparen T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_assign T_and ]
-expression -> expression . T_lt expression [ T_times T_rparen T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_assign T_and ]
-expression -> expression . T_gt expression [ T_times T_rparen T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_assign T_and ]
-expression -> expression . T_lteq expression [ T_times T_rparen T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_assign T_and ]
-expression -> expression . T_gteq expression [ T_times T_rparen T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_assign T_and ]
-expression -> expression . T_eq expression [ T_times T_rparen T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_assign T_and ]
-expression -> expression . T_neq expression [ T_times T_rparen T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_assign T_and ]
-expression -> expression . T_and expression [ T_times T_rparen T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_assign T_and ]
-expression -> expression . T_or expression [ T_times T_rparen T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_assign T_and ]
-expression -> expression . T_comma expression [ T_times T_rparen T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_assign T_and ]
-expression -> expression . unary_assignment [ T_times T_rparen T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_assign T_and ]
-expression -> expression . binary_assignment expression [ T_times T_rparen T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_assign T_and ]
-expression -> expression . T_qmark expression T_colon expression [ T_times T_rparen T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_assign T_and ]
-expression_list -> expression_list T_comma expression . [ T_rparen T_comma ]
--- On T_times shift to state 54
--- On T_qmark shift to state 56
--- On T_plus shift to state 58
--- On T_plu_assign shift to state 60
--- On T_or shift to state 61
--- On T_neq shift to state 63
--- On T_mul_assign shift to state 65
--- On T_mod_assign shift to state 66
--- On T_mod shift to state 67
--- On T_minus shift to state 69
--- On T_min_assign shift to state 71
--- On T_lteq shift to state 72
--- On T_lt shift to state 74
--- On T_lbrack shift to state 76
--- On T_incr shift to state 39
--- On T_gteq shift to state 79
--- On T_gt shift to state 81
--- On T_eq shift to state 83
--- On T_div_assign shift to state 85
--- On T_div shift to state 86
--- On T_dcr shift to state 45
--- On T_assign shift to state 90
--- On T_and shift to state 91
--- On unary_assignment shift to state 51
--- On binary_assignment shift to state 52
--- On T_rparen reduce production expression_list -> expression_list T_comma expression 
--- On T_comma reduce production expression_list -> expression_list T_comma expression 
-
-State 102:
-expression -> expression . T_lbrack expression T_rbrack [ T_times T_rparen T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_assign T_and ]
-expression -> expression . T_times expression [ T_times T_rparen T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_assign T_and ]
-expression -> expression . T_div expression [ T_times T_rparen T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_assign T_and ]
-expression -> expression . T_mod expression [ T_times T_rparen T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_assign T_and ]
-expression -> expression . T_plus expression [ T_times T_rparen T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_assign T_and ]
-expression -> expression . T_minus expression [ T_times T_rparen T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_assign T_and ]
-expression -> expression . T_lt expression [ T_times T_rparen T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_assign T_and ]
-expression -> expression . T_gt expression [ T_times T_rparen T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_assign T_and ]
-expression -> expression . T_lteq expression [ T_times T_rparen T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_assign T_and ]
-expression -> expression . T_gteq expression [ T_times T_rparen T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_assign T_and ]
-expression -> expression . T_eq expression [ T_times T_rparen T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_assign T_and ]
-expression -> expression . T_neq expression [ T_times T_rparen T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_assign T_and ]
-expression -> expression . T_and expression [ T_times T_rparen T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_assign T_and ]
-expression -> expression . T_or expression [ T_times T_rparen T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_assign T_and ]
-expression -> expression . T_comma expression [ T_times T_rparen T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_assign T_and ]
-expression -> expression . unary_assignment [ T_times T_rparen T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_assign T_and ]
-expression -> expression . binary_assignment expression [ T_times T_rparen T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_assign T_and ]
-expression -> expression . T_qmark expression T_colon expression [ T_times T_rparen T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_assign T_and ]
-expression_list -> expression . [ T_rparen T_comma ]
--- On T_times shift to state 54
--- On T_qmark shift to state 56
--- On T_plus shift to state 58
--- On T_plu_assign shift to state 60
--- On T_or shift to state 61
--- On T_neq shift to state 63
--- On T_mul_assign shift to state 65
--- On T_mod_assign shift to state 66
--- On T_mod shift to state 67
--- On T_minus shift to state 69
--- On T_min_assign shift to state 71
--- On T_lteq shift to state 72
--- On T_lt shift to state 74
--- On T_lbrack shift to state 76
--- On T_incr shift to state 39
--- On T_gteq shift to state 79
--- On T_gt shift to state 81
--- On T_eq shift to state 83
--- On T_div_assign shift to state 85
--- On T_div shift to state 86
--- On T_dcr shift to state 45
--- On T_comma shift to state 88
--- On T_assign shift to state 90
--- On T_and shift to state 91
--- On unary_assignment shift to state 51
--- On binary_assignment shift to state 52
--- On T_rparen reduce production expression_list -> expression 
--- On T_comma reduce production expression_list -> expression 
-** Conflict on T_comma
-
-State 103:
+State 105:
 expression -> T_lparen expression . T_rparen [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
 expression -> expression . T_lbrack expression T_rbrack [ T_times T_rparen T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_assign T_and ]
 expression -> expression . T_times expression [ T_times T_rparen T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_assign T_and ]
@@ -3142,35 +3037,35 @@ expression -> expression . T_comma expression [ T_times T_rparen T_qmark T_plus 
 expression -> expression . unary_assignment [ T_times T_rparen T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_assign T_and ]
 expression -> expression . binary_assignment expression [ T_times T_rparen T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_assign T_and ]
 expression -> expression . T_qmark expression T_colon expression [ T_times T_rparen T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_assign T_and ]
--- On T_times shift to state 54
--- On T_rparen shift to state 104
--- On T_qmark shift to state 56
--- On T_plus shift to state 58
--- On T_plu_assign shift to state 60
--- On T_or shift to state 61
--- On T_neq shift to state 63
--- On T_mul_assign shift to state 65
--- On T_mod_assign shift to state 66
--- On T_mod shift to state 67
--- On T_minus shift to state 69
--- On T_min_assign shift to state 71
--- On T_lteq shift to state 72
--- On T_lt shift to state 74
--- On T_lbrack shift to state 76
+-- On T_times shift to state 62
+-- On T_rparen shift to state 106
+-- On T_qmark shift to state 64
+-- On T_plus shift to state 66
+-- On T_plu_assign shift to state 68
+-- On T_or shift to state 69
+-- On T_neq shift to state 71
+-- On T_mul_assign shift to state 73
+-- On T_mod_assign shift to state 74
+-- On T_mod shift to state 75
+-- On T_minus shift to state 77
+-- On T_min_assign shift to state 79
+-- On T_lteq shift to state 80
+-- On T_lt shift to state 82
+-- On T_lbrack shift to state 84
 -- On T_incr shift to state 39
--- On T_gteq shift to state 79
--- On T_gt shift to state 81
--- On T_eq shift to state 83
--- On T_div_assign shift to state 85
--- On T_div shift to state 86
--- On T_dcr shift to state 45
--- On T_comma shift to state 88
--- On T_assign shift to state 90
--- On T_and shift to state 91
--- On unary_assignment shift to state 51
--- On binary_assignment shift to state 52
+-- On T_gteq shift to state 87
+-- On T_gt shift to state 89
+-- On T_eq shift to state 91
+-- On T_div_assign shift to state 93
+-- On T_div shift to state 94
+-- On T_dcr shift to state 53
+-- On T_comma shift to state 96
+-- On T_assign shift to state 98
+-- On T_and shift to state 99
+-- On unary_assignment shift to state 59
+-- On binary_assignment shift to state 60
 
-State 104:
+State 106:
 expression -> T_lparen expression T_rparen . [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
 -- On T_times reduce production expression -> T_lparen expression T_rparen 
 -- On T_semicolon reduce production expression -> T_lparen expression T_rparen 
@@ -3201,11 +3096,11 @@ expression -> T_lparen expression T_rparen . [ T_times T_semicolon T_rparen T_rb
 -- On T_assign reduce production expression -> T_lparen expression T_rparen 
 -- On T_and reduce production expression -> T_lparen expression T_rparen 
 
-State 105:
+State 107:
 expression -> T_lparen ctype . T_rparen expression [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
--- On T_rparen shift to state 106
+-- On T_rparen shift to state 108
 
-State 106:
+State 108:
 expression -> T_lparen ctype T_rparen . expression [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
 -- On T_true shift to state 25
 -- On T_times shift to state 26
@@ -3219,17 +3114,17 @@ expression -> T_lparen ctype T_rparen . expression [ T_times T_semicolon T_rpare
 -- On T_int_const shift to state 38
 -- On T_incr shift to state 39
 -- On T_id shift to state 40
--- On T_false shift to state 42
--- On T_double_const shift to state 43
--- On T_delete shift to state 44
--- On T_dcr shift to state 45
--- On T_char_const shift to state 46
--- On T_addr shift to state 47
--- On unary_operator shift to state 48
--- On unary_assignment shift to state 49
--- On expression shift to state 107
+-- On T_false shift to state 50
+-- On T_double_const shift to state 51
+-- On T_delete shift to state 52
+-- On T_dcr shift to state 53
+-- On T_char_const shift to state 54
+-- On T_addr shift to state 55
+-- On unary_operator shift to state 56
+-- On unary_assignment shift to state 57
+-- On expression shift to state 109
 
-State 107:
+State 109:
 expression -> expression . T_lbrack expression T_rbrack [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
 expression -> expression . T_times expression [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
 expression -> expression . T_div expression [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
@@ -3250,9 +3145,9 @@ expression -> expression . binary_assignment expression [ T_times T_semicolon T_
 expression -> T_lparen ctype T_rparen expression . [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
 expression -> expression . T_qmark expression T_colon expression [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
 -- On T_incr shift to state 39
--- On T_dcr shift to state 45
--- On unary_assignment shift to state 51
--- On binary_assignment shift to state 52
+-- On T_dcr shift to state 53
+-- On unary_assignment shift to state 59
+-- On binary_assignment shift to state 60
 -- On T_times reduce production expression -> T_lparen ctype T_rparen expression 
 -- On T_semicolon reduce production expression -> T_lparen ctype T_rparen expression 
 -- On T_rparen reduce production expression -> T_lparen ctype T_rparen expression 
@@ -3280,7 +3175,7 @@ expression -> expression . T_qmark expression T_colon expression [ T_times T_sem
 -- On T_assign reduce production expression -> T_lparen ctype T_rparen expression 
 -- On T_and reduce production expression -> T_lparen ctype T_rparen expression 
 
-State 108:
+State 110:
 expression -> expression . T_lbrack expression T_rbrack [ T_times T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_assign T_and ]
 expression -> expression . T_times expression [ T_times T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_assign T_and ]
 expression -> expression . T_div expression [ T_times T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_assign T_and ]
@@ -3300,35 +3195,35 @@ expression -> expression . unary_assignment [ T_times T_rbrack T_qmark T_plus T_
 expression -> expression . binary_assignment expression [ T_times T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_assign T_and ]
 expression -> expression . T_qmark expression T_colon expression [ T_times T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_assign T_and ]
 expression -> T_new ctype T_lbrack expression . T_rbrack [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
--- On T_times shift to state 54
--- On T_rbrack shift to state 109
--- On T_qmark shift to state 56
--- On T_plus shift to state 58
--- On T_plu_assign shift to state 60
--- On T_or shift to state 61
--- On T_neq shift to state 63
--- On T_mul_assign shift to state 65
--- On T_mod_assign shift to state 66
--- On T_mod shift to state 67
--- On T_minus shift to state 69
--- On T_min_assign shift to state 71
--- On T_lteq shift to state 72
--- On T_lt shift to state 74
--- On T_lbrack shift to state 76
+-- On T_times shift to state 62
+-- On T_rbrack shift to state 111
+-- On T_qmark shift to state 64
+-- On T_plus shift to state 66
+-- On T_plu_assign shift to state 68
+-- On T_or shift to state 69
+-- On T_neq shift to state 71
+-- On T_mul_assign shift to state 73
+-- On T_mod_assign shift to state 74
+-- On T_mod shift to state 75
+-- On T_minus shift to state 77
+-- On T_min_assign shift to state 79
+-- On T_lteq shift to state 80
+-- On T_lt shift to state 82
+-- On T_lbrack shift to state 84
 -- On T_incr shift to state 39
--- On T_gteq shift to state 79
--- On T_gt shift to state 81
--- On T_eq shift to state 83
--- On T_div_assign shift to state 85
--- On T_div shift to state 86
--- On T_dcr shift to state 45
--- On T_comma shift to state 88
--- On T_assign shift to state 90
--- On T_and shift to state 91
--- On unary_assignment shift to state 51
--- On binary_assignment shift to state 52
+-- On T_gteq shift to state 87
+-- On T_gt shift to state 89
+-- On T_eq shift to state 91
+-- On T_div_assign shift to state 93
+-- On T_div shift to state 94
+-- On T_dcr shift to state 53
+-- On T_comma shift to state 96
+-- On T_assign shift to state 98
+-- On T_and shift to state 99
+-- On unary_assignment shift to state 59
+-- On binary_assignment shift to state 60
 
-State 109:
+State 111:
 expression -> T_new ctype T_lbrack expression T_rbrack . [ T_times T_semicolon T_rparen T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_colon T_assign T_and ]
 -- On T_times reduce production expression -> T_new ctype T_lbrack expression T_rbrack 
 -- On T_semicolon reduce production expression -> T_new ctype T_lbrack expression T_rbrack 
@@ -3359,11 +3254,11 @@ expression -> T_new ctype T_lbrack expression T_rbrack . [ T_times T_semicolon T
 -- On T_assign reduce production expression -> T_new ctype T_lbrack expression T_rbrack 
 -- On T_and reduce production expression -> T_new ctype T_lbrack expression T_rbrack 
 
-State 110:
+State 112:
 statement -> T_return expression_e . T_semicolon [ T_true T_times T_string T_semicolon T_return T_rbrace T_plus T_null T_new T_negate T_minus T_lparen T_lbrace T_int_const T_incr T_if T_id T_for T_false T_else T_double_const T_delete T_dcr T_continue T_char_const T_break T_addr ]
--- On T_semicolon shift to state 111
+-- On T_semicolon shift to state 113
 
-State 111:
+State 113:
 statement -> T_return expression_e T_semicolon . [ T_true T_times T_string T_semicolon T_return T_rbrace T_plus T_null T_new T_negate T_minus T_lparen T_lbrace T_int_const T_incr T_if T_id T_for T_false T_else T_double_const T_delete T_dcr T_continue T_char_const T_break T_addr ]
 -- On T_true reduce production statement -> T_return expression_e T_semicolon 
 -- On T_times reduce production statement -> T_return expression_e T_semicolon 
@@ -3393,7 +3288,7 @@ statement -> T_return expression_e T_semicolon . [ T_true T_times T_string T_sem
 -- On T_break reduce production statement -> T_return expression_e T_semicolon 
 -- On T_addr reduce production statement -> T_return expression_e T_semicolon 
 
-State 112:
+State 114:
 expression -> expression . T_lbrack expression T_rbrack [ T_times T_semicolon T_rparen T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_assign T_and ]
 expression -> expression . T_times expression [ T_times T_semicolon T_rparen T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_assign T_and ]
 expression -> expression . T_div expression [ T_times T_semicolon T_rparen T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_assign T_and ]
@@ -3413,36 +3308,36 @@ expression -> expression . unary_assignment [ T_times T_semicolon T_rparen T_qma
 expression -> expression . binary_assignment expression [ T_times T_semicolon T_rparen T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_assign T_and ]
 expression -> expression . T_qmark expression T_colon expression [ T_times T_semicolon T_rparen T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_assign T_and ]
 expression_e -> expression . [ T_semicolon T_rparen ]
--- On T_times shift to state 54
--- On T_qmark shift to state 56
--- On T_plus shift to state 58
--- On T_plu_assign shift to state 60
--- On T_or shift to state 61
--- On T_neq shift to state 63
--- On T_mul_assign shift to state 65
--- On T_mod_assign shift to state 66
--- On T_mod shift to state 67
--- On T_minus shift to state 69
--- On T_min_assign shift to state 71
--- On T_lteq shift to state 72
--- On T_lt shift to state 74
--- On T_lbrack shift to state 76
+-- On T_times shift to state 62
+-- On T_qmark shift to state 64
+-- On T_plus shift to state 66
+-- On T_plu_assign shift to state 68
+-- On T_or shift to state 69
+-- On T_neq shift to state 71
+-- On T_mul_assign shift to state 73
+-- On T_mod_assign shift to state 74
+-- On T_mod shift to state 75
+-- On T_minus shift to state 77
+-- On T_min_assign shift to state 79
+-- On T_lteq shift to state 80
+-- On T_lt shift to state 82
+-- On T_lbrack shift to state 84
 -- On T_incr shift to state 39
--- On T_gteq shift to state 79
--- On T_gt shift to state 81
--- On T_eq shift to state 83
--- On T_div_assign shift to state 85
--- On T_div shift to state 86
--- On T_dcr shift to state 45
--- On T_comma shift to state 88
--- On T_assign shift to state 90
--- On T_and shift to state 91
--- On unary_assignment shift to state 51
--- On binary_assignment shift to state 52
+-- On T_gteq shift to state 87
+-- On T_gt shift to state 89
+-- On T_eq shift to state 91
+-- On T_div_assign shift to state 93
+-- On T_div shift to state 94
+-- On T_dcr shift to state 53
+-- On T_comma shift to state 96
+-- On T_assign shift to state 98
+-- On T_and shift to state 99
+-- On unary_assignment shift to state 59
+-- On binary_assignment shift to state 60
 -- On T_semicolon reduce production expression_e -> expression 
 -- On T_rparen reduce production expression_e -> expression 
 
-State 113:
+State 115:
 function_definition -> result_type T_id T_lparen parameter_list_e T_rparen T_lbrace declaration_list_e statement_list_e T_rbrace . [ T_void T_true T_times T_string T_semicolon T_return T_rbrace T_plus T_null T_new T_negate T_minus T_lparen T_lbrace T_int_const T_int T_incr T_if T_id T_for T_false T_eof T_double_const T_double T_delete T_dcr T_continue T_char_const T_char T_break T_bool T_addr ]
 -- On T_void reduce production function_definition -> result_type T_id T_lparen parameter_list_e T_rparen T_lbrace declaration_list_e statement_list_e T_rbrace 
 -- On T_true reduce production function_definition -> result_type T_id T_lparen parameter_list_e T_rparen T_lbrace declaration_list_e statement_list_e T_rbrace 
@@ -3477,9 +3372,9 @@ function_definition -> result_type T_id T_lparen parameter_list_e T_rparen T_lbr
 -- On T_bool reduce production function_definition -> result_type T_id T_lparen parameter_list_e T_rparen T_lbrace declaration_list_e statement_list_e T_rbrace 
 -- On T_addr reduce production function_definition -> result_type T_id T_lparen parameter_list_e T_rparen T_lbrace declaration_list_e statement_list_e T_rbrace 
 
-State 114:
+State 116:
 statement -> T_lbrace . statement_list_e T_rbrace [ T_true T_times T_string T_semicolon T_return T_rbrace T_plus T_null T_new T_negate T_minus T_lparen T_lbrace T_int_const T_incr T_if T_id T_for T_false T_else T_double_const T_delete T_dcr T_continue T_char_const T_break T_addr ]
--- On statement_list_e shift to state 115
+-- On statement_list_e shift to state 117
 -- On T_true reduce production statement_list_e -> 
 -- On T_times reduce production statement_list_e -> 
 -- On T_string reduce production statement_list_e -> 
@@ -3507,7 +3402,7 @@ statement -> T_lbrace . statement_list_e T_rbrace [ T_true T_times T_string T_se
 -- On T_break reduce production statement_list_e -> 
 -- On T_addr reduce production statement_list_e -> 
 
-State 115:
+State 117:
 statement -> T_lbrace statement_list_e . T_rbrace [ T_true T_times T_string T_semicolon T_return T_rbrace T_plus T_null T_new T_negate T_minus T_lparen T_lbrace T_int_const T_incr T_if T_id T_for T_false T_else T_double_const T_delete T_dcr T_continue T_char_const T_break T_addr ]
 statement_list_e -> statement_list_e . statement [ T_true T_times T_string T_semicolon T_return T_rbrace T_plus T_null T_new T_negate T_minus T_lparen T_lbrace T_int_const T_incr T_if T_id T_for T_false T_double_const T_delete T_dcr T_continue T_char_const T_break T_addr ]
 -- On T_true shift to state 25
@@ -3515,34 +3410,34 @@ statement_list_e -> statement_list_e . statement [ T_true T_times T_string T_sem
 -- On T_string shift to state 27
 -- On T_semicolon shift to state 28
 -- On T_return shift to state 29
--- On T_rbrace shift to state 116
+-- On T_rbrace shift to state 118
 -- On T_plus shift to state 30
 -- On T_null shift to state 31
 -- On T_new shift to state 32
 -- On T_negate shift to state 35
 -- On T_minus shift to state 36
 -- On T_lparen shift to state 37
--- On T_lbrace shift to state 114
+-- On T_lbrace shift to state 116
 -- On T_int_const shift to state 38
 -- On T_incr shift to state 39
--- On T_if shift to state 117
--- On T_id shift to state 121
--- On T_false shift to state 42
--- On T_double_const shift to state 43
--- On T_delete shift to state 44
--- On T_dcr shift to state 45
--- On T_continue shift to state 123
--- On T_char_const shift to state 46
--- On T_break shift to state 127
--- On T_addr shift to state 47
--- On unary_operator shift to state 48
--- On unary_assignment shift to state 49
--- On statement shift to state 146
--- On label_e shift to state 133
--- On expression shift to state 143
+-- On T_if shift to state 119
+-- On T_id shift to state 123
+-- On T_false shift to state 50
+-- On T_double_const shift to state 51
+-- On T_delete shift to state 52
+-- On T_dcr shift to state 53
+-- On T_continue shift to state 125
+-- On T_char_const shift to state 54
+-- On T_break shift to state 129
+-- On T_addr shift to state 55
+-- On unary_operator shift to state 56
+-- On unary_assignment shift to state 57
+-- On statement shift to state 148
+-- On label_e shift to state 135
+-- On expression shift to state 145
 -- On T_for reduce production label_e -> 
 
-State 116:
+State 118:
 statement -> T_lbrace statement_list_e T_rbrace . [ T_true T_times T_string T_semicolon T_return T_rbrace T_plus T_null T_new T_negate T_minus T_lparen T_lbrace T_int_const T_incr T_if T_id T_for T_false T_else T_double_const T_delete T_dcr T_continue T_char_const T_break T_addr ]
 -- On T_true reduce production statement -> T_lbrace statement_list_e T_rbrace 
 -- On T_times reduce production statement -> T_lbrace statement_list_e T_rbrace 
@@ -3572,11 +3467,11 @@ statement -> T_lbrace statement_list_e T_rbrace . [ T_true T_times T_string T_se
 -- On T_break reduce production statement -> T_lbrace statement_list_e T_rbrace 
 -- On T_addr reduce production statement -> T_lbrace statement_list_e T_rbrace 
 
-State 117:
+State 119:
 statement -> T_if . T_lparen expression T_rparen statement else_part_e [ T_true T_times T_string T_semicolon T_return T_rbrace T_plus T_null T_new T_negate T_minus T_lparen T_lbrace T_int_const T_incr T_if T_id T_for T_false T_else T_double_const T_delete T_dcr T_continue T_char_const T_break T_addr ]
--- On T_lparen shift to state 118
+-- On T_lparen shift to state 120
 
-State 118:
+State 120:
 statement -> T_if T_lparen . expression T_rparen statement else_part_e [ T_true T_times T_string T_semicolon T_return T_rbrace T_plus T_null T_new T_negate T_minus T_lparen T_lbrace T_int_const T_incr T_if T_id T_for T_false T_else T_double_const T_delete T_dcr T_continue T_char_const T_break T_addr ]
 -- On T_true shift to state 25
 -- On T_times shift to state 26
@@ -3590,17 +3485,17 @@ statement -> T_if T_lparen . expression T_rparen statement else_part_e [ T_true 
 -- On T_int_const shift to state 38
 -- On T_incr shift to state 39
 -- On T_id shift to state 40
--- On T_false shift to state 42
--- On T_double_const shift to state 43
--- On T_delete shift to state 44
--- On T_dcr shift to state 45
--- On T_char_const shift to state 46
--- On T_addr shift to state 47
--- On unary_operator shift to state 48
--- On unary_assignment shift to state 49
--- On expression shift to state 119
+-- On T_false shift to state 50
+-- On T_double_const shift to state 51
+-- On T_delete shift to state 52
+-- On T_dcr shift to state 53
+-- On T_char_const shift to state 54
+-- On T_addr shift to state 55
+-- On unary_operator shift to state 56
+-- On unary_assignment shift to state 57
+-- On expression shift to state 121
 
-State 119:
+State 121:
 expression -> expression . T_lbrack expression T_rbrack [ T_times T_rparen T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_assign T_and ]
 expression -> expression . T_times expression [ T_times T_rparen T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_assign T_and ]
 expression -> expression . T_div expression [ T_times T_rparen T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_assign T_and ]
@@ -3620,35 +3515,35 @@ expression -> expression . unary_assignment [ T_times T_rparen T_qmark T_plus T_
 expression -> expression . binary_assignment expression [ T_times T_rparen T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_assign T_and ]
 expression -> expression . T_qmark expression T_colon expression [ T_times T_rparen T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_assign T_and ]
 statement -> T_if T_lparen expression . T_rparen statement else_part_e [ T_true T_times T_string T_semicolon T_return T_rbrace T_plus T_null T_new T_negate T_minus T_lparen T_lbrace T_int_const T_incr T_if T_id T_for T_false T_else T_double_const T_delete T_dcr T_continue T_char_const T_break T_addr ]
--- On T_times shift to state 54
--- On T_rparen shift to state 120
--- On T_qmark shift to state 56
--- On T_plus shift to state 58
--- On T_plu_assign shift to state 60
--- On T_or shift to state 61
--- On T_neq shift to state 63
--- On T_mul_assign shift to state 65
--- On T_mod_assign shift to state 66
--- On T_mod shift to state 67
--- On T_minus shift to state 69
--- On T_min_assign shift to state 71
--- On T_lteq shift to state 72
--- On T_lt shift to state 74
--- On T_lbrack shift to state 76
+-- On T_times shift to state 62
+-- On T_rparen shift to state 122
+-- On T_qmark shift to state 64
+-- On T_plus shift to state 66
+-- On T_plu_assign shift to state 68
+-- On T_or shift to state 69
+-- On T_neq shift to state 71
+-- On T_mul_assign shift to state 73
+-- On T_mod_assign shift to state 74
+-- On T_mod shift to state 75
+-- On T_minus shift to state 77
+-- On T_min_assign shift to state 79
+-- On T_lteq shift to state 80
+-- On T_lt shift to state 82
+-- On T_lbrack shift to state 84
 -- On T_incr shift to state 39
--- On T_gteq shift to state 79
--- On T_gt shift to state 81
--- On T_eq shift to state 83
--- On T_div_assign shift to state 85
--- On T_div shift to state 86
--- On T_dcr shift to state 45
--- On T_comma shift to state 88
--- On T_assign shift to state 90
--- On T_and shift to state 91
--- On unary_assignment shift to state 51
--- On binary_assignment shift to state 52
+-- On T_gteq shift to state 87
+-- On T_gt shift to state 89
+-- On T_eq shift to state 91
+-- On T_div_assign shift to state 93
+-- On T_div shift to state 94
+-- On T_dcr shift to state 53
+-- On T_comma shift to state 96
+-- On T_assign shift to state 98
+-- On T_and shift to state 99
+-- On unary_assignment shift to state 59
+-- On binary_assignment shift to state 60
 
-State 120:
+State 122:
 statement -> T_if T_lparen expression T_rparen . statement else_part_e [ T_true T_times T_string T_semicolon T_return T_rbrace T_plus T_null T_new T_negate T_minus T_lparen T_lbrace T_int_const T_incr T_if T_id T_for T_false T_else T_double_const T_delete T_dcr T_continue T_char_const T_break T_addr ]
 -- On T_true shift to state 25
 -- On T_times shift to state 26
@@ -3661,32 +3556,32 @@ statement -> T_if T_lparen expression T_rparen . statement else_part_e [ T_true 
 -- On T_negate shift to state 35
 -- On T_minus shift to state 36
 -- On T_lparen shift to state 37
--- On T_lbrace shift to state 114
+-- On T_lbrace shift to state 116
 -- On T_int_const shift to state 38
 -- On T_incr shift to state 39
--- On T_if shift to state 117
--- On T_id shift to state 121
--- On T_false shift to state 42
--- On T_double_const shift to state 43
--- On T_delete shift to state 44
--- On T_dcr shift to state 45
--- On T_continue shift to state 123
--- On T_char_const shift to state 46
--- On T_break shift to state 127
--- On T_addr shift to state 47
--- On unary_operator shift to state 48
--- On unary_assignment shift to state 49
--- On statement shift to state 130
--- On label_e shift to state 133
--- On expression shift to state 143
+-- On T_if shift to state 119
+-- On T_id shift to state 123
+-- On T_false shift to state 50
+-- On T_double_const shift to state 51
+-- On T_delete shift to state 52
+-- On T_dcr shift to state 53
+-- On T_continue shift to state 125
+-- On T_char_const shift to state 54
+-- On T_break shift to state 129
+-- On T_addr shift to state 55
+-- On unary_operator shift to state 56
+-- On unary_assignment shift to state 57
+-- On statement shift to state 132
+-- On label_e shift to state 135
+-- On expression shift to state 145
 -- On T_for reduce production label_e -> 
 
-State 121:
+State 123:
 expression -> T_id . [ T_times T_semicolon T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_assign T_and ]
-expression -> T_id . T_lparen expression_list_e T_rparen [ T_times T_semicolon T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_assign T_and ]
+expression -> T_id . T_lparen parameter_list_e T_rparen [ T_times T_semicolon T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_assign T_and ]
 label_e -> T_id . T_colon [ T_for ]
 -- On T_lparen shift to state 41
--- On T_colon shift to state 122
+-- On T_colon shift to state 124
 -- On T_times reduce production expression -> T_id 
 -- On T_semicolon reduce production expression -> T_id 
 -- On T_qmark reduce production expression -> T_id 
@@ -3713,25 +3608,25 @@ label_e -> T_id . T_colon [ T_for ]
 -- On T_assign reduce production expression -> T_id 
 -- On T_and reduce production expression -> T_id 
 
-State 122:
+State 124:
 label_e -> T_id T_colon . [ T_for ]
 -- On T_for reduce production label_e -> T_id T_colon 
 
-State 123:
+State 125:
 statement -> T_continue . id_e T_semicolon [ T_true T_times T_string T_semicolon T_return T_rbrace T_plus T_null T_new T_negate T_minus T_lparen T_lbrace T_int_const T_incr T_if T_id T_for T_false T_else T_double_const T_delete T_dcr T_continue T_char_const T_break T_addr ]
--- On T_id shift to state 124
--- On id_e shift to state 125
+-- On T_id shift to state 126
+-- On id_e shift to state 127
 -- On T_semicolon reduce production id_e -> 
 
-State 124:
+State 126:
 id_e -> T_id . [ T_semicolon ]
 -- On T_semicolon reduce production id_e -> T_id 
 
-State 125:
+State 127:
 statement -> T_continue id_e . T_semicolon [ T_true T_times T_string T_semicolon T_return T_rbrace T_plus T_null T_new T_negate T_minus T_lparen T_lbrace T_int_const T_incr T_if T_id T_for T_false T_else T_double_const T_delete T_dcr T_continue T_char_const T_break T_addr ]
--- On T_semicolon shift to state 126
+-- On T_semicolon shift to state 128
 
-State 126:
+State 128:
 statement -> T_continue id_e T_semicolon . [ T_true T_times T_string T_semicolon T_return T_rbrace T_plus T_null T_new T_negate T_minus T_lparen T_lbrace T_int_const T_incr T_if T_id T_for T_false T_else T_double_const T_delete T_dcr T_continue T_char_const T_break T_addr ]
 -- On T_true reduce production statement -> T_continue id_e T_semicolon 
 -- On T_times reduce production statement -> T_continue id_e T_semicolon 
@@ -3761,17 +3656,17 @@ statement -> T_continue id_e T_semicolon . [ T_true T_times T_string T_semicolon
 -- On T_break reduce production statement -> T_continue id_e T_semicolon 
 -- On T_addr reduce production statement -> T_continue id_e T_semicolon 
 
-State 127:
+State 129:
 statement -> T_break . id_e T_semicolon [ T_true T_times T_string T_semicolon T_return T_rbrace T_plus T_null T_new T_negate T_minus T_lparen T_lbrace T_int_const T_incr T_if T_id T_for T_false T_else T_double_const T_delete T_dcr T_continue T_char_const T_break T_addr ]
--- On T_id shift to state 124
--- On id_e shift to state 128
+-- On T_id shift to state 126
+-- On id_e shift to state 130
 -- On T_semicolon reduce production id_e -> 
 
-State 128:
+State 130:
 statement -> T_break id_e . T_semicolon [ T_true T_times T_string T_semicolon T_return T_rbrace T_plus T_null T_new T_negate T_minus T_lparen T_lbrace T_int_const T_incr T_if T_id T_for T_false T_else T_double_const T_delete T_dcr T_continue T_char_const T_break T_addr ]
--- On T_semicolon shift to state 129
+-- On T_semicolon shift to state 131
 
-State 129:
+State 131:
 statement -> T_break id_e T_semicolon . [ T_true T_times T_string T_semicolon T_return T_rbrace T_plus T_null T_new T_negate T_minus T_lparen T_lbrace T_int_const T_incr T_if T_id T_for T_false T_else T_double_const T_delete T_dcr T_continue T_char_const T_break T_addr ]
 -- On T_true reduce production statement -> T_break id_e T_semicolon 
 -- On T_times reduce production statement -> T_break id_e T_semicolon 
@@ -3801,10 +3696,10 @@ statement -> T_break id_e T_semicolon . [ T_true T_times T_string T_semicolon T_
 -- On T_break reduce production statement -> T_break id_e T_semicolon 
 -- On T_addr reduce production statement -> T_break id_e T_semicolon 
 
-State 130:
+State 132:
 statement -> T_if T_lparen expression T_rparen statement . else_part_e [ T_true T_times T_string T_semicolon T_return T_rbrace T_plus T_null T_new T_negate T_minus T_lparen T_lbrace T_int_const T_incr T_if T_id T_for T_false T_else T_double_const T_delete T_dcr T_continue T_char_const T_break T_addr ]
--- On T_else shift to state 131
--- On else_part_e shift to state 145
+-- On T_else shift to state 133
+-- On else_part_e shift to state 147
 -- On T_true reduce production else_part_e -> 
 -- On T_times reduce production else_part_e -> 
 -- On T_string reduce production else_part_e -> 
@@ -3832,7 +3727,7 @@ statement -> T_if T_lparen expression T_rparen statement . else_part_e [ T_true 
 -- On T_break reduce production else_part_e -> 
 -- On T_addr reduce production else_part_e -> 
 
-State 131:
+State 133:
 else_part_e -> T_else . statement [ T_true T_times T_string T_semicolon T_return T_rbrace T_plus T_null T_new T_negate T_minus T_lparen T_lbrace T_int_const T_incr T_if T_id T_for T_false T_else T_double_const T_delete T_dcr T_continue T_char_const T_break T_addr ]
 -- On T_true shift to state 25
 -- On T_times shift to state 26
@@ -3845,27 +3740,27 @@ else_part_e -> T_else . statement [ T_true T_times T_string T_semicolon T_return
 -- On T_negate shift to state 35
 -- On T_minus shift to state 36
 -- On T_lparen shift to state 37
--- On T_lbrace shift to state 114
+-- On T_lbrace shift to state 116
 -- On T_int_const shift to state 38
 -- On T_incr shift to state 39
--- On T_if shift to state 117
--- On T_id shift to state 121
--- On T_false shift to state 42
--- On T_double_const shift to state 43
--- On T_delete shift to state 44
--- On T_dcr shift to state 45
--- On T_continue shift to state 123
--- On T_char_const shift to state 46
--- On T_break shift to state 127
--- On T_addr shift to state 47
--- On unary_operator shift to state 48
--- On unary_assignment shift to state 49
--- On statement shift to state 132
--- On label_e shift to state 133
--- On expression shift to state 143
+-- On T_if shift to state 119
+-- On T_id shift to state 123
+-- On T_false shift to state 50
+-- On T_double_const shift to state 51
+-- On T_delete shift to state 52
+-- On T_dcr shift to state 53
+-- On T_continue shift to state 125
+-- On T_char_const shift to state 54
+-- On T_break shift to state 129
+-- On T_addr shift to state 55
+-- On unary_operator shift to state 56
+-- On unary_assignment shift to state 57
+-- On statement shift to state 134
+-- On label_e shift to state 135
+-- On expression shift to state 145
 -- On T_for reduce production label_e -> 
 
-State 132:
+State 134:
 else_part_e -> T_else statement . [ T_true T_times T_string T_semicolon T_return T_rbrace T_plus T_null T_new T_negate T_minus T_lparen T_lbrace T_int_const T_incr T_if T_id T_for T_false T_else T_double_const T_delete T_dcr T_continue T_char_const T_break T_addr ]
 -- On T_true reduce production else_part_e -> T_else statement 
 -- On T_times reduce production else_part_e -> T_else statement 
@@ -3895,15 +3790,15 @@ else_part_e -> T_else statement . [ T_true T_times T_string T_semicolon T_return
 -- On T_break reduce production else_part_e -> T_else statement 
 -- On T_addr reduce production else_part_e -> T_else statement 
 
-State 133:
-statement -> label_e . T_for T_lparen expression_e T_semicolon expression_e T_semicolon expression_e T_rparen statement [ T_true T_times T_string T_semicolon T_return T_rbrace T_plus T_null T_new T_negate T_minus T_lparen T_lbrace T_int_const T_incr T_if T_id T_for T_false T_else T_double_const T_delete T_dcr T_continue T_char_const T_break T_addr ]
--- On T_for shift to state 134
-
-State 134:
-statement -> label_e T_for . T_lparen expression_e T_semicolon expression_e T_semicolon expression_e T_rparen statement [ T_true T_times T_string T_semicolon T_return T_rbrace T_plus T_null T_new T_negate T_minus T_lparen T_lbrace T_int_const T_incr T_if T_id T_for T_false T_else T_double_const T_delete T_dcr T_continue T_char_const T_break T_addr ]
--- On T_lparen shift to state 135
-
 State 135:
+statement -> label_e . T_for T_lparen expression_e T_semicolon expression_e T_semicolon expression_e T_rparen statement [ T_true T_times T_string T_semicolon T_return T_rbrace T_plus T_null T_new T_negate T_minus T_lparen T_lbrace T_int_const T_incr T_if T_id T_for T_false T_else T_double_const T_delete T_dcr T_continue T_char_const T_break T_addr ]
+-- On T_for shift to state 136
+
+State 136:
+statement -> label_e T_for . T_lparen expression_e T_semicolon expression_e T_semicolon expression_e T_rparen statement [ T_true T_times T_string T_semicolon T_return T_rbrace T_plus T_null T_new T_negate T_minus T_lparen T_lbrace T_int_const T_incr T_if T_id T_for T_false T_else T_double_const T_delete T_dcr T_continue T_char_const T_break T_addr ]
+-- On T_lparen shift to state 137
+
+State 137:
 statement -> label_e T_for T_lparen . expression_e T_semicolon expression_e T_semicolon expression_e T_rparen statement [ T_true T_times T_string T_semicolon T_return T_rbrace T_plus T_null T_new T_negate T_minus T_lparen T_lbrace T_int_const T_incr T_if T_id T_for T_false T_else T_double_const T_delete T_dcr T_continue T_char_const T_break T_addr ]
 -- On T_true shift to state 25
 -- On T_times shift to state 26
@@ -3917,23 +3812,23 @@ statement -> label_e T_for T_lparen . expression_e T_semicolon expression_e T_se
 -- On T_int_const shift to state 38
 -- On T_incr shift to state 39
 -- On T_id shift to state 40
--- On T_false shift to state 42
--- On T_double_const shift to state 43
--- On T_delete shift to state 44
--- On T_dcr shift to state 45
--- On T_char_const shift to state 46
--- On T_addr shift to state 47
--- On unary_operator shift to state 48
--- On unary_assignment shift to state 49
--- On expression_e shift to state 136
--- On expression shift to state 112
+-- On T_false shift to state 50
+-- On T_double_const shift to state 51
+-- On T_delete shift to state 52
+-- On T_dcr shift to state 53
+-- On T_char_const shift to state 54
+-- On T_addr shift to state 55
+-- On unary_operator shift to state 56
+-- On unary_assignment shift to state 57
+-- On expression_e shift to state 138
+-- On expression shift to state 114
 -- On T_semicolon reduce production expression_e -> 
 
-State 136:
+State 138:
 statement -> label_e T_for T_lparen expression_e . T_semicolon expression_e T_semicolon expression_e T_rparen statement [ T_true T_times T_string T_semicolon T_return T_rbrace T_plus T_null T_new T_negate T_minus T_lparen T_lbrace T_int_const T_incr T_if T_id T_for T_false T_else T_double_const T_delete T_dcr T_continue T_char_const T_break T_addr ]
--- On T_semicolon shift to state 137
+-- On T_semicolon shift to state 139
 
-State 137:
+State 139:
 statement -> label_e T_for T_lparen expression_e T_semicolon . expression_e T_semicolon expression_e T_rparen statement [ T_true T_times T_string T_semicolon T_return T_rbrace T_plus T_null T_new T_negate T_minus T_lparen T_lbrace T_int_const T_incr T_if T_id T_for T_false T_else T_double_const T_delete T_dcr T_continue T_char_const T_break T_addr ]
 -- On T_true shift to state 25
 -- On T_times shift to state 26
@@ -3947,23 +3842,23 @@ statement -> label_e T_for T_lparen expression_e T_semicolon . expression_e T_se
 -- On T_int_const shift to state 38
 -- On T_incr shift to state 39
 -- On T_id shift to state 40
--- On T_false shift to state 42
--- On T_double_const shift to state 43
--- On T_delete shift to state 44
--- On T_dcr shift to state 45
--- On T_char_const shift to state 46
--- On T_addr shift to state 47
--- On unary_operator shift to state 48
--- On unary_assignment shift to state 49
--- On expression_e shift to state 138
--- On expression shift to state 112
+-- On T_false shift to state 50
+-- On T_double_const shift to state 51
+-- On T_delete shift to state 52
+-- On T_dcr shift to state 53
+-- On T_char_const shift to state 54
+-- On T_addr shift to state 55
+-- On unary_operator shift to state 56
+-- On unary_assignment shift to state 57
+-- On expression_e shift to state 140
+-- On expression shift to state 114
 -- On T_semicolon reduce production expression_e -> 
 
-State 138:
+State 140:
 statement -> label_e T_for T_lparen expression_e T_semicolon expression_e . T_semicolon expression_e T_rparen statement [ T_true T_times T_string T_semicolon T_return T_rbrace T_plus T_null T_new T_negate T_minus T_lparen T_lbrace T_int_const T_incr T_if T_id T_for T_false T_else T_double_const T_delete T_dcr T_continue T_char_const T_break T_addr ]
--- On T_semicolon shift to state 139
+-- On T_semicolon shift to state 141
 
-State 139:
+State 141:
 statement -> label_e T_for T_lparen expression_e T_semicolon expression_e T_semicolon . expression_e T_rparen statement [ T_true T_times T_string T_semicolon T_return T_rbrace T_plus T_null T_new T_negate T_minus T_lparen T_lbrace T_int_const T_incr T_if T_id T_for T_false T_else T_double_const T_delete T_dcr T_continue T_char_const T_break T_addr ]
 -- On T_true shift to state 25
 -- On T_times shift to state 26
@@ -3977,23 +3872,23 @@ statement -> label_e T_for T_lparen expression_e T_semicolon expression_e T_semi
 -- On T_int_const shift to state 38
 -- On T_incr shift to state 39
 -- On T_id shift to state 40
--- On T_false shift to state 42
--- On T_double_const shift to state 43
--- On T_delete shift to state 44
--- On T_dcr shift to state 45
--- On T_char_const shift to state 46
--- On T_addr shift to state 47
--- On unary_operator shift to state 48
--- On unary_assignment shift to state 49
--- On expression_e shift to state 140
--- On expression shift to state 112
+-- On T_false shift to state 50
+-- On T_double_const shift to state 51
+-- On T_delete shift to state 52
+-- On T_dcr shift to state 53
+-- On T_char_const shift to state 54
+-- On T_addr shift to state 55
+-- On unary_operator shift to state 56
+-- On unary_assignment shift to state 57
+-- On expression_e shift to state 142
+-- On expression shift to state 114
 -- On T_rparen reduce production expression_e -> 
 
-State 140:
+State 142:
 statement -> label_e T_for T_lparen expression_e T_semicolon expression_e T_semicolon expression_e . T_rparen statement [ T_true T_times T_string T_semicolon T_return T_rbrace T_plus T_null T_new T_negate T_minus T_lparen T_lbrace T_int_const T_incr T_if T_id T_for T_false T_else T_double_const T_delete T_dcr T_continue T_char_const T_break T_addr ]
--- On T_rparen shift to state 141
+-- On T_rparen shift to state 143
 
-State 141:
+State 143:
 statement -> label_e T_for T_lparen expression_e T_semicolon expression_e T_semicolon expression_e T_rparen . statement [ T_true T_times T_string T_semicolon T_return T_rbrace T_plus T_null T_new T_negate T_minus T_lparen T_lbrace T_int_const T_incr T_if T_id T_for T_false T_else T_double_const T_delete T_dcr T_continue T_char_const T_break T_addr ]
 -- On T_true shift to state 25
 -- On T_times shift to state 26
@@ -4006,27 +3901,27 @@ statement -> label_e T_for T_lparen expression_e T_semicolon expression_e T_semi
 -- On T_negate shift to state 35
 -- On T_minus shift to state 36
 -- On T_lparen shift to state 37
--- On T_lbrace shift to state 114
+-- On T_lbrace shift to state 116
 -- On T_int_const shift to state 38
 -- On T_incr shift to state 39
--- On T_if shift to state 117
--- On T_id shift to state 121
--- On T_false shift to state 42
--- On T_double_const shift to state 43
--- On T_delete shift to state 44
--- On T_dcr shift to state 45
--- On T_continue shift to state 123
--- On T_char_const shift to state 46
--- On T_break shift to state 127
--- On T_addr shift to state 47
--- On unary_operator shift to state 48
--- On unary_assignment shift to state 49
--- On statement shift to state 142
--- On label_e shift to state 133
--- On expression shift to state 143
+-- On T_if shift to state 119
+-- On T_id shift to state 123
+-- On T_false shift to state 50
+-- On T_double_const shift to state 51
+-- On T_delete shift to state 52
+-- On T_dcr shift to state 53
+-- On T_continue shift to state 125
+-- On T_char_const shift to state 54
+-- On T_break shift to state 129
+-- On T_addr shift to state 55
+-- On unary_operator shift to state 56
+-- On unary_assignment shift to state 57
+-- On statement shift to state 144
+-- On label_e shift to state 135
+-- On expression shift to state 145
 -- On T_for reduce production label_e -> 
 
-State 142:
+State 144:
 statement -> label_e T_for T_lparen expression_e T_semicolon expression_e T_semicolon expression_e T_rparen statement . [ T_true T_times T_string T_semicolon T_return T_rbrace T_plus T_null T_new T_negate T_minus T_lparen T_lbrace T_int_const T_incr T_if T_id T_for T_false T_else T_double_const T_delete T_dcr T_continue T_char_const T_break T_addr ]
 -- On T_true reduce production statement -> label_e T_for T_lparen expression_e T_semicolon expression_e T_semicolon expression_e T_rparen statement 
 -- On T_times reduce production statement -> label_e T_for T_lparen expression_e T_semicolon expression_e T_semicolon expression_e T_rparen statement 
@@ -4056,7 +3951,7 @@ statement -> label_e T_for T_lparen expression_e T_semicolon expression_e T_semi
 -- On T_break reduce production statement -> label_e T_for T_lparen expression_e T_semicolon expression_e T_semicolon expression_e T_rparen statement 
 -- On T_addr reduce production statement -> label_e T_for T_lparen expression_e T_semicolon expression_e T_semicolon expression_e T_rparen statement 
 
-State 143:
+State 145:
 expression -> expression . T_lbrack expression T_rbrack [ T_times T_semicolon T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_assign T_and ]
 expression -> expression . T_times expression [ T_times T_semicolon T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_assign T_and ]
 expression -> expression . T_div expression [ T_times T_semicolon T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_assign T_and ]
@@ -4076,35 +3971,35 @@ expression -> expression . unary_assignment [ T_times T_semicolon T_qmark T_plus
 expression -> expression . binary_assignment expression [ T_times T_semicolon T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_assign T_and ]
 expression -> expression . T_qmark expression T_colon expression [ T_times T_semicolon T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_assign T_and ]
 statement -> expression . T_semicolon [ T_true T_times T_string T_semicolon T_return T_rbrace T_plus T_null T_new T_negate T_minus T_lparen T_lbrace T_int_const T_incr T_if T_id T_for T_false T_else T_double_const T_delete T_dcr T_continue T_char_const T_break T_addr ]
--- On T_times shift to state 54
--- On T_semicolon shift to state 144
--- On T_qmark shift to state 56
--- On T_plus shift to state 58
--- On T_plu_assign shift to state 60
--- On T_or shift to state 61
--- On T_neq shift to state 63
--- On T_mul_assign shift to state 65
--- On T_mod_assign shift to state 66
--- On T_mod shift to state 67
--- On T_minus shift to state 69
--- On T_min_assign shift to state 71
--- On T_lteq shift to state 72
--- On T_lt shift to state 74
--- On T_lbrack shift to state 76
+-- On T_times shift to state 62
+-- On T_semicolon shift to state 146
+-- On T_qmark shift to state 64
+-- On T_plus shift to state 66
+-- On T_plu_assign shift to state 68
+-- On T_or shift to state 69
+-- On T_neq shift to state 71
+-- On T_mul_assign shift to state 73
+-- On T_mod_assign shift to state 74
+-- On T_mod shift to state 75
+-- On T_minus shift to state 77
+-- On T_min_assign shift to state 79
+-- On T_lteq shift to state 80
+-- On T_lt shift to state 82
+-- On T_lbrack shift to state 84
 -- On T_incr shift to state 39
--- On T_gteq shift to state 79
--- On T_gt shift to state 81
--- On T_eq shift to state 83
--- On T_div_assign shift to state 85
--- On T_div shift to state 86
--- On T_dcr shift to state 45
--- On T_comma shift to state 88
--- On T_assign shift to state 90
--- On T_and shift to state 91
--- On unary_assignment shift to state 51
--- On binary_assignment shift to state 52
+-- On T_gteq shift to state 87
+-- On T_gt shift to state 89
+-- On T_eq shift to state 91
+-- On T_div_assign shift to state 93
+-- On T_div shift to state 94
+-- On T_dcr shift to state 53
+-- On T_comma shift to state 96
+-- On T_assign shift to state 98
+-- On T_and shift to state 99
+-- On unary_assignment shift to state 59
+-- On binary_assignment shift to state 60
 
-State 144:
+State 146:
 statement -> expression T_semicolon . [ T_true T_times T_string T_semicolon T_return T_rbrace T_plus T_null T_new T_negate T_minus T_lparen T_lbrace T_int_const T_incr T_if T_id T_for T_false T_else T_double_const T_delete T_dcr T_continue T_char_const T_break T_addr ]
 -- On T_true reduce production statement -> expression T_semicolon 
 -- On T_times reduce production statement -> expression T_semicolon 
@@ -4134,7 +4029,7 @@ statement -> expression T_semicolon . [ T_true T_times T_string T_semicolon T_re
 -- On T_break reduce production statement -> expression T_semicolon 
 -- On T_addr reduce production statement -> expression T_semicolon 
 
-State 145:
+State 147:
 statement -> T_if T_lparen expression T_rparen statement else_part_e . [ T_true T_times T_string T_semicolon T_return T_rbrace T_plus T_null T_new T_negate T_minus T_lparen T_lbrace T_int_const T_incr T_if T_id T_for T_false T_else T_double_const T_delete T_dcr T_continue T_char_const T_break T_addr ]
 -- On T_true reduce production statement -> T_if T_lparen expression T_rparen statement else_part_e 
 -- On T_times reduce production statement -> T_if T_lparen expression T_rparen statement else_part_e 
@@ -4164,7 +4059,7 @@ statement -> T_if T_lparen expression T_rparen statement else_part_e . [ T_true 
 -- On T_break reduce production statement -> T_if T_lparen expression T_rparen statement else_part_e 
 -- On T_addr reduce production statement -> T_if T_lparen expression T_rparen statement else_part_e 
 
-State 146:
+State 148:
 statement_list_e -> statement_list_e statement . [ T_true T_times T_string T_semicolon T_return T_rbrace T_plus T_null T_new T_negate T_minus T_lparen T_lbrace T_int_const T_incr T_if T_id T_for T_false T_double_const T_delete T_dcr T_continue T_char_const T_break T_addr ]
 -- On T_true reduce production statement_list_e -> statement_list_e statement 
 -- On T_times reduce production statement_list_e -> statement_list_e statement 
@@ -4193,7 +4088,7 @@ statement_list_e -> statement_list_e statement . [ T_true T_times T_string T_sem
 -- On T_break reduce production statement_list_e -> statement_list_e statement 
 -- On T_addr reduce production statement_list_e -> statement_list_e statement 
 
-State 147:
+State 149:
 declaration_list -> declaration_list . declaration [ T_void T_true T_times T_string T_semicolon T_return T_rbrace T_plus T_null T_new T_negate T_minus T_lparen T_lbrace T_int_const T_int T_incr T_if T_id T_for T_false T_double_const T_double T_delete T_dcr T_continue T_char_const T_char T_break T_bool T_addr ]
 declaration_list_e -> declaration_list . [ T_true T_times T_string T_semicolon T_return T_rbrace T_plus T_null T_new T_negate T_minus T_lparen T_lbrace T_int_const T_incr T_if T_id T_for T_false T_double_const T_delete T_dcr T_continue T_char_const T_break T_addr ]
 -- On T_void shift to state 1
@@ -4205,8 +4100,8 @@ declaration_list_e -> declaration_list . [ T_true T_times T_string T_semicolon T
 -- On result_type shift to state 7
 -- On function_definition shift to state 21
 -- On function_declaration shift to state 22
--- On declaration shift to state 148
--- On ctype shift to state 149
+-- On declaration shift to state 150
+-- On ctype shift to state 151
 -- On basic_type shift to state 13
 -- On T_true reduce production declaration_list_e -> declaration_list 
 -- On T_times reduce production declaration_list_e -> declaration_list 
@@ -4235,7 +4130,7 @@ declaration_list_e -> declaration_list . [ T_true T_times T_string T_semicolon T
 -- On T_break reduce production declaration_list_e -> declaration_list 
 -- On T_addr reduce production declaration_list_e -> declaration_list 
 
-State 148:
+State 150:
 declaration_list -> declaration_list declaration . [ T_void T_true T_times T_string T_semicolon T_return T_rbrace T_plus T_null T_new T_negate T_minus T_lparen T_lbrace T_int_const T_int T_incr T_if T_id T_for T_false T_eof T_double_const T_double T_delete T_dcr T_continue T_char_const T_char T_break T_bool T_addr ]
 -- On T_void reduce production declaration_list -> declaration_list declaration 
 -- On T_true reduce production declaration_list -> declaration_list declaration 
@@ -4270,23 +4165,23 @@ declaration_list -> declaration_list declaration . [ T_void T_true T_times T_str
 -- On T_bool reduce production declaration_list -> declaration_list declaration 
 -- On T_addr reduce production declaration_list -> declaration_list declaration 
 
-State 149:
+State 151:
 result_type -> ctype . [ T_id ]
 variable_declaration -> ctype . more_declarators T_semicolon [ T_void T_true T_times T_string T_semicolon T_return T_rbrace T_plus T_null T_new T_negate T_minus T_lparen T_lbrace T_int_const T_int T_incr T_if T_id T_for T_false T_eof T_double_const T_double T_delete T_dcr T_continue T_char_const T_char T_break T_bool T_addr ]
--- On T_id shift to state 150
--- On more_declarators shift to state 155
--- On declarator shift to state 157
+-- On T_id shift to state 152
+-- On more_declarators shift to state 157
+-- On declarator shift to state 159
 -- On T_id reduce production result_type -> ctype 
 ** Conflict on T_id
 
-State 150:
+State 152:
 declarator -> T_id . T_lbrack constant_expression T_rbrack [ T_semicolon T_comma ]
 declarator -> T_id . [ T_semicolon T_comma ]
--- On T_lbrack shift to state 151
+-- On T_lbrack shift to state 153
 -- On T_semicolon reduce production declarator -> T_id 
 -- On T_comma reduce production declarator -> T_id 
 
-State 151:
+State 153:
 declarator -> T_id T_lbrack . constant_expression T_rbrack [ T_semicolon T_comma ]
 -- On T_true shift to state 25
 -- On T_times shift to state 26
@@ -4300,18 +4195,18 @@ declarator -> T_id T_lbrack . constant_expression T_rbrack [ T_semicolon T_comma
 -- On T_int_const shift to state 38
 -- On T_incr shift to state 39
 -- On T_id shift to state 40
--- On T_false shift to state 42
--- On T_double_const shift to state 43
--- On T_delete shift to state 44
--- On T_dcr shift to state 45
--- On T_char_const shift to state 46
--- On T_addr shift to state 47
--- On unary_operator shift to state 48
--- On unary_assignment shift to state 49
--- On expression shift to state 152
--- On constant_expression shift to state 153
+-- On T_false shift to state 50
+-- On T_double_const shift to state 51
+-- On T_delete shift to state 52
+-- On T_dcr shift to state 53
+-- On T_char_const shift to state 54
+-- On T_addr shift to state 55
+-- On unary_operator shift to state 56
+-- On unary_assignment shift to state 57
+-- On expression shift to state 154
+-- On constant_expression shift to state 155
 
-State 152:
+State 154:
 constant_expression -> expression . [ T_rbrack ]
 expression -> expression . T_lbrack expression T_rbrack [ T_times T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_assign T_and ]
 expression -> expression . T_times expression [ T_times T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_assign T_and ]
@@ -4331,48 +4226,48 @@ expression -> expression . T_comma expression [ T_times T_rbrack T_qmark T_plus 
 expression -> expression . unary_assignment [ T_times T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_assign T_and ]
 expression -> expression . binary_assignment expression [ T_times T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_assign T_and ]
 expression -> expression . T_qmark expression T_colon expression [ T_times T_rbrack T_qmark T_plus T_plu_assign T_or T_neq T_mul_assign T_mod_assign T_mod T_minus T_min_assign T_lteq T_lt T_lbrack T_incr T_gteq T_gt T_eq T_div_assign T_div T_dcr T_comma T_assign T_and ]
--- On T_times shift to state 54
--- On T_qmark shift to state 56
--- On T_plus shift to state 58
--- On T_plu_assign shift to state 60
--- On T_or shift to state 61
--- On T_neq shift to state 63
--- On T_mul_assign shift to state 65
--- On T_mod_assign shift to state 66
--- On T_mod shift to state 67
--- On T_minus shift to state 69
--- On T_min_assign shift to state 71
--- On T_lteq shift to state 72
--- On T_lt shift to state 74
--- On T_lbrack shift to state 76
+-- On T_times shift to state 62
+-- On T_qmark shift to state 64
+-- On T_plus shift to state 66
+-- On T_plu_assign shift to state 68
+-- On T_or shift to state 69
+-- On T_neq shift to state 71
+-- On T_mul_assign shift to state 73
+-- On T_mod_assign shift to state 74
+-- On T_mod shift to state 75
+-- On T_minus shift to state 77
+-- On T_min_assign shift to state 79
+-- On T_lteq shift to state 80
+-- On T_lt shift to state 82
+-- On T_lbrack shift to state 84
 -- On T_incr shift to state 39
--- On T_gteq shift to state 79
--- On T_gt shift to state 81
--- On T_eq shift to state 83
--- On T_div_assign shift to state 85
--- On T_div shift to state 86
--- On T_dcr shift to state 45
--- On T_comma shift to state 88
--- On T_assign shift to state 90
--- On T_and shift to state 91
--- On unary_assignment shift to state 51
--- On binary_assignment shift to state 52
+-- On T_gteq shift to state 87
+-- On T_gt shift to state 89
+-- On T_eq shift to state 91
+-- On T_div_assign shift to state 93
+-- On T_div shift to state 94
+-- On T_dcr shift to state 53
+-- On T_comma shift to state 96
+-- On T_assign shift to state 98
+-- On T_and shift to state 99
+-- On unary_assignment shift to state 59
+-- On binary_assignment shift to state 60
 -- On T_rbrack reduce production constant_expression -> expression 
 
-State 153:
+State 155:
 declarator -> T_id T_lbrack constant_expression . T_rbrack [ T_semicolon T_comma ]
--- On T_rbrack shift to state 154
+-- On T_rbrack shift to state 156
 
-State 154:
+State 156:
 declarator -> T_id T_lbrack constant_expression T_rbrack . [ T_semicolon T_comma ]
 -- On T_semicolon reduce production declarator -> T_id T_lbrack constant_expression T_rbrack 
 -- On T_comma reduce production declarator -> T_id T_lbrack constant_expression T_rbrack 
 
-State 155:
+State 157:
 variable_declaration -> ctype more_declarators . T_semicolon [ T_void T_true T_times T_string T_semicolon T_return T_rbrace T_plus T_null T_new T_negate T_minus T_lparen T_lbrace T_int_const T_int T_incr T_if T_id T_for T_false T_eof T_double_const T_double T_delete T_dcr T_continue T_char_const T_char T_break T_bool T_addr ]
--- On T_semicolon shift to state 156
+-- On T_semicolon shift to state 158
 
-State 156:
+State 158:
 variable_declaration -> ctype more_declarators T_semicolon . [ T_void T_true T_times T_string T_semicolon T_return T_rbrace T_plus T_null T_new T_negate T_minus T_lparen T_lbrace T_int_const T_int T_incr T_if T_id T_for T_false T_eof T_double_const T_double T_delete T_dcr T_continue T_char_const T_char T_break T_bool T_addr ]
 -- On T_void reduce production variable_declaration -> ctype more_declarators T_semicolon 
 -- On T_true reduce production variable_declaration -> ctype more_declarators T_semicolon 
@@ -4407,23 +4302,23 @@ variable_declaration -> ctype more_declarators T_semicolon . [ T_void T_true T_t
 -- On T_bool reduce production variable_declaration -> ctype more_declarators T_semicolon 
 -- On T_addr reduce production variable_declaration -> ctype more_declarators T_semicolon 
 
-State 157:
+State 159:
 more_declarators -> declarator . [ T_semicolon ]
 more_declarators -> declarator . T_comma more_declarators [ T_semicolon ]
--- On T_comma shift to state 158
+-- On T_comma shift to state 160
 -- On T_semicolon reduce production more_declarators -> declarator 
 
-State 158:
+State 160:
 more_declarators -> declarator T_comma . more_declarators [ T_semicolon ]
--- On T_id shift to state 150
--- On more_declarators shift to state 159
--- On declarator shift to state 157
+-- On T_id shift to state 152
+-- On more_declarators shift to state 161
+-- On declarator shift to state 159
 
-State 159:
+State 161:
 more_declarators -> declarator T_comma more_declarators . [ T_semicolon ]
 -- On T_semicolon reduce production more_declarators -> declarator T_comma more_declarators 
 
-State 160:
+State 162:
 declaration_list -> declaration . [ T_void T_true T_times T_string T_semicolon T_return T_rbrace T_plus T_null T_new T_negate T_minus T_lparen T_lbrace T_int_const T_int T_incr T_if T_id T_for T_false T_eof T_double_const T_double T_delete T_dcr T_continue T_char_const T_char T_break T_bool T_addr ]
 -- On T_void reduce production declaration_list -> declaration 
 -- On T_true reduce production declaration_list -> declaration 
@@ -4458,52 +4353,16 @@ declaration_list -> declaration . [ T_void T_true T_times T_string T_semicolon T
 -- On T_bool reduce production declaration_list -> declaration 
 -- On T_addr reduce production declaration_list -> declaration 
 
-State 161:
-parameter_list -> parameter_list . T_comma parameter [ T_rparen T_comma ]
-parameter_list_e -> parameter_list . [ T_rparen ]
--- On T_comma shift to state 162
--- On T_rparen reduce production parameter_list_e -> parameter_list 
-
-State 162:
-parameter_list -> parameter_list T_comma . parameter [ T_rparen T_comma ]
--- On T_int shift to state 2
--- On T_double shift to state 3
--- On T_char shift to state 4
--- On T_byref shift to state 10
--- On T_bool shift to state 5
--- On parameter shift to state 163
--- On ctype shift to state 164
--- On basic_type shift to state 13
-
 State 163:
-parameter_list -> parameter_list T_comma parameter . [ T_rparen T_comma ]
--- On T_rparen reduce production parameter_list -> parameter_list T_comma parameter 
--- On T_comma reduce production parameter_list -> parameter_list T_comma parameter 
-
-State 164:
-parameter -> ctype . T_id [ T_rparen T_comma ]
--- On T_id shift to state 165
-
-State 165:
-parameter -> ctype T_id . [ T_rparen T_comma ]
--- On T_rparen reduce production parameter -> ctype T_id 
--- On T_comma reduce production parameter -> ctype T_id 
-
-State 166:
-parameter_list -> parameter . [ T_rparen T_comma ]
--- On T_rparen reduce production parameter_list -> parameter 
--- On T_comma reduce production parameter_list -> parameter 
-
-State 167:
 program' -> program . [ # ]
 -- On # accept program
 
-State 168:
+State 164:
 declaration_list -> declaration_list . declaration [ T_void T_int T_eof T_double T_char T_bool ]
 program -> declaration_list . T_eof [ # ]
 -- On T_void shift to state 1
 -- On T_int shift to state 2
--- On T_eof shift to state 169
+-- On T_eof shift to state 165
 -- On T_double shift to state 3
 -- On T_char shift to state 4
 -- On T_bool shift to state 5
@@ -4511,11 +4370,11 @@ program -> declaration_list . T_eof [ # ]
 -- On result_type shift to state 7
 -- On function_definition shift to state 21
 -- On function_declaration shift to state 22
--- On declaration shift to state 148
--- On ctype shift to state 149
+-- On declaration shift to state 150
+-- On ctype shift to state 151
 -- On basic_type shift to state 13
 
-State 169:
+State 165:
 program -> declaration_list T_eof . [ # ]
 -- On # reduce production program -> declaration_list T_eof 
 

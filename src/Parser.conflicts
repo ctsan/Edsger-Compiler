@@ -1,5 +1,5 @@
 
-** Conflict (shift/reduce) in state 149.
+** Conflict (shift/reduce) in state 151.
 ** Token involved: T_id
 ** This state is reached from program after reading:
 
@@ -13,7 +13,7 @@ declaration_list T_eof
 declaration 
 (?)
 
-** In state 149, looking ahead at T_id, shifting is permitted
+** In state 151, looking ahead at T_id, shifting is permitted
 ** because of the following sub-derivation:
 
 variable_declaration 
@@ -21,44 +21,10 @@ ctype more_declarators T_semicolon
       declarator 
       . T_id T_lbrack constant_expression T_rbrack 
 
-** In state 149, looking ahead at T_id, reducing production
+** In state 151, looking ahead at T_id, reducing production
 ** result_type -> ctype 
 ** is permitted because of the following sub-derivation:
 
 function_declaration 
 result_type T_id T_lparen parameter_list_e T_rparen T_semicolon // lookahead token appears
 ctype . 
-
-** Conflict (shift/reduce) in state 102.
-** Token involved: T_comma
-** This state is reached from program after reading:
-
-ctype T_id T_lbrack T_id T_lparen expression 
-
-** The derivations that appear below have the following common factor:
-** (The question mark symbol (?) represents the spot where the derivations begin to differ.)
-
-program 
-declaration_list T_eof 
-declaration 
-variable_declaration 
-ctype more_declarators T_semicolon 
-      declarator 
-      T_id T_lbrack constant_expression T_rbrack 
-                    expression 
-                    T_id T_lparen expression_list_e T_rparen 
-                                  expression_list 
-                                  (?)
-
-** In state 102, looking ahead at T_comma, shifting is permitted
-** because of the following sub-derivation:
-
-expression 
-expression . T_comma expression 
-
-** In state 102, looking ahead at T_comma, reducing production
-** expression_list -> expression 
-** is permitted because of the following sub-derivation:
-
-expression_list T_comma expression // lookahead token appears
-expression . 

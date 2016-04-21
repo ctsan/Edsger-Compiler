@@ -220,7 +220,7 @@ expression:
     | T_char_const {()}
     | T_double_const {()}
     | T_string {()}
-    | T_id T_lparen expression_list_e T_rparen %prec LARGEST {()}
+    | T_id T_lparen parameter_list_e T_rparen %prec LARGEST {()}
     | expression T_lbrack expression T_rbrack {()}
     | unary_operator expression %prec UNARY {()}
     | expression binary_operator expression %prec SUFFIX_DCR {()}
