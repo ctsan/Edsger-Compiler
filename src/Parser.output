@@ -1237,6 +1237,8 @@ state 90
 	expression : expression . binary_assignment expression  (64)
 	expression : expression . T_qmark expression T_colon expression  (66)
 
+	T_incr  shift 36
+	T_dcr  shift 37
 	T_lbrack  shift 76
 	T_qmark  shift 78
 	T_mod  shift 84
@@ -1246,8 +1248,6 @@ state 90
 	T_div_assign  reduce 60
 	T_mod_assign  reduce 60
 	T_assign  reduce 60
-	T_incr  reduce 60
-	T_dcr  reduce 60
 	T_lteq  reduce 60
 	T_gteq  reduce 60
 	T_gt  reduce 60
@@ -2819,5 +2819,5 @@ State 152 contains 1 shift/reduce conflict.
 State 160 contains 1 reduce/reduce conflict.
 
 
-65 terminals, 34 nonterminals
+66 terminals, 34 nonterminals
 106 grammar rules, 164 states

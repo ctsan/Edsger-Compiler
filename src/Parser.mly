@@ -34,6 +34,7 @@
 %left T_times T_div
 %right T_addr
 %left UNARY
+%right CHOOSE_LONGER
 %left T_incr T_dcr
 
 %start program
@@ -103,7 +104,7 @@ variable_declaration:
 more_declarators_e:
       {()}
     | more_declarators_e T_comma declarator {()}
-    | T_comma declarator  {()}
+    | T_comma declarator{()}
     ;
 
 ctype: 
@@ -206,7 +207,7 @@ expression:
     | expression T_lbrack expression T_rbrack {()}
     | unary_operator expression %prec UNARY {()}
     | expression binary_operator expression {()}
-    | unary_assignment expression {()}
+    | unary_assignment expression %prec T_dcr {()}
     | expression unary_assignment {()}
     | expression binary_assignment expression {()}
     | T_lparen result_type T_paren expression {()}
