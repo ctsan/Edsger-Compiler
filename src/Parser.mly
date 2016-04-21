@@ -34,6 +34,7 @@
 %left T_times T_div
 %right T_addr
 %left T_incr T_dcr
+%left MEGALO
 
 %start program
 %type <unit> program
@@ -203,7 +204,7 @@ expression:
     | T_string {()}
     | T_id T_lparen expression_list_e T_rparen {()}
     | expression T_lbrack expression T_rbrack {()}
-    | unary_operator expression {()}
+    | unary_operator expression %prec MEGALO {()}
     | expression binary_operator expression {()}
     | unary_assignment expression {()}
     | expression unary_assignment {()}
@@ -223,8 +224,6 @@ expression_e:
      {()}
      | expression {()}
      ;
-
-/* Notice Left Recursion here : (experssion_list is placed in the left) */
 
 expression_list:
       expression_list T_comma expression {()}
