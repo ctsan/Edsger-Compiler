@@ -24,8 +24,11 @@
 %token T_paren
 %token T_mod T_div
 
+%right BAD_CHOICE
 %left T_comma
+%left COMMAND
 %right T_assign T_plu_assign T_min_assign T_mul_assign T_div_assign T_mod_assign
+%right TERNARY
 %left T_or
 %left T_and
 %left T_eq T_neq
@@ -35,7 +38,11 @@
 %right T_addr
 %left UNARY
 %right CHOOSE_LONGER
-%left T_incr T_dcr
+%right T_incr T_dcr
+%left SUFFIX_DCR
+%right INDEXING
+%left LARGEST
+
 
 %start program
 %type <unit> program
@@ -195,7 +202,7 @@ id_e:
     
 expression:
       T_id {()}
-    | T_lparen expression T_rparen {()}
+    | T_lparen expression T_rparen %prec LARGEST {()}
     | T_true {()}
     | T_false {()}
     | T_null {()}
@@ -203,17 +210,18 @@ expression:
     | T_char_const {()}
     | T_double_const {()}
     | T_string {()}
-    | T_id T_lparen expression_list_e T_rparen {()}
+    | T_id T_lparen expression_list_e T_rparen %prec LARGEST {()}
     | expression T_lbrack expression T_rbrack {()}
     | unary_operator expression %prec UNARY {()}
-    | expression binary_operator expression {()}
+    | expression binary_operator expression %prec SUFFIX_DCR {()}
     | unary_assignment expression %prec T_dcr {()}
     | expression unary_assignment {()}
-    | expression binary_assignment expression {()}
+    | expression binary_assignment expression %prec T_assign {()}
     | T_lparen result_type T_paren expression {()}
-    | expression T_qmark expression T_colon expression {()}
-    | T_new result_type array_expr_index_e {()}
-    | T_delete expression {()}
+    | expression T_qmark expression T_colon expression %prec TERNARY {()}
+    | T_new result_type {()}
+    | T_new result_type T_lbrack expression T_rbrack %prec INDEXING {()}
+    | T_delete expression %prec COMMAND {()}
     ;
 
 array_expr_index_e:
