@@ -1,22 +1,25 @@
 # Edsger
 
 ## How To Compile it
-
-	cd src
 	make 
 
 ## How To Test it
+	make test1 (CORRECT)
+	make test2 (INCORRECT)
+	make test3 (CORRECT)
+	make test4 (CORRECT)
 
-	cd src
-	make test1
-	make test2
-
-## Tools
+## Requirements To Run
 * opam (package manager)
 * utop (opam install utop)
-* core (opam)
-* Menhir (opam install menhir) 
-* Ocamllex
+* core (opam install core)
+* menhir (opam install menhir) 
+
+## Requirements to Develop
+* OUnit (opam instal ounit )
+
+## Images in \_img in case you are not running it in a unix environment.
+
 
 ## Useful Links
 

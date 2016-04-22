@@ -41,7 +41,6 @@ open Core.Std;;
 %left T_times T_div T_mod
 %left UNARY
 %right T_incr T_dcr CAST
-%left SUFFIX_DCR
 //%left LARGEST
 %left T_else
 
@@ -217,7 +216,7 @@ expression:
     | T_id T_lparen expression_list_e  T_rparen {()}
     | expression T_lbrack expression T_rbrack {()}
     | unary_operator expression %prec UNARY {()}
-    | expression binary_operator expression %prec SUFFIX_DCR {()}
+    | expression binary_operator expression {()}
     | unary_assignment expression %prec T_dcr {()}
     | expression unary_assignment {()}
     | expression binary_assignment expression %prec T_assign {()}
