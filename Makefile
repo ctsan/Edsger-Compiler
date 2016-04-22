@@ -1,4 +1,7 @@
+
 TEST1=_test/input/parser3.txt
+TEST2=_test/input/parser4.txt
+
 EXENAME=Compiler
 EXE_FULL_PATH=./$(EXENAME)
 
@@ -18,3 +21,6 @@ clean:
 
 test1: 
 	$(EXE_FULL_PATH) < $(TEST1)
+test2:
+	$(EXE_FULL_PATH) < $(TEST2)
+
