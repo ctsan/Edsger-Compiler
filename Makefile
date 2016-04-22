@@ -1,9 +1,11 @@
-TEST1=../test/input/parser3.txt
+TEST1=_test/input/parser3.txt
 EXENAME=Compiler
+EXE_FULL_PATH=./$(EXENAME)
 
 $(EXENAME): 
 	ocamlbuild -r -use-menhir -tag thread -use-ocamlfind -quiet -pkg core Compiler.native
 	mv $(EXENAME).native $(EXENAME)
+
 
 .PHONY: clean distclean test1 test2 test3 test4
 
@@ -15,4 +17,4 @@ clean:
 	$(RM) -rf Compiler _build
 
 test1: 
-	$(FULLEXE) < $(TEST1)
+	$(EXE_FULL_PATH) < $(TEST1)
