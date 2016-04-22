@@ -1,21 +1,4 @@
 {
-(*
-type token =
-  | T_eof | T_negate
-  | T_plu_assign | T_int_const  | T_float_const | T_char_const
-  | T_min_assign | T_for | T_do | T_begin | T_end | T_if | T_then
-  | T_mul_assign | T_lparen | T_rparen | T_plus | T_minus | T_times
-  | T_div_assign | T_lteq | T_gteq | T_gt | T_lt | T_neq | T_eq
-  | T_mod_assign | T_incr | T_dcr
-  | T_assign
-  | T_lbrack | T_rbrack | T_semicolon| T_lbrace | T_rbrace 
-  | T_mod | T_div | T_qmark
-  | T_or    | T_string
-  | T_and   | T_int | T_float | T_char | T_bool
-  | T_addr  | T_break | T_byref | T_continue | T_new | T_delete | T_else
-  | T_comma | T_true | T_false | T_null | T_return | T_void
-  | T_colon | T_id  
-  *)
 open Parser
 } 
 
@@ -33,11 +16,7 @@ rule lexer = parse
   | "//" notnewline*  { lexer lexbuf }
   | "/*" { consume_comment lexbuf }
   | "for"    { T_for }
-  | "do"     { T_do }
-  | "begin"  { T_begin }
-  | "end"    { T_end }
   | "if"     { T_if }
-  | "then"   { T_then }
   | "else"   { T_else }
   | "true"   { T_true }
   | "false"   { T_false }
@@ -92,7 +71,7 @@ rule lexer = parse
   | "=="     { T_eq       }
   | "++"     { T_incr      }
   | "--"     { T_dcr       }
-  | letter (letter|digit|'_')*   { T_id }
+  | letter (letter|digit|'_')*   { T_id (Lexing.lexeme lexbuf) }
   |  eof          { T_eof }
   |  _ as chr     { Printf.eprintf "invalid character: '%c' (ascii: %d)"
                       chr (Char.code chr);

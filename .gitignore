@@ -1,6 +1,19 @@
-*.swp
-*bin/*
+# Generated ml files don't contain any interesting information 
+Parser.ml
+Lexer.ml
+
+# Build should be compiled, not imported
+_build/
+
+# Object ml files  
 *.cmo
 *.cmi
-*.mli
 
+# Parser Outputs
+*.output
+*.automaton
+*.conflicts
+
+# Vim Backup files / OS-specific files
+*.swp
+*.DS_STORE

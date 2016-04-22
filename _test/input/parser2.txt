@@ -1,0 +1,3 @@
+int y;
+bool y, k, delta;
+double z[100];
