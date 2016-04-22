@@ -72,8 +72,8 @@ open Core.Std;;
 %type <unit> id_e
 //%type <unit> array_expr_index_e
 %type <unit> expression
-//%type <unit> expression_list
-//%type <unit> expression_list_e
+%type <unit> expression_list
+%type <unit> expression_list_e
 %type <unit> constant_expression
 %type <unit> unary_operator
 //%type <unit> binary_operator //inline
@@ -214,7 +214,7 @@ expression:
     | T_char_const {()}
     | T_double_const {()}
     | T_string {()}
-    | T_id T_lparen parameter_list_e T_rparen {()}
+    | T_id T_lparen expression_list_e  T_rparen {()}
     | expression T_lbrack expression T_rbrack {()}
     | unary_operator expression %prec UNARY {()}
     | expression binary_operator expression %prec SUFFIX_DCR {()}
@@ -239,15 +239,15 @@ expression_e:
      | expression {()}
      ;
 
-//expression_list:
-//      expression_list T_comma expression {()}
-//    | expression {()}
-//    ;
+expression_list:
+      expression_list T_comma expression {()}
+    | expression %prec LOWEST {()}
+    ;
 
-//expression_list_e:
-//      {()} 
-//    | expression_list {()} 
-//    ;
+expression_list_e:
+      {()} 
+    | expression_list {()} 
+    ;
 
 constant_expression:
     expression {()}
