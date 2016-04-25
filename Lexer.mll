@@ -1,16 +1,19 @@
 {
 open Parser
+exception Unexpected_character of char*int
 } 
 
-let digit    = ['0'-'9']
-let int_const   = digit+
-let double_const   = digit+ '.' digit+ (['e' 'E'] ['+' '-']? digit+)?
-let char_const   = '\'' [^'\'']* '\''
-let letter   = ['A'-'Z''a'-'z']
-let white    = [' ' '\t' '\r' '\n']
-let newline    = '\r' | '\n' | "\r\n"
-let notnewline  = [^ '\r' '\n' ]
-
+let digit             = ['0'-'9']
+let hex_digit         = digit | ['a'-'f' 'A'-'F']
+let int_const         = digit+
+let double_const      = digit+ '.' digit+ (['e' 'E'] ['+' '-']? digit+)?
+let char_const        = '\'' [^'\'']* '\''
+let letter            = ['A'-'Z''a'-'z']
+let white             = [' ' '\t' '\r' '\n']
+let newline           = '\r' | '\n' | "\r\n"
+let notnewline        = [^ '\r' '\n' ]
+let const_char_inners = [^'\\' '\'' '\"']
+    | '\\'  ( '\''| '\\' | '"' | '\\' | '0' | 'n' | 'r' |'t'| ('x' hex_digit hex_digit))
 
 rule lexer = parse
   | "//" notnewline*  { lexer lexbuf }
@@ -33,7 +36,7 @@ rule lexer = parse
   | "bool"   { T_bool }
   | "char"   { T_char }
   | '"' ([^'"']|'\\' '"')* '"'  { T_string }
-  | '\'' ([^'\'']|'\\' '\'')* '\''  { T_char_const }
+  | '\'' const_char_inners '\'' { T_char_const }
   | int_const  { T_int_const }
   | double_const  { T_double_const }
   | '='      { T_assign }
@@ -61,7 +64,6 @@ rule lexer = parse
   | ','      { T_comma }
   | ':'      { T_colon }
   | white+               { lexer lexbuf }
-  | "'" [^ '\n']* "\n"   { lexer lexbuf }
   | ';'      { T_semicolon }
   | '<'      { T_lt        }
   | '>'      { T_gt        }
@@ -73,9 +75,7 @@ rule lexer = parse
   | "--"     { T_dcr       }
   | letter (letter|digit|'_')*   { T_id (Lexing.lexeme lexbuf) }
   |  eof          { T_eof }
-  |  _ as chr     { Printf.eprintf "invalid character: '%c' (ascii: %d)"
-                      chr (Char.code chr);
-                    lexer lexbuf }
+  |  _ as chr     { raise (Unexpected_character (chr,(Lexing.lexeme_start lexbuf)))}
 
 and consume_comment = 
     parse

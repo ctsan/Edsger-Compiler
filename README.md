@@ -18,9 +18,6 @@
 ## Requirements to Develop
 * OUnit (opam instal ounit )
 
-## Images in \_img in case you are not running it in a unix environment.
-
-
 ## Useful Links
 
 * [Lexing/Parsing](http://caml.inria.fr/pub/docs/manual-ocaml-4.00/manual026.html)

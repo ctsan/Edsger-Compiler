@@ -50,49 +50,42 @@ open Core.Std;;
 %type <unit> declaration_list
 %type <unit> declaration_list_e
 %type <unit> declaration
-//%type <unit> variable_declaration //INLINE 
-//%type <unit> more_declarators_e
 %type <unit> more_declarators
 %type <unit> ctype
 %type <unit> pointer_asterisk_e
 %type <unit> basic_type
 %type <unit> declarator
-//%type <unit> function_declaration //inline
-//%type <unit> result_type //inline
 %type <unit> parameter_list
 %type <unit> parameter
 %type <unit> parameter_list_e
-// %type <unit> function_definition //inline
 %type <unit> statement
 %type <unit> statement_list_e
-//%type <unit> statement_e
 %type <unit> else_part_e
 %type <unit> label_e
 %type <unit> id_e
-//%type <unit> array_expr_index_e
 %type <unit> expression
 %type <unit> expression_list
 %type <unit> expression_list_e
 %type <unit> constant_expression
 %type <unit> unary_operator
-//%type <unit> binary_operator //inline
 %type <unit> unary_assignment
 %type <unit> binary_assignment
 
 %%
 
 program:
-      declaration_list T_eof {  Printf.printf "Passing Syntax :-) \n";() }
+      declaration_list T_eof 
+        {Printf.printf "\x1B[32mPassing Syntax :-) \n\x1B[0m";() }
     ; 
 
 declaration_list:
        declaration_list declaration { () }
-     | declaration {  () }
+     | declaration                  { () }
      ;
 
 declaration_list_e:
-       {()}
-     | declaration_list {()} 
+                        { ()}
+     | declaration_list { ()}
      ;
 
 declaration:
@@ -109,30 +102,24 @@ more_declarators:
     declarator {()} 
     | declarator T_comma more_declarators { ()}
     
-//more_declarators_e:
-//      {()}
-//    | more_declarators_e T_comma declarator {()}
-//    | T_comma declarator{()}
-//    ;
-
 ctype: 
      basic_type pointer_asterisk_e {()}
     ;
 
 pointer_asterisk_e: 
-      %prec LOWEST {()}
-    | T_times pointer_asterisk_e {()}
+      %prec LOWEST               { ()}
+    | T_times pointer_asterisk_e { ()}
     ;
 
-basic_type: T_int {()}
-    | T_bool {()}
-    | T_char {()}
-    | T_double {()}
+basic_type: T_int { ()}
+    | T_bool      { ()}
+    | T_char      { ()}
+    | T_double    { ()}
    ; 
 
 declarator:
       name = T_id T_lbrack constant_expression T_rbrack 
-        { printf "Array Named %s\n" name; () }
+                  { printf "Array Named %s\n" name; () }
     | name = T_id { printf "Variable Name %s\n" name; ()}
     ;
 
@@ -141,111 +128,100 @@ declarator:
     ;
 
 %inline result_type:
-      ctype {()}
-    | T_void {()}
+      ctype  { ()}
+    | T_void { ()}
     ;
 
 parameter_list:
-      parameter_list T_comma parameter {()}
-    | parameter {()}
+      parameter_list T_comma parameter { ()}
+    | parameter                        { ()}
     ;
 
 parameter:
-     T_byref ctype T_id {()}
-    | ctype T_id {()}
+     T_byref ctype T_id { ()}
+    | ctype T_id        { ()}
     ;
 
 parameter_list_e:
-     {()}
-     | parameter_list {()}
+                      { ()}
+     | parameter_list { ()}
      ;
 
 %inline function_definition:
-    result_type T_id T_lparen parameter_list_e T_rparen T_lbrace declaration_list_e statement_list_e T_rbrace {()}
+    result_type T_id T_lparen parameter_list_e T_rparen T_lbrace declaration_list_e statement_list_e T_rbrace 
+        {()}
     ;
 
 statement:
-     T_semicolon {()}
-    | expression T_semicolon {()}
-    | T_lbrace statement_list_e T_rbrace {()}
-    | T_if T_lparen expression T_rparen statement else_part_e {()}
+     T_semicolon                                              { ()}
+    | expression T_semicolon                                  { ()}
+    | T_lbrace statement_list_e T_rbrace                      { ()}
+    | T_if T_lparen expression T_rparen statement else_part_e { ()}
     | label_e T_for T_lparen expression_e T_semicolon expression_e T_semicolon
-        expression_e T_rparen statement {()}
-    | T_continue id_e T_semicolon {()}
-    | T_break id_e T_semicolon {()}
-    | T_return expression_e T_semicolon {()}
+        expression_e T_rparen statement                       { ()}
+    | T_continue id_e T_semicolon                             { ()}
+    | T_break id_e T_semicolon                                { ()}
+    | T_return expression_e T_semicolon                       { ()}
     ;
 
 statement_list_e:
-     {()}
-    | statement_list_e statement {()}
+                                 { ()}
+    | statement_list_e statement { ()}
     ;
 
-
-//statement_e:
-//     {()}
-//    | statement {()}
-//    ;
-
-
 else_part_e:
-      %prec LOWEST {()}
-    | T_else statement {()} 
+      %prec LOWEST     { ()}
+    | T_else statement { ()}
     ;
 
 label_e:
-       {()} 
-    | T_id T_colon {()}
+                   { ()}
+    | T_id T_colon { ()}
     ;
 
 id_e:
-       {()}
-    | T_id {()}
+           { ()}
+    | T_id { ()}
     ;
     
 expression:
-      T_id {()}
-    | T_lparen expression T_rparen { Printf.printf "hi\n"; ()}
-    | T_true {()}
-    | T_false {()}
-    | T_null {()}
-    | T_int_const {()}
-    | T_char_const {()}
-    | T_double_const {()}
-    | T_string {()}
-    | T_id T_lparen expression_list_e  T_rparen {()}
-    | expression T_lbrack expression T_rbrack {()}
-    | unary_operator expression %prec UNARY {()}
-    | expression binary_operator expression {()}
-    | unary_assignment expression %prec T_dcr {()}
-    | expression unary_assignment {()}
-    | expression binary_assignment expression %prec T_assign {()}
-    | T_lparen ctype T_rparen expression %prec CAST {()}
-    | expression T_qmark expression T_colon expression %prec TERNARY {()}
-    | T_new ctype %prec LOWEST {()}
-    | T_new ctype T_lbrack expression T_rbrack {()}
-    | T_delete expression %prec COMMAND {()}
+      T_id                                                           { ()}
+    | T_lparen expression T_rparen                                   { Printf.printf "hi\n"; ()}
+    | T_true                                                         { ()}
+    | T_false                                                        { ()}
+    | T_null                                                         { ()}
+    | T_int_const                                                    { ()}
+    | T_char_const                                                   
+        { printf "Char Const\n" ; ()}
+    | T_double_const                                                 { ()}
+    | T_string                                                       { ()}
+    | T_id T_lparen expression_list_e  T_rparen                      { ()}
+    | expression T_lbrack expression T_rbrack                        { ()}
+    | unary_operator expression %prec UNARY                          { ()}
+    | expression binary_operator expression                          { ()}
+    | unary_assignment expression %prec T_dcr                        { ()}
+    | expression unary_assignment                                    { ()}
+    | expression binary_assignment expression %prec T_assign         { ()}
+    | T_lparen ctype T_rparen expression %prec CAST                  { ()}
+    | expression T_qmark expression T_colon expression %prec TERNARY { ()}
+    | T_new ctype %prec LOWEST                                       { ()}
+    | T_new ctype T_lbrack expression T_rbrack                       { ()}
+    | T_delete expression %prec COMMAND                              { ()}
     ;
 
-
-//array_expr_index_e:
-//        {()}
-//      | T_lbrack expression T_rbrack {()}
-//      ;
-
 expression_e:
-     {()}
-     | expression {()}
+                  { ()}
+     | expression { ()}
      ;
 
 expression_list:
-      expression_list T_comma expression {()}
-    | expression %prec LOWEST {()}
+      expression_list T_comma expression { ()}
+    | expression %prec LOWEST            { ()}
     ;
 
 expression_list_e:
-      {()} 
-    | expression_list {()} 
+                      { ()}
+    | expression_list { ()}
     ;
 
 constant_expression:
@@ -253,40 +229,40 @@ constant_expression:
     ;
 
 unary_operator:
-      T_addr {()}
-    | T_times {()}
-    | T_plus {()}
-    | T_minus {()}
-    | T_negate {()}
+      T_addr   { ()}
+    | T_times  { ()}
+    | T_plus   { ()}
+    | T_minus  { ()}
+    | T_negate { ()}
     ;
 
 %inline binary_operator:
-      T_times {()}
-    | T_div {()}
-    | T_mod {()}
-    | T_plus {()}
-    | T_minus {()}
-    | T_lt {()}
-    | T_gt {()}
-    | T_lteq {()}
-    | T_gteq {()}
-    | T_eq {()}
-    | T_neq {()}
-    | T_and {()}
-    | T_or {()}
-    | T_comma {()}
+      T_times { ()}
+    | T_div   { ()}
+    | T_mod   { ()}
+    | T_plus  { ()}
+    | T_minus { ()}
+    | T_lt    { ()}
+    | T_gt    { ()}
+    | T_lteq  { ()}
+    | T_gteq  { ()}
+    | T_eq    { ()}
+    | T_neq   { ()}
+    | T_and   { ()}
+    | T_or    { ()}
+    | T_comma { ()}
     ;
 
 unary_assignment:
-      T_incr {()}
-    | T_dcr {()}
+      T_incr { ()}
+    | T_dcr  { ()}
     ;
 
 binary_assignment:
-      T_assign {()}
-    | T_mul_assign {()}
-    | T_div_assign {()}
-    | T_mod_assign {()}
-    | T_plu_assign {()}
-    | T_min_assign {()}
+      T_assign     { ()}
+    | T_mul_assign { ()}
+    | T_div_assign { ()}
+    | T_mod_assign { ()}
+    | T_plu_assign { ()}
+    | T_min_assign { ()}
     ;

@@ -23,6 +23,7 @@ void new_fun(int arg1, byref int arg2, byref char test) {
 		int z;
 		y /= 80;	
 		z %= 800;
+		k = '\x1f';
 		if ( x==0 || z==0 || r+9==15 ) 
 			z=0;
 		else; 

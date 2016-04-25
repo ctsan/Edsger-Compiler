@@ -7,7 +7,7 @@ TEST4=_test/input/parser4.txt
 EXENAME=Compiler
 EXE_FULL_PATH=./$(EXENAME)
 
-$(EXENAME): Parser.mly Lexer.mll
+$(EXENAME): Parser.mly Lexer.mll Compiler.ml
 	ocamlbuild -r -use-menhir -tag thread -use-ocamlfind -quiet -pkg core Compiler.native
 	mv $(EXENAME).native $(EXENAME)
 
@@ -22,11 +22,11 @@ clean:
 	$(RM) -rf Compiler _build
 
 test1: 
-	$(EXE_FULL_PATH) < $(TEST1)
+	$(EXE_FULL_PATH) $(TEST1)
 test3: 
-	$(EXE_FULL_PATH) < $(TEST3)
+	$(EXE_FULL_PATH) $(TEST3)
 test2: 
-	$(EXE_FULL_PATH) < $(TEST2)
+	$(EXE_FULL_PATH) $(TEST2)
 test4:
-	$(EXE_FULL_PATH) < $(TEST4)
+	$(EXE_FULL_PATH) $(TEST4)
 
