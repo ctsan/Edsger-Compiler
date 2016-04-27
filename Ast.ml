@@ -1,17 +1,17 @@
-type var  = char
-type oper = O_plus | O_minus | O_times
+type ast_prog = ast_declaration list
 
-type ast_stmt =
-    | S_print of ast_expr
-    | S_let   of var * ast_expr
-    | S_for   of ast_expr * ast_stmt
-    | S_block of ast_stmt list
-    | S_if    of ast_expr * ast_stmt
+type ast_declaration = 
+    | S_variable_declaration of ast_ctype * ast_declaration list 
+    | S_function_declaration of ast_result_type * ast_parameter list
+    | S_function_definition  of ast_result_type * ast_parameter list *
+                                ast_declaration list * ast_statement list
+
+type ast_ctype = { primitive_type: string ; asterisks_no : int }
 
 and ast_expr =
-| E_const of int
-| E_var of var
-| E_op of ast_expr * oper * ast_expr
+    | E_const of int
+    | E_var of var
+    | E_op of ast_expr * oper * ast_expr
 
 let vars = Array.create 26 0
 
@@ -39,4 +39,5 @@ let rec run_stmt ast =
   | S_block b    -> run b
   | S_if (e, s)  -> let v = run_expr e in
                     if v <> 0 then run_stmt s
+
 and run asts = List.iter run_stmt asts
