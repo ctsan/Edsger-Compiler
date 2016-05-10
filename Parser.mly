@@ -75,7 +75,7 @@ open Core.Std;;
 
 program:
       declaration_list T_eof 
-        {Printf.printf "\x1B[32mPassing Syntax :-) \n\x1B[0m";() }
+        {Printf.eprintf "\x1B[32mPassing Syntax :-) \n\x1B[0m";() }
     ; 
 
 declaration_list:

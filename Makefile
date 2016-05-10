@@ -1,18 +1,39 @@
+#####################################################################
+#-----|                  Edsger Makefile                      #-----|
+#-----|                                                       #-----|
+#####################################################################
 
-TEST1=_test/input/parser1.txt
-TEST2=_test/input/parser2.txt
-TEST3=_test/input/parser3.txt
-TEST4=_test/input/parser4.txt
 
-EXENAME=Compiler
-EXE_FULL_PATH=./$(EXENAME)
+#####################################################################
+#| Compiler Specific Variables
+#####################################################################
+
+EXENAME       = Compiler
+EXE_FULL_PATH = ./$(EXENAME)
+FLAGS         = -r -use-menhir -tag 'debug,thread' -use-ocamlfind -quiet
+PACKAGES      = -pkgs 'core,ounit'
+
+#####################################################################
+#| Testing Variables
+#####################################################################
+
+TESTINPUT  = _test/input/
+TESTLIST  := $(wildcard $(TESTINPUT)*.txt)
+
+#####################################################################
+#| Refer to the following link for more info about ocamlbuild
+#| https://github.com/ocaml/ocamlbuild/blob/master/manual/manual.adoc
+#####################################################################
 
 $(EXENAME): Parser.mly Lexer.mll Compiler.ml
-	ocamlbuild -r -use-menhir -tag thread -use-ocamlfind -quiet -pkg core Compiler.native
+	ocamlbuild $(FLAGS) $(PACKAGES) Compiler.native
 	mv $(EXENAME).native $(EXENAME)
 
+#####################################################################
+#######| Helping Targets 
+#####################################################################
 
-.PHONY: clean distclean test1 test2 test3 test4
+.PHONY: clean test ftest
 
 clean:
 	$(RM) *.cmo *.cmi *~ 
@@ -21,12 +42,16 @@ clean:
 	$(RM) Parser.automaton Parser.conflicts Parser.output
 	$(RM) -rf Compiler _build
 
-test1: 
-	$(EXE_FULL_PATH) $(TEST1)
-test3: 
-	$(EXE_FULL_PATH) $(TEST3)
-test2: 
-	$(EXE_FULL_PATH) $(TEST2)
-test4:
-	$(EXE_FULL_PATH) $(TEST4)
+#####################################################################
+#######| Testing Targets 
+#####################################################################
 
+COMMAND = echo $(TESTLIST) | xargs -t -n 1 $(EXE_FULL_PATH) $(TEST) 
+test: Compiler
+	$(COMMAND) 1>/dev/null
+ftest: Compiler
+	$(COMMAND)
+
+#####################################################################
+#-----|                        THE END                        #-----|
+#####################################################################

@@ -1,33 +1,30 @@
-# Edsger
+# Edsger Compiler
 
 ## How To Compile it
 	make 
 
 ## How To Test it
-	make test1 (CORRECT)
-	make test2 (INCORRECT)
-	make test3 (CORRECT)
-	make test4 (CORRECT)
+	make test  (for standard error printing only) 
+	make testf (for full print)
+	
+*files ending with 'w' are invalid, files ending with 'c' are correct*
 
-## Requirements To Run
+## Requirements To Compile
 * opam (package manager)
-* utop (opam install utop)
 * core (opam install core)
 * menhir (opam install menhir) 
 
-## Requirements to Develop
+## For Developers
 * OUnit (opam instal ounit )
+* utop (opam install utop)
 
-## Useful Links
+## Error Codes
 
-* [Lexing/Parsing](http://caml.inria.fr/pub/docs/manual-ocaml-4.00/manual026.html)
-
-* [More about Lexing/Parsing](https://realworldocaml.org/v1/en/html/parsing-with-ocamllex-and-menhir.html)
-
-* [Unit Testing](http://ounit.forge.ocamlcore.org/api-ounit/)
+* [1] Lexical  Error
+* [2] Syntax   Error
+* [3] Semantic Error
 
 ## Instructions for Developers
-
 ### Semantic analysis
 
 1. all used IDs are declared
@@ -58,3 +55,4 @@ or appearance in the source (location,type,scope).
 * Visibility
 * Position of Variable in Mem/Register
 * Of labels
+

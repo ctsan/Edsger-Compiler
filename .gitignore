@@ -1,8 +1,4 @@
-# Generated ml files don't contain any interesting information 
-Parser.ml
-Lexer.ml
-
-# Build should be compiled, not imported
+# _build should be generated not imported
 _build/
 
 # Object ml files  
