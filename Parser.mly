@@ -1,6 +1,7 @@
 %{
 open Core.Std;;
 open NicePrint;;
+open Ast;;
 %}
 %token <string>T_id
 %token T_int  T_double T_bool T_char 
@@ -8,32 +9,33 @@ open NicePrint;;
 %token T_true T_false
 %token T_null
 %token T_plu_assign T_min_assign T_mul_assign T_div_assign T_mod_assign
-%token T_assign
-%token T_incr T_dcr
-%token T_lteq T_gteq T_gt T_lt T_neq T_eq
-%token T_lbrace T_rbrace
-%token T_lbrack T_rbrack
-%token T_lparen T_rparen
+%token T_assign /* "=" */
+%token T_incr T_dcr  /* "++" "--" */
+%token T_lteq T_gteq T_gt T_lt T_neq T_eq /* "<=", ">=" ">" "<" "!=" "==" */
+%token T_lbrace T_rbrace /* "{" "}" */
+%token T_lbrack T_rbrack /* "[" "]" */
+%token T_lparen T_rparen /* "(" ")" */
 %token T_colon T_semicolon T_comma
-%token T_qmark
+%token T_qmark  /* '?' */
 %token T_and
 %token T_or
-%token T_negate
+%token T_negate /* '!' */
 %token T_plus
 %token T_minus
-%token T_times
-%token T_addr T_break T_byref T_continue T_new T_delete T_else
+%token T_times 
+%token T_addr /* pointer '*' */
+%token T_break T_byref T_continue T_new T_delete T_else 
 %token T_return T_void
 %token T_eof
 %token T_for T_if 
-%token T_mod T_div
+%token T_mod T_div 
 
 %left LOWEST
-%left T_lbrack 
+%nonassoc T_lbrack 
 %left T_comma
 %left COMMAND
-%right T_assign T_plu_assign T_min_assign T_mul_assign T_div_assign T_mod_assign
-%right TERNARY T_qmark 
+%nonassoc T_assign T_plu_assign T_min_assign T_mul_assign T_div_assign T_mod_assign
+%nonassoc TERNARY T_qmark 
 %left T_or
 %left T_and
 %left T_eq T_neq
@@ -42,18 +44,16 @@ open NicePrint;;
 %left T_times T_div T_mod
 %left UNARY
 %right T_incr T_dcr CAST
-//%left LARGEST
-%left T_else
-
+%nonassoc T_else
 
 %start program
 %type <unit> program
-%type <unit> declaration_list
-%type <unit> declaration_list_e
-%type <unit> declaration
-%type <unit> more_declarators
+%type <ast_decl list> declaration_list
+%type <ast_decl list> declaration_list_e
+%type <ast_decl> declaration
+%type <ast_decl list> more_declarators
 %type <unit> ctype
-%type <unit> pointer_asterisk_e
+%type <int> pointer_asterisk_e 
 %type <unit> basic_type
 %type <unit> declarator
 %type <unit> parameter_list
@@ -78,7 +78,9 @@ program:
       declaration_list T_eof 
         {
             eprintf_color Green "Passing Syntax :-) \n";
-            eclear(); () 
+            eclear();
+            ast_tree := Some $1;
+            () 
         }; 
 
 declaration_list:

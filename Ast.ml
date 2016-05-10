@@ -1,43 +1,54 @@
-type ast_prog = ast_declaration list
+(* let vars = Array.create 26 0 *)
 
-type ast_declaration = 
-    | S_variable_declaration of ast_ctype * ast_declaration list 
-    | S_function_declaration of ast_result_type * ast_parameter list
-    | S_function_definition  of ast_result_type * ast_parameter list *
-                                ast_declaration list * ast_statement list
+(* The First Bool Expresses whether the parameter is byref or not *)
+type ast_param = 
+    | P_int  of bool * string
+    | P_char of bool * string
+    | P_bool of bool * string
+    | P_double of bool * string
 
-type ast_ctype = { primitive_type: string ; asterisks_no : int }
+and ast_decl = 
+    (* first int expresses number of asterisks (from 0 to N>0) *)
+    | D_var_int    of int * (string * ast_expr option ) list
+    | D_var_char   of int * (string * ast_expr option ) list
+    | D_var_double of int * (string * ast_expr option ) list
+    | D_var_bool   of int * (string * ast_expr option ) list
 
-and ast_expr =
-    | E_const of int
-    | E_var of var
-    | E_op of ast_expr * oper * ast_expr
+    | D_func_decl_int    of int * string * ast_param list
+    | D_func_decl_char   of int * string * ast_param list
+    | D_func_decl_bool   of int * string * ast_param list
+    | D_func_decl_double of int * string * ast_param list
 
-let vars = Array.create 26 0
+    | D_func_def_int    of int * string * ast_param list * ast_decl list * ast_stmt list
+    | D_func_def_char   of int * string * ast_param list * ast_decl list * ast_stmt list
+    | D_func_def_bool   of int * string * ast_param list * ast_decl list * ast_stmt list
+    | D_func_def_double of int * string * ast_param list * ast_decl list * ast_stmt list
 
-let rec run_expr ast =
-  match ast with
-  | E_const n         -> n
-  | E_var x           -> vars.(int_of_char x - int_of_char 'a')
-  | E_op (e1, op, e2) -> let v1 = run_expr e1
-                         and v2 = run_expr e2 in
-		         match op with
-		         | O_plus  -> v1 + v2
-		         | O_minus -> v1 - v2
-		         | O_times -> v1 * v2
+and ast_stmt = 
+    | S_None (* if empty statement *)
+    | S_expr     of ast_expr
+    | S_braces   of ast_stmt list
+    | S_if       of ast_expr * ast_stmt * ast_stmt option
+    | S_for      of string option * ast_expr option * ast_expr option * ast_expr option * ast_stmt
+    | S_continue of string option
+    | S_break    of string option
+    | S_return   of ast_expr option
 
-let rec run_stmt ast =
-  match ast with
-  | S_print e    -> let v = run_expr e in
-                    Printf.printf "%d\n" v
-  | S_let (x, e) -> let v = run_expr e in
-                    vars.(int_of_char x - int_of_char 'a') <- v
-  | S_for (e, s) -> let v = run_expr e in
-                    for i = 1 to v do
-		      run_stmt s
-		    done
-  | S_block b    -> run b
-  | S_if (e, s)  -> let v = run_expr e in
-                    if v <> 0 then run_stmt s
+(**** Design-Choices >  
+ * Edsger int  -> OCaml int   (even though in OCaml its 32/64bit, use that for temp-store)
+ * E.bool -> OC.char  (since it is 8bits)
+ * E.double -> OC.string (since it is 10bytes) ****)
 
-and run asts = List.iter run_stmt asts
+and ast_expr = 
+    | E_int    of int
+    | E_bool   of char
+    | E_char   of char
+    | E_double of string
+    | E_plus  of ast_expr * ast_expr
+    | E_minus of ast_expr * ast_expr
+    | E_div   of ast_expr * ast_expr
+    | E_mult of ast_expr * ast_expr 
+    (* TODO More Here *)
+;;
+
+let ast_tree:ast_decl list option ref = ref None
