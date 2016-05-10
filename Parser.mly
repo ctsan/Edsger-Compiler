@@ -1,5 +1,6 @@
 %{
 open Core.Std;;
+open NicePrint;;
 %}
 %token <string>T_id
 %token T_int  T_double T_bool T_char 
@@ -75,8 +76,10 @@ open Core.Std;;
 
 program:
       declaration_list T_eof 
-        {Printf.eprintf "\x1B[32mPassing Syntax :-) \n\x1B[0m";() }
-    ; 
+        {
+            eprintf_color Green "Passing Syntax :-) \n";
+            eclear(); () 
+        }; 
 
 declaration_list:
        declaration_list declaration { () }

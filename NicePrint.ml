@@ -16,14 +16,14 @@ type color =
 
 let colortxt = function
     | Normal -> "\x1B[0m" 
-    | Green  -> "\x1B[31m"
+    | Green  -> "\x1B[32m"
     | Red    -> "\x1B[31m";;
 
 
 (* These Functions Print on Standard Error *)
 
 let eprintf_color color = 
-    prerr_string @@ colortxt Red;
+    prerr_string @@ colortxt color;
     Printf.eprintf;;
 
 let eclear () = prerr_string @@ colortxt Normal
