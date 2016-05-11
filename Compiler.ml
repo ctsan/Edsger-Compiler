@@ -7,7 +7,7 @@ let compile_channel channel =
         Parser.program Lexer.lexer lexbuf; 
         exit 0
     with 
-		| Parsing.Parse_error | Parser.Error ->
+        | Parsing.Parse_error | Parser.Error ->
             eprintf_color Red "[2] Syntax Error :(\n"; eclear ();
             exit 2
         | Lexer.Unexpected_character (chr,pos) ->
@@ -18,7 +18,7 @@ let compile_channel channel =
 
 (* Parse Flags and Provide Documentation for -help *) 
 let arguments = 
-	let open Command.Spec in 
+    let open Command.Spec in 
      empty
      +> flag "-O" no_arg ~doc:" Optimization Flag."
      +> flag "-f" no_arg ~doc:" Get src code from stdin, output assembly on stdout."
@@ -28,17 +28,19 @@ let arguments =
 let command = 
  Command.basic
     ~summary:"Edsger Compiler (C.Tsanikidis,A.Aggelakis)."
-	arguments
+    arguments
     (fun optim assembly intermediary filename () ->
-	   let file_channel = 
+       let file_channel = 
            if filename="-" then stdin
            else open_in filename
        in
        match (assembly,intermediary) with
-	   | (true,true) ->
+       | (true,true) ->
             eprintf_color Red "Bad combination of flags. Aborting...\n"; eclear (); exit 124;
-	   | _ -> compile_channel file_channel (* TODO Later Stages *)
+       | _ -> compile_channel file_channel (* TODO Later Stages *)
     )
 
 let main =
         Command.run ~version:"0.1" command
+
+

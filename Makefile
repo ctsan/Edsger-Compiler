@@ -11,7 +11,7 @@
 EXENAME       = Compiler
 EXE_FULL_PATH = ./$(EXENAME)
 FLAGS         = -r -use-menhir -tag 'debug,thread' -use-ocamlfind -quiet
-PACKAGES      = -pkgs 'core,ounit'
+PACKAGES      = -pkgs 'core'
 
 #####################################################################
 #| Testing Variables
