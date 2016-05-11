@@ -1,8 +1,9 @@
 %{
-open Core.Std;;
-open NicePrint;;
-open Ast;;
+open Core.Std
+open NicePrint
+open Ast
 %}
+
 %token <string>T_id
 %token T_int  T_double T_bool T_char 
 %token T_string T_char_const T_int_const T_double_const

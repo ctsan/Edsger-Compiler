@@ -47,7 +47,24 @@ and ast_expr =
     | E_plus  of ast_expr * ast_expr
     | E_minus of ast_expr * ast_expr
     | E_div   of ast_expr * ast_expr
-    | E_mult of ast_expr * ast_expr 
+    | E_mult of ast_expr * ast_expr
+    | E_mod of ast_expr * ast_expr
+    | E_div of ast_expr * ast_expr
+    | E_and of ast_expr * ast_expr
+    | E_or of ast_expr * ast_expr
+    | E_negate of ast_expr
+    | E_incr_bef of ast_expr (* difference of ++x, x++ * (???) *)
+    | E_decr_bef of ast_expr
+    | E_incr_aft of ast_expr
+    | E_decr_aft of ast_expr
+    | E_lteq of ast_expr * ast_expr
+    | E_gteq of ast_expr * ast_expr
+    | E_lt of ast_expr * ast_expr
+    | E_gt of ast_expr * ast_expr
+    | E_neq of ast_expr * ast_expr
+    | E_eq of ast_expr * ast_expr
+    | E_neq of ast_expr * ast_expr
+    | E_neq of ast_expr * ast_expr
     (* TODO More Here *)
 ;;
 
