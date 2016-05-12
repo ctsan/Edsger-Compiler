@@ -49,7 +49,6 @@ and ast_expr =
     | E_div   of ast_expr * ast_expr
     | E_mult of ast_expr * ast_expr
     | E_mod of ast_expr * ast_expr
-    | E_div of ast_expr * ast_expr
     | E_and of ast_expr * ast_expr
     | E_or of ast_expr * ast_expr
     | E_negate of ast_expr
@@ -63,9 +62,8 @@ and ast_expr =
     | E_gt of ast_expr * ast_expr
     | E_neq of ast_expr * ast_expr
     | E_eq of ast_expr * ast_expr
-    | E_neq of ast_expr * ast_expr
-    | E_neq of ast_expr * ast_expr
-    (* TODO More Here *)
+    | E_comma of ast_expr * ast_expr
+    (* TODO More Here (or not) *)
 ;;
 
 let ast_tree:ast_decl list option ref = ref None

@@ -1,6 +1,6 @@
 %{
-open Core.Std
 open NicePrint
+open Printf
 open Ast
 %}
 
@@ -49,12 +49,17 @@ open Ast
 
 %start program
 %type <unit> program
-%type <ast_decl list> declaration_list
-%type <ast_decl list> declaration_list_e
-%type <ast_decl> declaration
-%type <ast_decl list> more_declarators
+%type <unit> declaration_list
+/* %type <ast_decl list> declaration_list */
+%type <unit> declaration_list_e
+/* %type <ast_decl list> declaration_list_e */
+%type <unit> declaration
+//%type <ast_decl> declaration
+%type <unit> more_declarators
+//%type <ast_decl list> more_declarators
 %type <unit> ctype
-%type <int> pointer_asterisk_e 
+%type <unit> pointer_asterisk_e 
+//%type <int> pointer_asterisk_e 
 %type <unit> basic_type
 %type <unit> declarator
 %type <unit> parameter_list
@@ -65,14 +70,14 @@ open Ast
 %type <unit> else_part_e
 %type <unit> label_e
 %type <unit> id_e
-%type <unit> expression
+%type <ast_expr> expression
 %type <unit> expression_list
 %type <unit> expression_list_e
 %type <unit> constant_expression
 %type <unit> unary_operator
 %type <unit> unary_assignment
 %type <unit> binary_assignment
-
+%type <ast_expr> binary_operator
 %%
 
 program:
@@ -80,7 +85,7 @@ program:
         {
             eprintf_color Green "Passing Syntax :-) \n";
             eclear();
-            ast_tree := Some $1;
+            (*ast_tree := Some $1; *)
             () 
         }; 
 
@@ -191,28 +196,44 @@ id_e:
     ;
     
 expression:
-      T_id                                                           { ()}
-    | T_lparen expression T_rparen                                   { Printf.printf "hi\n"; ()}
-    | T_true                                                         { ()}
-    | T_false                                                        { ()}
-    | T_null                                                         { ()}
-    | T_int_const                                                    { ()}
+      T_id                                                           { E_int 0 }
+    | T_lparen expression T_rparen                                   { E_int 0}
+    | T_true                                                         { E_int 0}
+    | T_false                                                        { E_int 0}
+    | T_null                                                         { E_int 0}
+    | T_int_const                                                    { E_int 0}
     | T_char_const                                                   
-        { printf "Char Const\n" ; ()}
-    | T_double_const                                                 { ()}
-    | T_string                                                       { ()}
-    | T_id T_lparen expression_list_e  T_rparen                      { ()}
-    | expression T_lbrack expression T_rbrack                        { ()}
-    | unary_operator expression %prec UNARY                          { ()}
-    | expression binary_operator expression                          { ()}
-    | unary_assignment expression %prec T_dcr                        { ()}
-    | expression unary_assignment                                    { ()}
-    | expression binary_assignment expression %prec T_assign         { ()}
-    | T_lparen ctype T_rparen expression %prec CAST                  { ()}
-    | expression T_qmark expression T_colon expression %prec TERNARY { ()}
-    | T_new ctype %prec LOWEST                                       { ()}
-    | T_new ctype T_lbrack expression T_rbrack                       { ()}
-    | T_delete expression %prec COMMAND                              { ()}
+        { E_int 0}
+    | T_double_const                                                 { E_int 0}
+    | T_string                                                       { E_int 0}
+    | T_id T_lparen expression_list_e  T_rparen                      { E_int 0}
+    | expression T_lbrack expression T_rbrack                        { E_int 0}
+    | unary_operator expression %prec UNARY                          { E_int 0}
+    | e =  expression ;  op= binary_operator; e2 =expression                            
+        { match op with
+         |  E_mult (_,_) -> E_mult(e,e2)
+         | E_div (_,_) -> E_div (e,e2)
+         | E_mod (_,_) -> E_mod (e,e2)
+         | E_plus(_,_) -> E_plus(e,e2)
+         | E_minus (_,_) -> E_minus (e,e2)
+         | E_lt(_,_) -> E_lt(e,e2)
+         | E_gt (_,_) -> E_gt (e,e2)
+         | E_lteq(_,_) -> E_lteq(e,e2)
+         | E_gteq(_,_) -> E_gteq(e,e2)
+         | E_eq (_,_) -> E_eq (e,e2)
+         | E_neq(_,_) -> E_neq(e,e2)
+         | E_and(_,_) -> E_and(e,e2)
+         | E_or (_,_) -> E_or (e,e2)
+        | E_comma (_,_) -> E_comma (e,e2)
+        }
+    | unary_assignment expression %prec T_dcr                        { E_int 0}
+    | expression unary_assignment                                    { E_int 0}
+    | expression binary_assignment expression %prec T_assign         { E_int 0}
+    | T_lparen ctype T_rparen expression %prec CAST                  { E_int 0}
+    | expression T_qmark expression T_colon expression %prec TERNARY { E_int 0}
+    | T_new ctype %prec LOWEST                                       { E_int 0}
+    | T_new ctype T_lbrack expression T_rbrack                       { E_int 0}
+    | T_delete expression %prec COMMAND                              { E_int 0}
     ;
 
 expression_e:
@@ -243,20 +264,20 @@ unary_operator:
     ;
 
 %inline binary_operator:
-      T_times { ()}
-    | T_div   { ()}
-    | T_mod   { ()}
-    | T_plus  { ()}
-    | T_minus { ()}
-    | T_lt    { ()}
-    | T_gt    { ()}
-    | T_lteq  { ()}
-    | T_gteq  { ()}
-    | T_eq    { ()}
-    | T_neq   { ()}
-    | T_and   { ()}
-    | T_or    { ()}
-    | T_comma { ()}
+      T_times { E_mult (E_int 0,E_int 0) }
+    | T_div   { E_div (E_int 0,E_int 0)}
+    | T_mod   { E_mod ((E_int 0,E_int 0)) }
+    | T_plus  { E_plus (E_int 0,E_int 0) }
+    | T_minus { E_minus (E_int 0,E_int 0) }
+    | T_lt    { E_lt (E_int 0,E_int 0) }
+    | T_gt    { E_gt (E_int 0,E_int 0)}
+    | T_lteq  { E_lteq (E_int 0,E_int 0)}
+    | T_gteq  { E_gteq (E_int 0,E_int 0)}
+    | T_eq    { E_eq (E_int 0,E_int 0)}
+    | T_neq   { E_neq (E_int 0,E_int 0)}
+    | T_and   { E_and (E_int 0,E_int 0)}
+    | T_or    { E_or (E_int 0,E_int 0)}
+    | T_comma { E_comma (E_int 0,E_int 0)}
     ;
 
 unary_assignment:
