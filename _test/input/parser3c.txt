@@ -8,5 +8,6 @@ double another();
 
 int myfun() {
 	;;;
+    y = 4+9;
 }
 

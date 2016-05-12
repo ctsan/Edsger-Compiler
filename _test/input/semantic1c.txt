@@ -1,4 +1,5 @@
 // This is my First Program
-int y;
+int y, l;
 bool y, k, delta;
 double z[100];
+
