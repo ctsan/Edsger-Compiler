@@ -34,16 +34,17 @@ and ast_stmt =
     | S_break    of string option
     | S_return   of ast_expr option
 
-(**** Design-Choices >  
- * Edsger int  -> OCaml int   (even though in OCaml its 32/64bit, use that for temp-store)
- * E.bool -> OC.char  (since it is 8bits)
- * E.double -> OC.string (since it is 10bytes) ****)
-
 and ast_expr = 
-    | E_int    of int
-    | E_bool   of char
+	| E_id of string
+	| E_function_call of string * ast_expr list option 
+	(* Literals *)
+    | E_int    of string
+    | E_bool   of bool
     | E_char   of char
     | E_double of string
+	| E_string of string
+	| E_null
+	(* Operations *)
     | E_plus  of ast_expr * ast_expr
     | E_minus of ast_expr * ast_expr
     | E_div   of ast_expr * ast_expr
@@ -63,6 +64,7 @@ and ast_expr =
     | E_neq of ast_expr * ast_expr
     | E_eq of ast_expr * ast_expr
     | E_comma of ast_expr * ast_expr
+
     (* TODO More Here (or not) *)
 ;;
 

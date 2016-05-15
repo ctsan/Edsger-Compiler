@@ -1,6 +1,37 @@
 {
 open Parser
 exception Unexpected_character of char*int
+exception Bad_character_format of string
+
+(* Assuming there is a starting "'" character as well as an ending "'" *)
+
+let unwrap_str str = 
+    let open String in 
+    let old_size = length str in
+    sub str 1 (old_size-2)
+;;
+
+let getEdsgerCharacter str = 
+    let open String in 
+    let old_size = length str in
+    let ears_free_str = sub str 1 (old_size-2) in
+    match get ears_free_str 0 with
+    | '\\' ->
+          ( match get ears_free_str 1 with 
+            | 'x' -> 
+                let hex_friendly_str = "0x" ^ 
+                                      (sub ears_free_str 2 2)   
+                in  Char.chr @@ int_of_string hex_friendly_str
+            | '\\'-> '\\'
+            | '\'' -> '\''
+            | '"' -> '"'
+            | '0' -> Char.chr 0
+            | 't' -> '\t'
+            | 'n' -> '\n'
+            | 'r' -> '\r'
+            | _ -> raise (Bad_character_format str))
+    | plain_char -> plain_char
+
 } 
 
 let digit             = ['0'-'9']
@@ -12,7 +43,7 @@ let letter            = ['A'-'Z''a'-'z']
 let white             = [' ' '\t' '\r' '\n']
 let newline           = '\r' | '\n' | "\r\n"
 let notnewline        = [^ '\r' '\n' ]
-let const_char_inners = [^'\\' '\'' '\"']
+let const_char_inners = [^'\\' '\'' '"']
     | '\\'  ( '\''| '\\' | '"' | '\\' | '0' | 'n' | 'r' |'t'| ('x' hex_digit hex_digit))
 
 rule lexer = parse
@@ -35,10 +66,18 @@ rule lexer = parse
   | "double"  { T_double }
   | "bool"   { T_bool }
   | "char"   { T_char }
-  | '"' ([^'"']|'\\' '"')* '"'  { T_string }
-  | '\'' const_char_inners '\'' { T_char_const }
-  | int_const  { T_int_const }
-  | double_const  { T_double_const }
+  | '"' ([^'"']|'\\' '"')* '"'  
+      {
+        T_string (unwrap_str @@ Lexing.lexeme lexbuf) 
+      }
+
+  | '\'' const_char_inners '\'' 
+      {
+        let str = Lexing.lexeme lexbuf in
+        T_char_const ( getEdsgerCharacter str )
+      }
+  | int_const  { T_int_const (Lexing.lexeme lexbuf) }
+  | double_const  { T_double_const (Lexing.lexeme lexbuf)}
   | '='      { T_assign }
   | "+="     { T_plu_assign }
   | "-="     { T_min_assign }
