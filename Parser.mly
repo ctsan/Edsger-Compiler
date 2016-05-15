@@ -110,21 +110,13 @@ let construct_binary_operation typ arg1 arg2 =
 
 %start program
 %type <unit> program
-//%type <unit> declaration_list
-/* %type <ast_decl list> declaration_list */
-%type <unit> declaration_list_e
-/* %type <ast_decl list> declaration_list_e */
 %type <ast_decl> declaration
 %type <ast_type> ctype
 %type <int> pointer_asterisk_e 
 %type <ast_param list> parameter_list
-//%type <unit> parameter_list_e
 %type <ast_stmt> statement
-%type <unit> statement_list_e
-%type <unit> id_e
 %type <ast_expr> expression
 %type <ast_expr list> expression_list
-%type <ast_expr list option> expression_list_e
 %%
 
 program:
@@ -138,11 +130,6 @@ program:
 declaration_list:
        declaration_list declaration { $2::$1 }
      | declaration                  { $1::[] }
-     ;
-
-declaration_list_e:
-                        { ()}
-     | declaration_list { ()}
      ;
 
 declaration:
@@ -200,11 +187,6 @@ parameter:
     | ctype T_id        { P_byval ($1,$2)}
     ;
 
-parameter_list_e:
-                      {[]}
-     | parameter_list {$1}
-     ;
-
 %inline function_definition:
     result_type T_id T_lparen parameter_list? T_rparen T_lbrace
     declaration_list? statement* T_rbrace 
@@ -222,14 +204,10 @@ statement:
     (*-------------------- For Statement ----------------------*)
     | label_e T_for T_lparen expression? T_semicolon expression? T_semicolon
         expression? T_rparen statement  { S_for ($1,$4,$6,$8,$10)}
+    (*-------------------- Other Keywords *--------------------*)
     | T_continue T_id? T_semicolon      { S_continue $2}
     | T_break T_id? T_semicolon         { S_break $2}
     | T_return expression? T_semicolon  { S_return $2}
-    ;
-
-statement_list_e:
-                                 { ()}
-    | statement_list_e statement { ()}
     ;
 
 else_part_e:
@@ -242,11 +220,6 @@ label_e:
     | T_id T_colon { Some $1}
     ;
 
-id_e:
-           { ()}
-    | T_id { ()}
-    ;
-    
 expression:
       T_id                               { E_id $1 }
     (*--------------------  (x+y) * 3 ------------------------------*)
@@ -290,20 +263,11 @@ expression:
     | T_delete expression %prec COMMAND  { E_delete $2}
     ;
 
-expression_e:
-                  { ()}
-     | expression { ()}
-     ;
-
 expression_list:
       rest = expression_list ; T_comma ; new_expr = expression { new_expr::rest }
     | expression %prec LOWEST            { $1::[]}
     ;
 
-expression_list_e:
-                      { None }
-    | expression_list { Some $1 }
-    ;
 
 constant_expression: expression { $1 };
 
