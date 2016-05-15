@@ -47,10 +47,12 @@ Test: for ( i=19 ; i<19 && j>30 ; k++ ) {
 		for ( j=500; j<500 ; j+=3) {
 			sum /= 2;	
 			if (z==0)  { 
-				z=9;
+				z=-9;
 				break Test;
 			} else if (k==0) {
-				z=3;	
+				z=+3;	
+				z=&k;
+				z=!9;
 				break Test;
 			}
 		}
