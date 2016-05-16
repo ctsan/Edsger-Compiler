@@ -1,10 +1,13 @@
 open NicePrint
 open Core.Std
+open Ast
 
 let compile_channel channel = 
     let lexbuf = Lexing.from_channel channel in
     try
         Parser.program Lexer.lexer lexbuf; 
+        Semantic.count_top_level_decls !ast_tree;
+        Semantic.check !ast_tree;
         exit 0
     with 
         | Parsing.Parse_error | Parser.Error ->
@@ -15,6 +18,9 @@ let compile_channel channel =
                 was found at offset %d. Aborting..\n"
                 chr (Char.to_int chr) (pos); eclear();
             exit 1
+        | Semantic.NoMainFunction ->
+            eprintf_color Red "[3] `main` function missing :(\n"; eclear ();
+            exit 3
 
 (* Parse Flags and Provide Documentation for -help *) 
 let arguments = 
@@ -42,5 +48,3 @@ let command =
 
 let main =
         Command.run ~version:"0.1" command
-
-

@@ -123,7 +123,7 @@ program:
       declaration+ T_eof 
         {
             eprintf_color Green "Passing Syntax :-) \n";
-            eclear();
+            eclear(); 
             ast_tree := Some $1
         }; 
 

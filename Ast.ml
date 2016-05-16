@@ -1,5 +1,6 @@
 (* let vars = Array.create 26 0 *)
 
+
 (* Notes: voids can't be pointers. *)
 type ast_type = 
 	| Ty_int    of int
@@ -8,7 +9,7 @@ type ast_type =
 	| Ty_double of int
 	| Ty_void 
 	
-type ast_param = 
+and ast_param = 
     | P_byval of ast_type * string
 	| P_byref of ast_type * string
 
@@ -32,7 +33,7 @@ and ast_expr =
 	| E_function_call of string * ast_expr list option 
 	(*-- Literals --*)
     | E_int    of string 
-    | E_bool   of bool   
+    | E_bool   of bool    (*  -> BOOL *)
     | E_char   of char
     | E_double of string
 	| E_string of string
@@ -44,14 +45,14 @@ and ast_expr =
     | E_mult of ast_expr * ast_expr
     | E_mod of ast_expr * ast_expr
     | E_and of ast_expr * ast_expr
-    | E_or of ast_expr * ast_expr
-    | E_lteq of ast_expr * ast_expr
-    | E_gteq of ast_expr * ast_expr
-    | E_lt of ast_expr * ast_expr
-    | E_gt of ast_expr * ast_expr
-    | E_neq of ast_expr * ast_expr
-    | E_eq of ast_expr * ast_expr
-    | E_comma of ast_expr * ast_expr 
+    | E_or of ast_expr * ast_expr     (*  -> BOOL *)
+    | E_lteq of ast_expr * ast_expr   (*  -> BOOL *)
+    | E_gteq of ast_expr * ast_expr   (*  -> BOOL *)
+    | E_lt of ast_expr * ast_expr     (*  -> BOOL *)
+    | E_gt of ast_expr * ast_expr     (*  -> BOOL *)
+    | E_neq of ast_expr * ast_expr    (*  -> BOOL *)
+    | E_eq of ast_expr * ast_expr     (*  -> BOOL *)
+    | E_comma of ast_expr * ast_expr  (* (X,Y) -> Y *) 
 	(*-- Binary Operations --*)
 	| E_assign     of ast_expr * ast_expr
 	| E_mul_assign of ast_expr * ast_expr
