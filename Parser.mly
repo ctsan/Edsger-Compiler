@@ -173,10 +173,10 @@ declarator:
     ;
 
 %inline function_declaration:
-    result_type T_id T_lparen parameter_list? T_rparen T_semicolon 
+    rt = result_type; id = T_id;  T_lparen; par=parameter_list?; T_rparen; T_semicolon; 
         {
-            let total_parameters = get_size_of_param_list $4
-            in D_func_decl ($1,$2 ^ "_" ^ total_parameters ,$4) 
+            let total_parameters = get_size_of_param_list par
+            in D_func_decl (rt,id ^ "_" ^ total_parameters ,par) 
         }
     ;
 
@@ -196,11 +196,11 @@ parameter:
     ;
 
 %inline function_definition:
-    result_type T_id T_lparen parameter_list? T_rparen T_lbrace
-    declaration_list? statement* T_rbrace 
+    rt = result_type; id = T_id;  T_lparen; par=parameter_list?; T_rparen; T_lbrace;
+    derlst =declaration_list?; st =  statement*; T_rbrace;
         {
-            let total_parameters = get_size_of_param_list $4 in
-            D_func_def ($1,$2 ^ "_" ^ total_parameters,$4,$7,$8)
+            let total_parameters = get_size_of_param_list par in
+            D_func_def (rt,id ^ "_" ^ total_parameters,par,derlst,st)
         };
 
 statement:
