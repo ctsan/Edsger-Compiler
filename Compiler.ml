@@ -6,7 +6,7 @@ let compile_channel channel =
     let lexbuf = Lexing.from_channel channel in
     try
         Parser.program Lexer.lexer lexbuf; 
-        Semantic.count_top_level_decls !ast_tree;
+        (* Semantic.count_top_level_decls !ast_tree;*)
         Semantic.check !ast_tree;
         exit 0
     with 

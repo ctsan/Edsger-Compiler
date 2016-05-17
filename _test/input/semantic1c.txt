@@ -1,9 +1,8 @@
-// This is my First Program
-int y, l;
-bool y, k, delta;
-double z[100];
+bool k[5+9*5], delta,epsilon;
+double z;
 
-int test() {
-	k = 9+3;
-}
+int myfirst_fun(int x, char y);
+
+int myfirst_fun(int x, char y, int z);
+
 

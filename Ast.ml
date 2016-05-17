@@ -45,14 +45,14 @@ and ast_expr =
     | E_mult of ast_expr * ast_expr
     | E_mod of ast_expr * ast_expr
     | E_and of ast_expr * ast_expr
-    | E_or of ast_expr * ast_expr     (*  -> BOOL *)
-    | E_lteq of ast_expr * ast_expr   (*  -> BOOL *)
-    | E_gteq of ast_expr * ast_expr   (*  -> BOOL *)
-    | E_lt of ast_expr * ast_expr     (*  -> BOOL *)
-    | E_gt of ast_expr * ast_expr     (*  -> BOOL *)
-    | E_neq of ast_expr * ast_expr    (*  -> BOOL *)
-    | E_eq of ast_expr * ast_expr     (*  -> BOOL *)
-    | E_comma of ast_expr * ast_expr  (* (X,Y) -> Y *) 
+    | E_or of ast_expr * ast_expr   (*  -> BOOL *)
+    | E_lteq of ast_expr * ast_expr (*  -> BOOL *)
+    | E_gteq of ast_expr * ast_expr (*  -> BOOL *)
+    | E_lt of ast_expr * ast_expr   (*  -> BOOL *)
+    | E_gt of ast_expr * ast_expr   (*  -> BOOL *)
+    | E_neq of ast_expr * ast_expr  (*  -> BOOL *)
+    | E_eq of ast_expr * ast_expr   (*  -> BOOL *)
+    | E_comma of ast_expr * ast_expr(* (X,Y) -> Y *) 
 	(*-- Binary Operations --*)
 	| E_assign     of ast_expr * ast_expr
 	| E_mul_assign of ast_expr * ast_expr

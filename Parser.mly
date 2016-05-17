@@ -56,7 +56,12 @@ let construct_binary_operation typ arg1 arg2 =
      | T_and    -> E_and(arg1,arg2)
      | T_or     -> E_or (arg1,arg2)
      | T_comma  -> E_comma (arg1,arg2)
-     | _ -> raise UnexpectedType
+     | _ -> raise UnexpectedType;;
+
+ let get_size_of_param_list paramlist = 
+     match paramlist with
+     | Some lst -> string_of_int @@ List.length lst
+     | None -> "0";;
 %}
 
 %token <string>T_id
@@ -169,7 +174,10 @@ declarator:
 
 %inline function_declaration:
     result_type T_id T_lparen parameter_list? T_rparen T_semicolon 
-        { D_func_decl ($1,$2,$4) }
+        {
+            let total_parameters = get_size_of_param_list $4
+            in D_func_decl ($1,$2 ^ "_" ^ total_parameters ,$4) 
+        }
     ;
 
 %inline result_type:
@@ -190,8 +198,10 @@ parameter:
 %inline function_definition:
     result_type T_id T_lparen parameter_list? T_rparen T_lbrace
     declaration_list? statement* T_rbrace 
-        { D_func_def ($1,$2,$4,$7,$8)}
-    ;
+        {
+            let total_parameters = get_size_of_param_list $4 in
+            D_func_def ($1,$2 ^ "_" ^ total_parameters,$4,$7,$8)
+        };
 
 statement:
      T_semicolon                                              { S_None}

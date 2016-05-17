@@ -5,8 +5,7 @@ type typ = TYPE_none
          | TYPE_bool
          | TYPE_double
          | TYPE_array of
-             typ *
-             int
+             typ * int
          | TYPE_proc
 
 let rec sizeOfType t =

@@ -101,77 +101,92 @@ let printSymbolTable () =
   printf "%a----------------------------------------\n"
     scope !currentScope
 
-(* check_program tree *)
-let rec count_top_level_decls ast =
-	match ast with
-	| None      -> raise (Terminate "AST is empty")
-	| Some tree -> 
-	let rec aux = (function
-		| [] -> Printf.printf "-- declarations printed --\n"
-		| hd::tl -> 
-				((match hd with
-					| D_var_decl (_,_) -> Printf.printf "- var decl\n"
-					| D_func_decl (_,_,_) -> Printf.printf "- fun decl\n"
-					| D_func_def (_,name,_,_,_) -> Printf.printf "- fun def %s\n" name);
-				aux tl)) 
-	in aux tree
+(* +------------------------------------------------------------------------------+ *)
+(* | Assertion of Return Types Through Lookup Tables                              | *)
+(* +------------------------------------------------------------------------------+ *)
+
+(* TODO: needs refinement, for now check if int *)
+let rec eval_const_int = function
+	| E_int x -> int_of_string x 
+	(*TODO:Tranform the parsing of int to Edsger Specific *)
+	| E_plus (x,y) ->((eval_const_int x)+(eval_const_int y))
+	| E_minus (x,y) -> ((eval_const_int x)-(eval_const_int y))
+	| E_div (x,y)  -> ((eval_const_int x)/(eval_const_int y))
+	| E_mult (x,y) ->((eval_const_int x)*(eval_const_int y))
+	| E_mod (x,y) -> ((eval_const_int x)mod(eval_const_int y)) 
+	| _ -> raise (Terminate "Not Constant Int Expression")
+
+let map_to_symbol_table_type = function
+	| Ty_int x -> TYPE_int
+	| Ty_char x -> TYPE_char
+	| Ty_bool x -> TYPE_bool 
+	| Ty_double x -> TYPE_double
+	| _ -> raise (Terminate "Bad Type")
 
 let rec check ast =
 	match ast with
 	| None      -> raise (Terminate "AST is empty")
-	| Some tree -> check_program tree
+	| Some tree -> (
+		initSymbolTable 256;
+		openScope();
+		check_all_decls tree;
+		printSymbolTable())
 
-and check_program decls =
-	initSymbolTable 256;
-	printSymbolTable ();
-	openScope();
-	printSymbolTable ();
-	let i1 = newVariable (id_make "i1") TYPE_int true in
-	let i2 = newVariable (id_make "i2") TYPE_int true in
-	ignore i1; ignore i2;
-	printSymbolTable ();
-	let p = newFunction (id_make "pr") true in
-	openScope ();
-	printSymbolTable ();
-	let p1 = newParameter (id_make "p1") TYPE_int  PASS_BY_VALUE p true in
-	let p2 = newParameter (id_make "p2") TYPE_int  PASS_BY_VALUE p true in
-	let p3 = newParameter (id_make "p3") TYPE_char PASS_BY_REFERENCE p true in
-	endFunctionHeader p TYPE_proc;
-	ignore p1; ignore p2; ignore p3;
-	printSymbolTable ();
-	let b1 = newVariable (id_make "b1") TYPE_bool true in
-	ignore b1;
-	let i1 = newVariable (id_make "i1") TYPE_int true in
-	ignore i1;
-	printSymbolTable ();
-	let i2 = lookupEntry (id_make "i2") LOOKUP_ALL_SCOPES true in
-	let i1 = lookupEntry (id_make "i1") LOOKUP_ALL_SCOPES true in
-	ignore i2; ignore i1;
-	let t1 = newTemporary TYPE_int in
-	let t2 = newTemporary TYPE_char in
-	ignore t1; ignore t2;
-	printSymbolTable ();
-	closeScope ();
-	printSymbolTable ();
-	let p = newFunction (id_make "f") true in
-	openScope ();
-	printSymbolTable ();
-	let x = newParameter (id_make "x") TYPE_int PASS_BY_VALUE p true in
-	let y = newParameter (id_make "y") TYPE_char PASS_BY_REFERENCE p true in
-	endFunctionHeader p TYPE_int;
-	ignore x; ignore y;
-	printSymbolTable ();
-	closeScope ();
-	printSymbolTable ();
-	let t1 = newTemporary TYPE_int in
-	let t2 = newTemporary TYPE_int in
-	ignore t1; ignore t2;
-	printSymbolTable ();
-	closeScope ();
-	printSymbolTable ()
+and check_all_decls decls =
+	List.iter decls check_a_declaration 
 
-(* let _ = List.fold_left *) 
-(* 			~f:check_decls ~init:[] decls in () *) 
+and check_a_declaration declaration = 
+	(match declaration with
+
+    (***********************************************)
+    (*** VARIABLES DECLARATION                   ***)
+    (***********************************************)
+
+	| D_var_decl (typ,defines) -> 
+		let sym_tbl_type = map_to_symbol_table_type typ in
+		let _ = printf "- var definition\n" in 
+		List.iter 
+			defines (* Check and Register Definitions*) 
+			(function 
+			| (id,Some expr) -> 
+				let dmy = 
+					newVariable (id_make id)
+						(TYPE_array (sym_tbl_type,eval_const_int expr))
+						true 
+				in ignore dmy; ()
+			| (id,None) -> 
+				let dmy = newVariable (id_make id)
+					sym_tbl_type true 
+				in ignore dmy; ()
+			) 
+
+    (***********************************************)
+    (*** FUNCTION DECLARATION                    ***)
+    (***********************************************)
+
+	| D_func_decl (typ,id,params) -> 
+		begin 
+			printf "- fun decl %s\n" id;
+			let symtbl_ret_type = map_to_symbol_table_type typ in
+			let brand_new_fun = newFunction (id_make id) true in
+			openScope ();
+			(match params with
+			| Some param_list -> 
+				(List.iter param_list
+				(function 
+					| P_byval (typ, id) -> let dmy = newParameter (id_make id) (map_to_symbol_table_type typ)  PASS_BY_VALUE brand_new_fun  true in ignore dmy;() 
+					| P_byref (typ, id) -> let dmy = newParameter (id_make id)  (map_to_symbol_table_type typ) PASS_BY_REFERENCE brand_new_fun  true  in ignore dmy; ()
+				))
+			| None -> ());
+			endFunctionHeader brand_new_fun symtbl_ret_type;
+			closeScope ();
+		end
+    (***********************************************)
+    (*** FUNCTION DEFINITION                     ***)
+    (***********************************************)
+
+	| D_func_def (_,id,_,_,_) -> printf "- fun def %s\n" id)
+	
 
 (* Params: Accumulated-Declarations, New Declaration *)
 (* and check_decls acc_decls new_decl = *) 
@@ -181,3 +196,54 @@ and check_program decls =
 (* 	| D_func_decl (ret_type,fun_id,params) -> *)
 (* 		let params =List.fold_left  ~f:(*Function:Add Fun Decl*) *) 
 (* 									~init:[] *)
+
+(****************************)
+(* and check_program decls = *)
+(* 	initSymbolTable 256; *)
+(* 	printSymbolTable (); *)
+(* 	openScope(); *)
+(* 	printSymbolTable (); *)
+(* 	let i1 = newVariable (id_make "i1") TYPE_int true in *)
+(* 	let i2 = newVariable (id_make "i2") TYPE_int true in *)
+(* 	ignore i1; ignore i2; *)
+(* 	printSymbolTable (); *)
+(* 	let p = newFunction (id_make "pr") true in *)
+(* 	openScope (); *)
+(* 	printSymbolTable (); *)
+(* 	let p1 = newParameter (id_make "p1") TYPE_int  PASS_BY_VALUE p true in *)
+(* 	let p2 = newParameter (id_make "p2") TYPE_int  PASS_BY_VALUE p true in *)
+(* 	let p3 = newParameter (id_make "p3") TYPE_char PASS_BY_REFERENCE p true in *)
+(* 	endFunctionHeader p TYPE_proc; *)
+(* 	ignore p1; ignore p2; ignore p3; *)
+(* 	printSymbolTable (); *)
+(* 	let b1 = newVariable (id_make "b1") TYPE_bool true in *)
+(* 	ignore b1; *)
+(* 	let i1 = newVariable (id_make "i1") TYPE_int true in *)
+(* 	ignore i1; *)
+(* 	printSymbolTable (); *)
+(* 	let i2 = lookupEntry (id_make "i2") LOOKUP_ALL_SCOPES true in *)
+(* 	let i1 = lookupEntry (id_make "i1") LOOKUP_ALL_SCOPES true in *)
+(* 	ignore i2; ignore i1; *)
+(* 	let t1 = newTemporary TYPE_int in *)
+(* 	let t2 = newTemporary TYPE_char in *)
+(* 	ignore t1; ignore t2; *)
+(* 	printSymbolTable (); *)
+(* 	closeScope (); *)
+(* 	printSymbolTable (); *)
+(* 	let p = newFunction (id_make "f") true in *)
+(* 	openScope (); *)
+(* 	printSymbolTable (); *)
+(* 	let x = newParameter (id_make "x") TYPE_int PASS_BY_VALUE p true in *)
+(* 	let y = newParameter (id_make "y") TYPE_char PASS_BY_REFERENCE p true in *)
+(* 	endFunctionHeader p TYPE_int; *)
+(* 	ignore x; ignore y; *)
+(* 	printSymbolTable (); *)
+(* 	closeScope (); *)
+(* 	printSymbolTable (); *)
+(* 	let t1 = newTemporary TYPE_int in *)
+(* 	let t2 = newTemporary TYPE_int in *)
+(* 	ignore t1; ignore t2; *)
+(* 	printSymbolTable (); *)
+(* 	closeScope (); *)
+(* 	printSymbolTable () *)
+
