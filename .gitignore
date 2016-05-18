@@ -13,3 +13,6 @@ _build/
 # Vim Backup files / OS-specific files
 *.swp
 *.DS_STORE
+
+# Compiler executable
+Compiler

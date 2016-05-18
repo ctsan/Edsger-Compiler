@@ -7,6 +7,7 @@ type typ = TYPE_none
          | TYPE_array of
              typ * int
          | TYPE_proc
+         | TYPE_null
 
 let rec sizeOfType t =
    match t with
@@ -24,4 +25,10 @@ let rec sizeOfType t =
 let rec equalType t1 t2 =
    match t1, t2 with
    | TYPE_array (et1, sz1), TYPE_array (et2, sz2) -> equalType et1 et2
+   | et1, TYPE_null when et1 <> TYPE_null         -> equalType t2 t1
+   | TYPE_null, TYPE_null                         -> true
+   | TYPE_null, TYPE_int n when n > 0             -> true
+   | TYPE_null, TYPE_bool n when n > 0            -> true
+   | TYPE_null, TYPE_char n when n > 0            -> true
+   | TYPE_null, TYPE_double n when n > 0          -> true
    | _                                            -> t1 = t2
