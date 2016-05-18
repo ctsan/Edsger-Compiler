@@ -125,23 +125,25 @@ let lookup_type str =
     match i1.entry_info with 
         | ENTRY_function inf  -> inf.function_result
         | ENTRY_variable inf  -> inf.variable_type
+        | ENTRY_parameter inf -> inf.parameter_type
+        | ENTRY_temporary inf -> inf.temporary_type
         | _ -> raise (Terminate "Bad lookup") 
 
-let addr_of_point = function
+let rec addr_of_point = function
     | TYPE_int x        -> TYPE_int (x+1)
     | TYPE_char x       -> TYPE_char (x+1)
     | TYPE_bool x       -> TYPE_bool (x+1)
     | TYPE_double x     -> TYPE_double (x+1)
-    | TYPE_array (x,y)  -> TYPE_array (x,y+1)
+    | TYPE_array (x,y)  -> TYPE_array (addr_of_point x,y) (* ??? *)
     | TYPE_null         -> TYPE_null
     | _                 -> raise (Terminate "bad addr type")
 
-let deref_expr = function
+let rec deref_expr = function
     | TYPE_int x when x>0           -> TYPE_int (x-1)
     | TYPE_char x when x>0          -> TYPE_char (x-1)
     | TYPE_bool x when x>0          -> TYPE_bool (x-1)
     | TYPE_double x when x>0        -> TYPE_double (x-1)
-    | TYPE_array (x,y) when y>0     -> TYPE_array (x,y-1)
+    | TYPE_array (x,y)              -> TYPE_array (deref_expr x,y)
     | _                             -> raise (Terminate "deref non-pointer")
 
 
@@ -157,13 +159,14 @@ let rec eval_const_int = function
 	| _ -> raise (Terminate "Not Constant Int Expression")
 
 let rec eval_expr = function
-    | E_function_call (x,_) -> lookup_type x
+    | E_function_call (x,l) -> lookup_type x
+    | E_id str -> lookup_type str
     | E_int _ -> TYPE_int 0
     | E_bool _ -> TYPE_bool 0
     | E_char _ -> TYPE_char 0
     | E_double _ -> TYPE_double 0
- (* | E_string _ -> ??? *)
-    | E_null -> TYPE_null (* De 8eloume kai tetoio? *)
+    | E_string x -> TYPE_array (TYPE_char 0, String.length x)
+    | E_null -> TYPE_null 
     | E_plus (x,y) -> check_eval_ar_op (x,y)
     | E_minus (x,y) -> check_eval_ar_op (x,y)
     | E_div (x,y) -> check_eval_ar_op (x,y)
@@ -193,12 +196,11 @@ let rec eval_expr = function
     | E_decr_bef x -> TYPE_int 0
     | E_incr_aft x -> TYPE_int 0
     | E_decr_aft x -> TYPE_int 0
-    | E_array_access (x,y) -> eval_expr y (* I have no idea what im doing vol 1231*)
+    | E_array_access (x,y) -> eval_expr x 
     | E_delete x -> eval_expr x
     | E_new (x, _) -> map_to_symbol_table_type x 
     | E_cast (x, _) -> map_to_symbol_table_type x 
     | E_ternary_op (_, _, z) -> eval_expr z 
-    | _ -> raise (Terminate "Bad expr type")
 
 (* Doesn't utilize number of pointers yet, have that in mind *) 
 (* to improve data-types of hash table *) 
@@ -207,7 +209,6 @@ and check_eval_ar_op = function
                     raise (Terminate "Addition arguments don't match")
                else 
                     eval_expr x
-
 
 let def_func_head typ id params ~forward=
 	let symtbl_ret_type = map_to_symbol_table_type typ in
