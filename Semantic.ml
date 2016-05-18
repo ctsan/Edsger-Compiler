@@ -36,6 +36,8 @@ let rec pretty_typ ppf typ =
         fprintf ppf " []"
   | TYPE_void ->
       fprintf ppf "proc"
+  | TYPE_null ->
+      fprintf ppf "null pointer"
 
 let pretty_mode ppf mode =
   match mode with
@@ -118,6 +120,33 @@ let map_to_symbol_table_type = function
 	| Ty_double n -> TYPE_double n
 	| _ -> raise (Terminate "Bad Type")
 
+let lookup_type str = 
+        let i1 = lookupEntry (id_make str) LOOKUP_ALL_SCOPES true in
+    match i1.entry_info with 
+        | ENTRY_function inf  -> inf.function_result
+        | ENTRY_variable inf  -> inf.variable_type
+        | ENTRY_parameter inf -> inf.parameter_type
+        | ENTRY_temporary inf -> inf.temporary_type
+        | _ -> raise (Terminate "Bad lookup") 
+
+let rec addr_of_point = function
+    | TYPE_int x        -> TYPE_int (x+1)
+    | TYPE_char x       -> TYPE_char (x+1)
+    | TYPE_bool x       -> TYPE_bool (x+1)
+    | TYPE_double x     -> TYPE_double (x+1)
+    | TYPE_array (x,y)  -> TYPE_array (addr_of_point x,y) (* ??? *)
+    | TYPE_null         -> TYPE_null
+    | _                 -> raise (Terminate "bad addr type")
+
+let rec deref_expr = function
+    | TYPE_int x when x>0           -> TYPE_int (x-1)
+    | TYPE_char x when x>0          -> TYPE_char (x-1)
+    | TYPE_bool x when x>0          -> TYPE_bool (x-1)
+    | TYPE_double x when x>0        -> TYPE_double (x-1)
+    | TYPE_array (x,y)              -> TYPE_array (deref_expr x,y)
+    | _                             -> raise (Terminate "deref non-pointer")
+
+
 (* TODO: needs refinement, for now check if int *)
 let rec eval_const_int = function
 	| E_int x -> int_of_string x 
@@ -129,59 +158,57 @@ let rec eval_const_int = function
 	| E_mod (x,y) -> ((eval_const_int x)mod(eval_const_int y)) 
 	| _ -> raise (Terminate "Not Constant Int Expression")
 
-(* let rec eval_expr = function *)
-(*     | E_function_call (ret_type,_) -> ret_type *)
-(*     | E_int _ -> TYPE_int *)
-(*     | E_bool _ -> TYPE_bool *)
-(*     | E_char _ -> TYPE_char *)
-(*     | E_double _ -> TYPE_double *)
-(*  (1* | E_string _ -> ??? *1) *)
-(*     | E_null -> TYPE_pointer (1* De 8eloume kai tetoio? *1) *)
-(*     | E_plus x -> check_eval_ar_op x *)
-(*     | E_minus x -> check_eval_ar_op x *)
-(*     | E_div x -> check_eval_ar_op x *)
-(*     | E_mult x -> check_eval_ar_op x *)
-(*     | E_mod (x,y) -> TYPE_int *)
-(*     | E_and _ -> TYPE_bool *)
-(*     | E_or _ -> TYPE_bool *)
-(*     | E_lteq _ -> TYPE_bool *)
-(*     | E_gteq _ -> TYPE_bool *)
-(*     | E_lt _ -> TYPE_bool *)
-(*     | E_gt _ -> TYPE_bool *)
-(*     | E_neq _ -> TYPE_bool *)
-(*     | E_eq _ -> TYPE_bool *)
-(*     | E_comma (_,y) -> eval_expr y *)
-(*     | E_assign (_,y) -> eval_expr y *)
-(*     | E_mul_assign (_,y) -> eval_expr y (*o elegxos gia lvalues staristera pou? *1) *)
-(*     | E_div_assign (_,y) -> eval_expr y *)
-(*     | E_mod_assign (_,_) -> TYPE_int *)
-(*     | E_plu_assign (_,y) -> eval_expr y *)
-(*     | E_min_assign (_,y) -> eval_expr y *)
-(*     | E_negate _ -> TYPE_bool *)
-(*     | E_uplus x -> eval_expr x *)
-(*     | E_uminus x -> eval_expr x *)
-(*     | E_addr x -> TYPE_pointer (1* ksana ??? *1) *)
-(*     | E_deref x -> eval_address x (1* ??? *1) *)
-(*     | E_incr_bef x -> TYPE_int *)
-(*     | E_decr_bef x -> TYPE_int *)
-(*     | E_incr_aft x -> TYPE_int *)
-(*     | E_decr_aft x -> TYPE_int *)
-(*     | E_array_access (x,y) -> eval_expr y (1* I have no idea what im doing vol 1231*) *)
-(*     | E_delete _ -> TYPE_none *)
-(*     | E_new (x, _) -> map_to_symbol_table_type x *) 
-(*     | E_cast (x, _) -> map_to_symbol_table_type x *) 
-(*     | E_ternary_op (_, _, z) -> eval_expr z *) 
-(*     | _ -> raise (Terminate "Bad expr type") *)
+let rec eval_expr = function
+    | E_function_call (x,l) -> lookup_type x
+    | E_id str -> lookup_type str
+    | E_int _ -> TYPE_int 0
+    | E_bool _ -> TYPE_bool 0
+    | E_char _ -> TYPE_char 0
+    | E_double _ -> TYPE_double 0
+    | E_string x -> TYPE_array (TYPE_char 0, String.length x)
+    | E_null -> TYPE_null 
+    | E_plus (x,y) -> check_eval_ar_op (x,y)
+    | E_minus (x,y) -> check_eval_ar_op (x,y)
+    | E_div (x,y) -> check_eval_ar_op (x,y)
+    | E_mult (x,y) -> check_eval_ar_op (x,y)
+    | E_mod (x,y) -> TYPE_int 0
+    | E_and _ -> TYPE_bool 0
+    | E_or _ -> TYPE_bool 0
+    | E_lteq _ -> TYPE_bool 0
+    | E_gteq _ -> TYPE_bool 0
+    | E_lt _ -> TYPE_bool 0
+    | E_gt _ -> TYPE_bool 0
+    | E_neq _ -> TYPE_bool 0
+    | E_eq _ -> TYPE_bool 0
+    | E_comma (_,y) -> eval_expr y
+    | E_assign (_,y) -> eval_expr y
+    | E_mul_assign (_,y) -> eval_expr y (*o elegxos gia lvalues staristera pou? *)
+    | E_div_assign (_,y) -> eval_expr y
+    | E_mod_assign (_,_) -> TYPE_int 0
+    | E_plu_assign (_,y) -> eval_expr y
+    | E_min_assign (_,y) -> eval_expr y
+    | E_negate _ -> TYPE_bool 0
+    | E_uplus x -> eval_expr x
+    | E_uminus x -> eval_expr x
+    | E_addr x ->  addr_of_point (eval_expr x)
+    | E_deref x -> deref_expr (eval_expr x)
+    | E_incr_bef x -> TYPE_int 0
+    | E_decr_bef x -> TYPE_int 0
+    | E_incr_aft x -> TYPE_int 0
+    | E_decr_aft x -> TYPE_int 0
+    | E_array_access (x,y) -> eval_expr x 
+    | E_delete x -> eval_expr x
+    | E_new (x, _) -> map_to_symbol_table_type x 
+    | E_cast (x, _) -> map_to_symbol_table_type x 
+    | E_ternary_op (_, _, z) -> eval_expr z 
 
 (* Doesn't utilize number of pointers yet, have that in mind *) 
 (* to improve data-types of hash table *) 
-(* and check_eval_ar_op = function *)
-(*     | (x,y) -> if (eval_expr x) <> (eval_expr x) then *)
-(*                     raise (Terminate "Addition arguments don't match") *)
-(*                else *) 
-(*                     eval_expr x *)
-(*     | _ -> raise (Terminate "Bad arithmetic operation type") *)
-
+and check_eval_ar_op = function
+    | (x,y) -> if (eval_expr x) <> (eval_expr x) then
+                    raise (Terminate "Addition arguments don't match")
+               else 
+                    eval_expr x
 
 let def_func_head typ id params ~forward=
 	let symtbl_ret_type = map_to_symbol_table_type typ in
@@ -336,16 +363,6 @@ and eval_expr = function
 	| _ -> TYPE_bool 0;
 	
 	
-
-(* Params: Accumulated-Declarations, New Declaration *)
-(* and check_decls acc_decls new_decl = *) 
-(* 	match new_decl with *)
-(* 	| D_var_decl (defed_type,vars) -> *)
-(* 		List.iter (*Function:Add Variable of type defed_type*) vars *)
-(* 	| D_func_decl (ret_type,fun_id,params) -> *)
-(* 		let params =List.fold_left  ~f:(*Function:Add Fun Decl*) *) 
-(* 									~init:[] *)
-
 (****************************)
 (* and check_program decls = *)
 (* 	initSymbolTable 256; *)
