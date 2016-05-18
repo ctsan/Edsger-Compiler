@@ -155,9 +155,9 @@ let rec eval_expr = function
     | E_decr_aft x -> TYPE_int
     | E_array_access (x,y) -> eval_expr y (* I have no idea what im doing vol 1231*)
     | E_delete _ -> TYPE_none
-    | E_new (x, y) -> x (* vevaia den einai idio type opote ki ayto la8os *)
-    | E_cast (x, _) -> x (*to idio*)
-    | E_ternary_op (x, y, z) -> eval_expr x (* no idea whats that *)
+    | E_new (x, _) -> map_to_symbol_table_type x 
+    | E_cast (x, _) -> map_to_symbol_table_type x 
+    | E_ternary_op (_, _, z) -> eval_expr z 
     | _ -> raise (Terminate "Bad expr type")
 
 and check_eval_ar_op = function
