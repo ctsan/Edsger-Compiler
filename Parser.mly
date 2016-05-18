@@ -138,13 +138,13 @@ declaration_list:
      ;
 
 declaration:
-      variable_declaration { $1 }
-    | function_declaration { $1 }
-    | function_definition  { $1 }
+    vd = variable_declaration; { vd }
+     | fd = function_declaration; { fd }
+    | fd = function_definition;  { fd }
     ;
 
 %inline variable_declaration:
-    | ctype more_declarators T_semicolon  { D_var_decl ($1,$2) }
+     | ct = ctype; md = more_declarators; T_semicolon  { D_var_decl (ct,md) }
     ;
 
 more_declarators:
@@ -181,7 +181,7 @@ declarator:
     ;
 
 %inline result_type:
-      ctype  { $1}
+    ct = ctype; { ct }
     | T_void { Ty_void }
     ;
 

@@ -111,6 +111,12 @@ let printSymbolTable () =
 (* | Assertion of Return Types Through Lookup Tables                              | *)
 (* +------------------------------------------------------------------------------+ *)
 
+let map_to_symbol_table_type = function
+	| Ty_int n -> TYPE_int n
+	| Ty_char n -> TYPE_char n
+	| Ty_bool n -> TYPE_bool n
+	| Ty_double n -> TYPE_double n
+	| _ -> raise (Terminate "Bad Type")
 
 (* TODO: needs refinement, for now check if int *)
 let rec eval_const_int = function
@@ -123,14 +129,59 @@ let rec eval_const_int = function
 	| E_mod (x,y) -> ((eval_const_int x)mod(eval_const_int y)) 
 	| _ -> raise (Terminate "Not Constant Int Expression")
 
+let rec eval_expr = function
+    | E_function_call (ret_type,_) -> ret_type
+    | E_int _ -> TYPE_int
+    | E_bool _ -> TYPE_bool
+    | E_char _ -> TYPE_char
+    | E_double _ -> TYPE_double
+ (* | E_string _ -> ??? *)
+    | E_null -> TYPE_pointer (* De 8eloume kai tetoio? *)
+    | E_plus x -> check_eval_ar_op x
+    | E_minus x -> check_eval_ar_op x
+    | E_div x -> check_eval_ar_op x
+    | E_mult x -> check_eval_ar_op x
+    | E_mod (x,y) -> TYPE_int
+    | E_and _ -> TYPE_bool
+    | E_or _ -> TYPE_bool
+    | E_lteq _ -> TYPE_bool
+    | E_gteq _ -> TYPE_bool
+    | E_lt _ -> TYPE_bool
+    | E_gt _ -> TYPE_bool
+    | E_neq _ -> TYPE_bool
+    | E_eq _ -> TYPE_bool
+    | E_comma (_,y) -> eval_expr y
+    | E_assign (_,y) -> eval_expr y
+    | E_mul_assign (_,y) -> eval_expr y (*o elegxos gia lvalues staristera pou? *)
+    | E_div_assign (_,y) -> eval_expr y
+    | E_mod_assign (_,_) -> TYPE_int
+    | E_plu_assign (_,y) -> eval_expr y
+    | E_min_assign (_,y) -> eval_expr y
+    | E_negate _ -> TYPE_bool
+    | E_uplus x -> eval_expr x
+    | E_uminus x -> eval_expr x
+    | E_addr x -> TYPE_pointer (* ksana ??? *)
+    | E_deref x -> eval_address x (* ??? *)
+    | E_incr_bef x -> TYPE_int
+    | E_decr_bef x -> TYPE_int
+    | E_incr_aft x -> TYPE_int
+    | E_decr_aft x -> TYPE_int
+    | E_array_access (x,y) -> eval_expr y (* I have no idea what im doing vol 1231*)
+    | E_delete _ -> TYPE_none
+    | E_new (x, _) -> map_to_symbol_table_type x 
+    | E_cast (x, _) -> map_to_symbol_table_type x 
+    | E_ternary_op (_, _, z) -> eval_expr z 
+    | _ -> raise (Terminate "Bad expr type")
+
 (* Doesn't utilize number of pointers yet, have that in mind *) 
 (* to improve data-types of hash table *) 
-let map_to_symbol_table_type = function
-	| Ty_int n -> TYPE_int n
-	| Ty_char n -> TYPE_char n
-	| Ty_bool n -> TYPE_bool n
-	| Ty_double n -> TYPE_double n
-	| _ -> raise (Terminate "Bad Type")
+and check_eval_ar_op = function
+    | (x,y) -> if (eval_expr x) <> (eval_expr x) then
+                    raise (Terminate "Addition arguments don't match")
+               else 
+                    eval_expr x
+    | _ -> raise (Terminate "Bad arithmetic operation type")
+
 
 let def_func_head typ id params ~forward=
 	let symtbl_ret_type = map_to_symbol_table_type typ in
