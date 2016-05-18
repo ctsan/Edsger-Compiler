@@ -36,6 +36,8 @@ let rec pretty_typ ppf typ =
         fprintf ppf " []"
   | TYPE_proc ->
       fprintf ppf "proc"
+  | TYPE_null ->
+      fprintf ppf "null pointer"
 
 let pretty_mode ppf mode =
   match mode with
@@ -100,7 +102,7 @@ let printSymbolTable () =
           fprintf ppf "<impossible>\n"
     end in
   let scope ppf scp =
-    if scp.sco_nesting == 0 then
+    if scp.sco_nesting = 0 then
       fprintf ppf "no scope\n"
     else
       walk ppf scp in
@@ -118,6 +120,31 @@ let map_to_symbol_table_type = function
 	| Ty_double n -> TYPE_double n
 	| _ -> raise (Terminate "Bad Type")
 
+let lookup_type str = 
+        let i1 = lookupEntry (id_make str) LOOKUP_ALL_SCOPES true in
+    match i1.entry_info with 
+        | ENTRY_function inf  -> inf.function_result
+        | ENTRY_variable inf  -> inf.variable_type
+        | _ -> raise (Terminate "Bad lookup") 
+
+let addr_of_point = function
+    | TYPE_int x        -> TYPE_int (x+1)
+    | TYPE_char x       -> TYPE_char (x+1)
+    | TYPE_bool x       -> TYPE_bool (x+1)
+    | TYPE_double x     -> TYPE_double (x+1)
+    | TYPE_array (x,y)  -> TYPE_array (x,y+1)
+    | TYPE_null         -> TYPE_null
+    | _                 -> raise (Terminate "bad addr type")
+
+let deref_expr = function
+    | TYPE_int x when x>0           -> TYPE_int (x-1)
+    | TYPE_char x when x>0          -> TYPE_char (x-1)
+    | TYPE_bool x when x>0          -> TYPE_bool (x-1)
+    | TYPE_double x when x>0        -> TYPE_double (x-1)
+    | TYPE_array (x,y) when y>0     -> TYPE_array (x,y-1)
+    | _                             -> raise (Terminate "deref non-pointer")
+
+
 (* TODO: needs refinement, for now check if int *)
 let rec eval_const_int = function
 	| E_int x -> int_of_string x 
@@ -130,44 +157,44 @@ let rec eval_const_int = function
 	| _ -> raise (Terminate "Not Constant Int Expression")
 
 let rec eval_expr = function
-    | E_function_call (ret_type,_) -> ret_type
-    | E_int _ -> TYPE_int
-    | E_bool _ -> TYPE_bool
-    | E_char _ -> TYPE_char
-    | E_double _ -> TYPE_double
+    | E_function_call (x,_) -> lookup_type x
+    | E_int _ -> TYPE_int 0
+    | E_bool _ -> TYPE_bool 0
+    | E_char _ -> TYPE_char 0
+    | E_double _ -> TYPE_double 0
  (* | E_string _ -> ??? *)
-    | E_null -> TYPE_pointer (* De 8eloume kai tetoio? *)
-    | E_plus x -> check_eval_ar_op x
-    | E_minus x -> check_eval_ar_op x
-    | E_div x -> check_eval_ar_op x
-    | E_mult x -> check_eval_ar_op x
-    | E_mod (x,y) -> TYPE_int
-    | E_and _ -> TYPE_bool
-    | E_or _ -> TYPE_bool
-    | E_lteq _ -> TYPE_bool
-    | E_gteq _ -> TYPE_bool
-    | E_lt _ -> TYPE_bool
-    | E_gt _ -> TYPE_bool
-    | E_neq _ -> TYPE_bool
-    | E_eq _ -> TYPE_bool
+    | E_null -> TYPE_null (* De 8eloume kai tetoio? *)
+    | E_plus (x,y) -> check_eval_ar_op (x,y)
+    | E_minus (x,y) -> check_eval_ar_op (x,y)
+    | E_div (x,y) -> check_eval_ar_op (x,y)
+    | E_mult (x,y) -> check_eval_ar_op (x,y)
+    | E_mod (x,y) -> TYPE_int 0
+    | E_and _ -> TYPE_bool 0
+    | E_or _ -> TYPE_bool 0
+    | E_lteq _ -> TYPE_bool 0
+    | E_gteq _ -> TYPE_bool 0
+    | E_lt _ -> TYPE_bool 0
+    | E_gt _ -> TYPE_bool 0
+    | E_neq _ -> TYPE_bool 0
+    | E_eq _ -> TYPE_bool 0
     | E_comma (_,y) -> eval_expr y
     | E_assign (_,y) -> eval_expr y
     | E_mul_assign (_,y) -> eval_expr y (*o elegxos gia lvalues staristera pou? *)
     | E_div_assign (_,y) -> eval_expr y
-    | E_mod_assign (_,_) -> TYPE_int
+    | E_mod_assign (_,_) -> TYPE_int 0
     | E_plu_assign (_,y) -> eval_expr y
     | E_min_assign (_,y) -> eval_expr y
-    | E_negate _ -> TYPE_bool
+    | E_negate _ -> TYPE_bool 0
     | E_uplus x -> eval_expr x
     | E_uminus x -> eval_expr x
-    | E_addr x -> TYPE_pointer (* ksana ??? *)
-    | E_deref x -> eval_address x (* ??? *)
-    | E_incr_bef x -> TYPE_int
-    | E_decr_bef x -> TYPE_int
-    | E_incr_aft x -> TYPE_int
-    | E_decr_aft x -> TYPE_int
+    | E_addr x ->  addr_of_point (eval_expr x)
+    | E_deref x -> deref_expr (eval_expr x)
+    | E_incr_bef x -> TYPE_int 0
+    | E_decr_bef x -> TYPE_int 0
+    | E_incr_aft x -> TYPE_int 0
+    | E_decr_aft x -> TYPE_int 0
     | E_array_access (x,y) -> eval_expr y (* I have no idea what im doing vol 1231*)
-    | E_delete _ -> TYPE_none
+    | E_delete x -> eval_expr x
     | E_new (x, _) -> map_to_symbol_table_type x 
     | E_cast (x, _) -> map_to_symbol_table_type x 
     | E_ternary_op (_, _, z) -> eval_expr z 
@@ -180,7 +207,6 @@ and check_eval_ar_op = function
                     raise (Terminate "Addition arguments don't match")
                else 
                     eval_expr x
-    | _ -> raise (Terminate "Bad arithmetic operation type")
 
 
 let def_func_head typ id params ~forward=
