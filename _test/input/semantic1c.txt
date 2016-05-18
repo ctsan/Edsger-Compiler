@@ -1,8 +1,16 @@
+char *l[10];
 bool k[5+9*5], delta,epsilon;
-double z;
+double *z;
 
-int myfirst_fun(int x, char y);
+int my_fun(int* x, char y);
 
-int myfirst_fun(int x, char y, int z);
+// This is allowed since we have different amount of params
+int my_fun(int x, char y, int z);
 
-
+int my_fun(int* x, char y) {
+	double l;
+	double z[100];
+	char lolz() {
+		bool z;
+	}
+}

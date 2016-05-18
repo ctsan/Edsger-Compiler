@@ -11,17 +11,23 @@ exception NoMainFunction
 let show_offsets = true
 
 let rec pretty_typ ppf typ =
+  let pretty_pointer n = 
+	let rec aux str = function
+	| 0 -> str
+	| n -> aux (str ^ "*") (n-1)
+	in aux "" n
+  in
   match typ with
   | TYPE_none ->
       fprintf ppf "<undefined>"
-  | TYPE_int ->
-      fprintf ppf "int"
-  | TYPE_char ->
-      fprintf ppf "char"
-  | TYPE_bool ->
-      fprintf ppf "bool"
-  | TYPE_double ->
-      fprintf ppf "double"
+  | TYPE_int n ->
+      fprintf ppf "int %s" (pretty_pointer n)
+  | TYPE_char n->
+      fprintf ppf "char %s" (pretty_pointer n)
+  | TYPE_bool n->
+      fprintf ppf "bool %s" (pretty_pointer n)
+  | TYPE_double n ->
+      fprintf ppf "double %s"  (pretty_pointer n)
   | TYPE_array (et, sz) ->
       pretty_typ ppf et;
       if sz > 0 then
@@ -105,6 +111,7 @@ let printSymbolTable () =
 (* | Assertion of Return Types Through Lookup Tables                              | *)
 (* +------------------------------------------------------------------------------+ *)
 
+
 (* TODO: needs refinement, for now check if int *)
 let rec eval_const_int = function
 	| E_int x -> int_of_string x 
@@ -116,12 +123,29 @@ let rec eval_const_int = function
 	| E_mod (x,y) -> ((eval_const_int x)mod(eval_const_int y)) 
 	| _ -> raise (Terminate "Not Constant Int Expression")
 
+(* Doesn't utilize number of pointers yet, have that in mind *) 
+(* to improve data-types of hash table *) 
 let map_to_symbol_table_type = function
-	| Ty_int x -> TYPE_int
-	| Ty_char x -> TYPE_char
-	| Ty_bool x -> TYPE_bool 
-	| Ty_double x -> TYPE_double
+	| Ty_int n -> TYPE_int n
+	| Ty_char n -> TYPE_char n
+	| Ty_bool n -> TYPE_bool n
+	| Ty_double n -> TYPE_double n
 	| _ -> raise (Terminate "Bad Type")
+
+let def_func_head typ id params ~forward=
+	let symtbl_ret_type = map_to_symbol_table_type typ in
+	let brand_new_fun = newFunction (id_make id) true in
+	openScope ();
+	(match params with
+	| Some param_list -> 
+		(List.iter param_list
+		(function 
+			| P_byval (typ, id) -> let dmy = newParameter (id_make id) (map_to_symbol_table_type typ)  PASS_BY_VALUE brand_new_fun  true in ignore dmy;() 
+			| P_byref (typ, id) -> let dmy = newParameter (id_make id)  (map_to_symbol_table_type typ) PASS_BY_REFERENCE brand_new_fun  true  in ignore dmy; ()
+		))
+	| None -> ());
+	if forward then forwardFunction brand_new_fun;
+	endFunctionHeader brand_new_fun symtbl_ret_type;;
 
 let rec check ast =
 	match ast with
@@ -135,9 +159,8 @@ let rec check ast =
 and check_all_decls decls =
 	List.iter decls check_a_declaration 
 
-and check_a_declaration declaration = 
-	(match declaration with
-
+and check_a_declaration  = 
+	(function
     (***********************************************)
     (*** VARIABLES DECLARATION                   ***)
     (***********************************************)
@@ -167,25 +190,27 @@ and check_a_declaration declaration =
 	| D_func_decl (typ,id,params) -> 
 		begin 
 			printf "- fun decl %s\n" id;
-			let symtbl_ret_type = map_to_symbol_table_type typ in
-			let brand_new_fun = newFunction (id_make id) true in
-			openScope ();
-			(match params with
-			| Some param_list -> 
-				(List.iter param_list
-				(function 
-					| P_byval (typ, id) -> let dmy = newParameter (id_make id) (map_to_symbol_table_type typ)  PASS_BY_VALUE brand_new_fun  true in ignore dmy;() 
-					| P_byref (typ, id) -> let dmy = newParameter (id_make id)  (map_to_symbol_table_type typ) PASS_BY_REFERENCE brand_new_fun  true  in ignore dmy; ()
-				))
-			| None -> ());
-			endFunctionHeader brand_new_fun symtbl_ret_type;
+			def_func_head typ id params ~forward:true;
 			closeScope ();
 		end
     (***********************************************)
     (*** FUNCTION DEFINITION                     ***)
     (***********************************************)
 
-	| D_func_def (_,id,_,_,_) -> printf "- fun def %s\n" id)
+	| D_func_def (typ,id,params,fun_decls,fun_stmts) -> 	
+		begin
+			printf "- fun def %s\n" id;
+			def_func_head typ id params ~forward:false;
+			(match fun_decls with
+				| Some declerations -> check_all_decls declerations
+				| None -> ()
+			);
+			List.iter fun_stmts check_a_statement;
+			closeScope ();
+		end)
+
+and check_a_statement stmt = ();
+	
 	
 
 (* Params: Accumulated-Declarations, New Declaration *)
