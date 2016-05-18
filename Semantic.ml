@@ -34,7 +34,7 @@ let rec pretty_typ ppf typ =
         fprintf ppf " [%d]" sz
       else
         fprintf ppf " []"
-  | TYPE_proc ->
+  | TYPE_void ->
       fprintf ppf "proc"
 
 let pretty_mode ppf mode =
@@ -100,7 +100,7 @@ let printSymbolTable () =
           fprintf ppf "<impossible>\n"
     end in
   let scope ppf scp =
-    if scp.sco_nesting == 0 then
+    if scp.sco_nesting = 0 then 
       fprintf ppf "no scope\n"
     else
       walk ppf scp in
@@ -129,58 +129,58 @@ let rec eval_const_int = function
 	| E_mod (x,y) -> ((eval_const_int x)mod(eval_const_int y)) 
 	| _ -> raise (Terminate "Not Constant Int Expression")
 
-let rec eval_expr = function
-    | E_function_call (ret_type,_) -> ret_type
-    | E_int _ -> TYPE_int
-    | E_bool _ -> TYPE_bool
-    | E_char _ -> TYPE_char
-    | E_double _ -> TYPE_double
- (* | E_string _ -> ??? *)
-    | E_null -> TYPE_pointer (* De 8eloume kai tetoio? *)
-    | E_plus x -> check_eval_ar_op x
-    | E_minus x -> check_eval_ar_op x
-    | E_div x -> check_eval_ar_op x
-    | E_mult x -> check_eval_ar_op x
-    | E_mod (x,y) -> TYPE_int
-    | E_and _ -> TYPE_bool
-    | E_or _ -> TYPE_bool
-    | E_lteq _ -> TYPE_bool
-    | E_gteq _ -> TYPE_bool
-    | E_lt _ -> TYPE_bool
-    | E_gt _ -> TYPE_bool
-    | E_neq _ -> TYPE_bool
-    | E_eq _ -> TYPE_bool
-    | E_comma (_,y) -> eval_expr y
-    | E_assign (_,y) -> eval_expr y
-    | E_mul_assign (_,y) -> eval_expr y (*o elegxos gia lvalues staristera pou? *)
-    | E_div_assign (_,y) -> eval_expr y
-    | E_mod_assign (_,_) -> TYPE_int
-    | E_plu_assign (_,y) -> eval_expr y
-    | E_min_assign (_,y) -> eval_expr y
-    | E_negate _ -> TYPE_bool
-    | E_uplus x -> eval_expr x
-    | E_uminus x -> eval_expr x
-    | E_addr x -> TYPE_pointer (* ksana ??? *)
-    | E_deref x -> eval_address x (* ??? *)
-    | E_incr_bef x -> TYPE_int
-    | E_decr_bef x -> TYPE_int
-    | E_incr_aft x -> TYPE_int
-    | E_decr_aft x -> TYPE_int
-    | E_array_access (x,y) -> eval_expr y (* I have no idea what im doing vol 1231*)
-    | E_delete _ -> TYPE_none
-    | E_new (x, _) -> map_to_symbol_table_type x 
-    | E_cast (x, _) -> map_to_symbol_table_type x 
-    | E_ternary_op (_, _, z) -> eval_expr z 
-    | _ -> raise (Terminate "Bad expr type")
+(* let rec eval_expr = function *)
+(*     | E_function_call (ret_type,_) -> ret_type *)
+(*     | E_int _ -> TYPE_int *)
+(*     | E_bool _ -> TYPE_bool *)
+(*     | E_char _ -> TYPE_char *)
+(*     | E_double _ -> TYPE_double *)
+(*  (1* | E_string _ -> ??? *1) *)
+(*     | E_null -> TYPE_pointer (1* De 8eloume kai tetoio? *1) *)
+(*     | E_plus x -> check_eval_ar_op x *)
+(*     | E_minus x -> check_eval_ar_op x *)
+(*     | E_div x -> check_eval_ar_op x *)
+(*     | E_mult x -> check_eval_ar_op x *)
+(*     | E_mod (x,y) -> TYPE_int *)
+(*     | E_and _ -> TYPE_bool *)
+(*     | E_or _ -> TYPE_bool *)
+(*     | E_lteq _ -> TYPE_bool *)
+(*     | E_gteq _ -> TYPE_bool *)
+(*     | E_lt _ -> TYPE_bool *)
+(*     | E_gt _ -> TYPE_bool *)
+(*     | E_neq _ -> TYPE_bool *)
+(*     | E_eq _ -> TYPE_bool *)
+(*     | E_comma (_,y) -> eval_expr y *)
+(*     | E_assign (_,y) -> eval_expr y *)
+(*     | E_mul_assign (_,y) -> eval_expr y (*o elegxos gia lvalues staristera pou? *1) *)
+(*     | E_div_assign (_,y) -> eval_expr y *)
+(*     | E_mod_assign (_,_) -> TYPE_int *)
+(*     | E_plu_assign (_,y) -> eval_expr y *)
+(*     | E_min_assign (_,y) -> eval_expr y *)
+(*     | E_negate _ -> TYPE_bool *)
+(*     | E_uplus x -> eval_expr x *)
+(*     | E_uminus x -> eval_expr x *)
+(*     | E_addr x -> TYPE_pointer (1* ksana ??? *1) *)
+(*     | E_deref x -> eval_address x (1* ??? *1) *)
+(*     | E_incr_bef x -> TYPE_int *)
+(*     | E_decr_bef x -> TYPE_int *)
+(*     | E_incr_aft x -> TYPE_int *)
+(*     | E_decr_aft x -> TYPE_int *)
+(*     | E_array_access (x,y) -> eval_expr y (1* I have no idea what im doing vol 1231*) *)
+(*     | E_delete _ -> TYPE_none *)
+(*     | E_new (x, _) -> map_to_symbol_table_type x *) 
+(*     | E_cast (x, _) -> map_to_symbol_table_type x *) 
+(*     | E_ternary_op (_, _, z) -> eval_expr z *) 
+(*     | _ -> raise (Terminate "Bad expr type") *)
 
 (* Doesn't utilize number of pointers yet, have that in mind *) 
 (* to improve data-types of hash table *) 
-and check_eval_ar_op = function
-    | (x,y) -> if (eval_expr x) <> (eval_expr x) then
-                    raise (Terminate "Addition arguments don't match")
-               else 
-                    eval_expr x
-    | _ -> raise (Terminate "Bad arithmetic operation type")
+(* and check_eval_ar_op = function *)
+(*     | (x,y) -> if (eval_expr x) <> (eval_expr x) then *)
+(*                     raise (Terminate "Addition arguments don't match") *)
+(*                else *) 
+(*                     eval_expr x *)
+(*     | _ -> raise (Terminate "Bad arithmetic operation type") *)
 
 
 let def_func_head typ id params ~forward=
@@ -258,9 +258,82 @@ and check_a_declaration  =
 			);
 			List.iter fun_stmts check_a_statement;
 			closeScope ();
-		end)
+		end);
 
-and check_a_statement stmt = ();
+
+and check_a_statement = (function 
+	| S_None -> ()
+	| S_expr expr -> let _ = eval_expr expr in ()
+	| S_braces many_stmts -> 
+		begin 
+			printf "New block\n";
+			(* openScope(); This Is probably not necessery *)
+			List.iter many_stmts check_a_statement
+			(* closeScope()  *)
+		end
+	| S_if (bool_expr,if_stmt,el_stmt) ->
+		begin
+			printf "new if statement\n"; 
+			if (equalType (eval_expr bool_expr) (TYPE_bool 0)) then
+				(check_a_statement if_stmt;	
+				(match el_stmt with
+				 | Some e -> printf "else stmt\n"; check_a_statement e
+				 | None -> ()))
+			else raise (Terminate "if statement lacks boolean check")
+		end
+	| S_for (label,expr1,expr2,expr3,stmt) ->
+		begin 
+			printf "new for statement\n";
+
+			(* manage label existance *)
+			let labl = (match label with
+			| Some l -> (newLabel (id_make l) true)
+			| None -> (let e =  no_entry (id_make "___trash") in e)) in 
+			let for_exps = (function
+			| Some exp -> 
+				eval_expr exp
+			| None -> TYPE_bool 0) in 
+			(* execute the analysis  of the first expression *)
+			let _ = for_exps expr1 in (); 
+			(* do the same for the second, while checking for being boolean*)
+			if not ( equalType (for_exps expr2) (TYPE_bool 0))then
+				raise (Terminate "guard in for statement should be boolean or empty\n");
+			(* third expression *)
+			let _ = for_exps expr3 in ();
+			check_a_statement stmt;
+			(* disable label acceptance *)
+			(match label with
+			| Some l -> endLabelScope labl
+			| None -> ());
+		end
+	| S_continue label | S_break label -> 
+		begin 
+			let labl = (match label with
+			| Some l -> l
+			| None -> "") in
+			if labl <> "" then begin
+				let lbl_entry = lookupEntry (id_make labl) LOOKUP_CURRENT_SCOPE true in
+				match lbl_entry.entry_info with
+				| ENTRY_label v -> 
+					if (not !v) then raise (Terminate "This label does not correspond to a valid loop")
+				| ENTRY_none ->  
+					();
+				| _ -> raise (Terminate "BAD ENTRY TYPE MISTER DEVELOPER")
+			end
+		end
+	| S_return r -> 
+			()
+			(* match r with *)
+			(* | Some expr -> *)
+			(* 	if ( not equalType (eval_expr expr) () ) raise (Terminate "return type is not correct") *)
+			(* | None -> *) 
+			(* 	if ( not equalType (eval_expr expr) TYPE_void ) raise (Terminate "return type is not correct") *)
+	)	
+
+	
+
+and eval_expr = function
+	| _ -> TYPE_bool 0;
 	
 	
 
@@ -279,7 +352,6 @@ and check_a_statement stmt = ();
 (* 	printSymbolTable (); *)
 (* 	openScope(); *)
 (* 	printSymbolTable (); *)
-(* 	let i1 = newVariable (id_make "i1") TYPE_int true in *)
 (* 	let i2 = newVariable (id_make "i2") TYPE_int true in *)
 (* 	ignore i1; ignore i2; *)
 (* 	printSymbolTable (); *)
