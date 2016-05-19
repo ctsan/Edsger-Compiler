@@ -146,6 +146,15 @@ let rec deref_expr = function
     | TYPE_array (x,y)              -> TYPE_array (deref_expr x,y)
     | _                             -> raise (Terminate "deref non-pointer")
 
+let is_pointer = function
+    | TYPE_int x when x>0           -> true
+    | TYPE_char x when x>0          -> true
+    | TYPE_bool x when x>0          -> true
+    | TYPE_double x when x>0        -> true
+    | TYPE_array (x,y)              -> true
+    | _                             -> false
+
+
 
 (* TODO: needs refinement, for now check if int *)
 let rec eval_const_int = function
@@ -180,27 +189,56 @@ let rec eval_expr = function
     | E_gt _ -> TYPE_bool 0
     | E_neq _ -> TYPE_bool 0
     | E_eq _ -> TYPE_bool 0
-    | E_comma (_,y) -> eval_expr y
-    | E_assign (_,y) -> eval_expr y
-    | E_mul_assign (_,y) -> eval_expr y (*o elegxos gia lvalues staristera pou? *)
-    | E_div_assign (_,y) -> eval_expr y
-    | E_mod_assign (_,_) -> TYPE_int 0
-    | E_plu_assign (_,y) -> eval_expr y
-    | E_min_assign (_,y) -> eval_expr y
-    | E_negate _ -> TYPE_bool 0
+    | E_comma (x,y) -> (ignore (eval_expr x); eval_expr y)
+    | E_assign (x,y) -> (ignore (eval_expr x); eval_expr y) (* LVALUE CHECK! *)
+    | E_mul_assign (x,y) ->  if equalType (eval_expr y) (eval_expr x) then
+                                eval_expr y
+                            else
+                                raise (Terminate "Non-matching types assignment")
+    | E_div_assign (x,y) ->  if equalType (eval_expr y) (eval_expr x) then
+                                eval_expr y
+                            else
+                                raise (Terminate "Non-matching types assignment")
+    | E_mod_assign (x,y) ->  if equalType (eval_expr y) (eval_expr x) then
+                                eval_expr y
+                            else
+                                raise (Terminate "Non-matching types assignment")
+    | E_plu_assign (x,y) ->  if equalType (eval_expr y) (eval_expr x) then
+                                eval_expr y
+                            else
+                                raise (Terminate "Non-matching types assignment")
+    | E_min_assign (x,y) -> if equalType (eval_expr y) (eval_expr x) then
+                                eval_expr y
+                            else
+                                raise (Terminate "Non-matching types assignment")
+    | E_negate x -> (ignore (eval_expr x); TYPE_bool 0)
     | E_uplus x -> eval_expr x
     | E_uminus x -> eval_expr x
     | E_addr x ->  addr_of_point (eval_expr x)
     | E_deref x -> deref_expr (eval_expr x)
-    | E_incr_bef x -> TYPE_int 0
-    | E_decr_bef x -> TYPE_int 0
-    | E_incr_aft x -> TYPE_int 0
-    | E_decr_aft x -> TYPE_int 0
-    | E_array_access (x,y) -> eval_expr x 
-    | E_delete x -> eval_expr x
-    | E_new (x, _) -> map_to_symbol_table_type x 
-    | E_cast (x, _) -> map_to_symbol_table_type x 
-    | E_ternary_op (_, _, z) -> eval_expr z 
+    | E_incr_bef x -> (ignore (eval_expr x); TYPE_int 0)
+    | E_decr_bef x -> (ignore (eval_expr x); TYPE_int 0)
+    | E_incr_aft x -> (ignore (eval_expr x); TYPE_int 0)
+    | E_decr_aft x -> (ignore (eval_expr x); TYPE_int 0) (*we need an lvalue check function*)
+    | E_array_access (x,y) -> if (equalType (eval_expr y) (TYPE_int 0)) then
+                                  eval_expr x 
+                              else
+                                  raise (Terminate "Array index not int")
+    | E_delete x -> if is_pointer (eval_expr x) then
+                        eval_expr x
+                    else
+                        raise (Terminate "Can't delete non-point")
+    | E_new (x, None) -> addr_of_point (map_to_symbol_table_type x)
+    | E_new (x, Some y) -> if equalType (eval_expr y) (TYPE_int 0) then
+                                addr_of_point (map_to_symbol_table_type x)
+                           else
+                                raise (Terminate "Non int array size")
+    | E_cast (x, y) -> (ignore (eval_expr y); map_to_symbol_table_type x) 
+    | E_ternary_op (x, y, z) -> if (equalType (eval_expr x) (TYPE_bool 0)) 
+            && (equalType (eval_expr y) (eval_expr z)) then
+                eval_expr z
+            else
+                raise (Terminate "Wrong types ternary")
 
 (* Doesn't utilize number of pointers yet, have that in mind *) 
 (* to improve data-types of hash table *) 
