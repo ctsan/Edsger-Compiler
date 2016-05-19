@@ -121,7 +121,7 @@ let map_to_symbol_table_type = function
 	| _ -> raise (Terminate "Bad Type")
 
 let lookup_type str = 
-        let i1 = lookupEntry (id_make str) LOOKUP_ALL_SCOPES true in
+	let i1 = lookupEntry (id_make str) LOOKUP_ALL_SCOPES true in
     match i1.entry_info with 
         | ENTRY_function inf  -> inf.function_result
         | ENTRY_variable inf  -> inf.variable_type
@@ -160,7 +160,7 @@ let rec eval_const_int = function
 
 let rec eval_expr = function
     | E_function_call (x,l) -> lookup_type x
-    | E_id str -> lookup_type str
+    | E_id str -> printf "will lookup for %s\n" str;lookup_type str
     | E_int _ -> TYPE_int 0
     | E_bool _ -> TYPE_bool 0
     | E_char _ -> TYPE_char 0
@@ -171,15 +171,15 @@ let rec eval_expr = function
     | E_minus (x,y) -> check_eval_ar_op (x,y)
     | E_div (x,y) -> check_eval_ar_op (x,y)
     | E_mult (x,y) -> check_eval_ar_op (x,y)
-    | E_mod (x,y) -> TYPE_int 0
-    | E_and _ -> TYPE_bool 0
-    | E_or _ -> TYPE_bool 0
-    | E_lteq _ -> TYPE_bool 0
-    | E_gteq _ -> TYPE_bool 0
-    | E_lt _ -> TYPE_bool 0
-    | E_gt _ -> TYPE_bool 0
-    | E_neq _ -> TYPE_bool 0
-    | E_eq _ -> TYPE_bool 0
+    | E_mod (x,y) -> check_eval_ar_op (x,y)
+	(* Logical Operator*)
+    | E_and (x,y) | E_or (x,y) -> 
+		if (not (check_binary_logical_operator x y))
+			then raise (Terminate "operands of and/or should be booleans\n")
+			else TYPE_bool 0
+	| E_lteq (x,y) | E_gteq (x,y) | E_lt  (x,y) | E_gt  (x,y) 
+	| E_neq (x,y) | E_eq  (x,y) -> 
+		check_eval_ar_op (x,y); TYPE_bool 0
     | E_comma (_,y) -> eval_expr y
     | E_assign (_,y) -> eval_expr y
     | E_mul_assign (_,y) -> eval_expr y (*o elegxos gia lvalues staristera pou? *)
@@ -202,13 +202,21 @@ let rec eval_expr = function
     | E_cast (x, _) -> map_to_symbol_table_type x 
     | E_ternary_op (_, _, z) -> eval_expr z 
 
-(* Doesn't utilize number of pointers yet, have that in mind *) 
-(* to improve data-types of hash table *) 
 and check_eval_ar_op = function
-    | (x,y) -> if (eval_expr x) <> (eval_expr x) then
+    | (x,y) ->
+		let x_eval = eval_expr x in 
+		let y_eval = eval_expr y in
+			  if (x_eval) <> (y_eval) then
                     raise (Terminate "Addition arguments don't match")
                else 
-                    eval_expr x
+                    x_eval 
+
+and check_eval_of_type x y ~wanted_type =
+	(let res1 = check_eval_ar_op (x,y) in
+	equalType res1 wanted_type)
+
+and check_binary_logical_operator x y =
+	check_eval_of_type x y ~wanted_type:(TYPE_bool 0)
 
 let def_func_head typ id params ~forward=
 	let symtbl_ret_type = map_to_symbol_table_type typ in
@@ -357,11 +365,6 @@ and check_a_statement = (function
 			(* 	if ( not equalType (eval_expr expr) TYPE_void ) raise (Terminate "return type is not correct") *)
 	)	
 
-	
-
-and eval_expr = function
-	| _ -> TYPE_bool 0;
-	
 	
 (****************************)
 (* and check_program decls = *)

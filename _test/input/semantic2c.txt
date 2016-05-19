@@ -1,0 +1,14 @@
+int j;
+int i[1000];
+
+int anotherfunction();
+
+char new_fun (char x, char y);
+
+int anotherfunction() {
+	int i;
+	for (i=0; i<100; i++) {
+		i += 1;
+	}
+}
+
