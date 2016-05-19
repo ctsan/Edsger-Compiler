@@ -4,119 +4,10 @@ open Format
 open Identifier
 open Types
 open Symbol
+open NiceDebug
 
 exception Terminate of string
 exception NoMainFunction
-
-let show_offsets = true
-
-let rec pretty_typ ppf typ =
-  let pretty_pointer n = 
-	let rec aux str = function
-	| 0 -> str
-	| n -> aux (str ^ "*") (n-1)
-	in aux "" n
-  in
-  match typ with
-  | TYPE_none ->
-      fprintf ppf "<undefined>"
-  | TYPE_int n ->
-      fprintf ppf "int %s" (pretty_pointer n)
-  | TYPE_char n->
-      fprintf ppf "char %s" (pretty_pointer n)
-  | TYPE_bool n->
-      fprintf ppf "bool %s" (pretty_pointer n)
-  | TYPE_double n ->
-      fprintf ppf "double %s"  (pretty_pointer n)
-  | TYPE_array (et, sz) ->
-      pretty_typ ppf et;
-      if sz > 0 then
-        fprintf ppf " [%d]" sz
-      else
-        fprintf ppf " []"
-  | TYPE_void ->
-      fprintf ppf "proc"
-  | TYPE_null ->
-      fprintf ppf "null pointer"
-
-let pretty_mode ppf mode =
-  match mode with
-  | PASS_BY_REFERENCE ->
-      fprintf ppf "reference "
-  | _ ->
-      ()
-
-let printSymbolTable () =
-  let rec walk ppf scp =
-    if scp.sco_nesting <> 0 then begin
-      fprintf ppf "scope: ";
-      let entry ppf e =
-        fprintf ppf "%a" pretty_id e.entry_id;
-        match e.entry_info with
-        | ENTRY_none ->
-            fprintf ppf "<none>"
-        | ENTRY_variable inf ->
-            if show_offsets then
-              fprintf ppf "[%d]" inf.variable_offset
-        | ENTRY_label _ -> fprintf ppf ""
-        | ENTRY_function inf ->
-            let param ppf e =
-              match e.entry_info with
-                | ENTRY_parameter inf ->
-                   fprintf ppf "%a%a : %a"
-                      pretty_mode inf.parameter_mode
-                      pretty_id e.entry_id
-                      pretty_typ inf.parameter_type
-                | _ ->
-                    fprintf ppf "<invalid>" in
-            let rec params ppf ps =
-              match ps with
-              | [p] ->
-                  fprintf ppf "%a" param p
-              | p :: ps ->
-                  fprintf ppf "%a; %a" param p params ps;
-              | [] ->
-                  () in
-            fprintf ppf "(%a) : %a"
-              params inf.function_paramlist
-              pretty_typ inf.function_result
-        | ENTRY_parameter inf ->
-            if show_offsets then
-              fprintf ppf "[%d]" inf.parameter_offset
-        | ENTRY_temporary inf ->
-            if show_offsets then
-              fprintf ppf "[%d]" inf.temporary_offset in
-      let rec entries ppf es =
-        match es with
-          | [e] ->
-              fprintf ppf "%a" entry e
-          | e :: es ->
-              fprintf ppf "%a, %a" entry e entries es;
-          | [] ->
-              () in
-      match scp.sco_parent with
-      | Some scpar ->
-          fprintf ppf "%a\n%a"
-            entries scp.sco_entries
-            walk scpar
-      | None ->
-          fprintf ppf "<impossible>\n"
-    end in
-  let scope ppf scp =
-    if scp.sco_nesting = 0 then 
-      fprintf ppf "no scope\n"
-    else
-      walk ppf scp in
-  printf "%a----------------------------------------\n"
-    scope !currentScope
-
-let map_to_symbol_table_type = function
-	| Ty_int n -> TYPE_int n
-	| Ty_char n -> TYPE_char n
-	| Ty_bool n -> TYPE_bool n
-	| Ty_double n -> TYPE_double n
-	| Ty_void -> TYPE_void
-	| _ -> raise (Terminate "Bad Type")
 
 let lookup_type str = 
 	let i1 = lookupEntry (id_make str) LOOKUP_ALL_SCOPES true in
@@ -135,33 +26,6 @@ let lookup_name str =
         | ENTRY_parameter inf -> inf.parameter_type
         | ENTRY_temporary inf -> inf.temporary_type
         | _ -> raise (Terminate "Bad lookup") 
-
-let rec addr_of_point = function
-    | TYPE_int x        -> TYPE_int (x+1)
-    | TYPE_char x       -> TYPE_char (x+1)
-    | TYPE_bool x       -> TYPE_bool (x+1)
-    | TYPE_double x     -> TYPE_double (x+1)
-    | TYPE_array (x,y)  -> TYPE_array (addr_of_point x,y) (* ??? *)
-    | TYPE_null         -> TYPE_null
-    | _                 -> raise (Terminate "bad addr type")
-
-let rec deref_expr = function
-    | TYPE_int x when x>0           -> TYPE_int (x-1)
-    | TYPE_char x when x>0          -> TYPE_char (x-1)
-    | TYPE_bool x when x>0          -> TYPE_bool (x-1)
-    | TYPE_double x when x>0        -> TYPE_double (x-1)
-    | TYPE_array (x,y)              -> TYPE_array (deref_expr x,y)
-    | _                             -> raise (Terminate "deref non-pointer")
-
-let is_pointer = function
-    | TYPE_int x when x>0           -> true
-    | TYPE_char x when x>0          -> true
-    | TYPE_bool x when x>0          -> true
-    | TYPE_double x when x>0        -> true
-    | TYPE_array (x,y)              -> true
-    | _                             -> false
-
-
 
 (* TODO: needs refinement, for now check if int *)
 let rec eval_const_int = function
@@ -274,21 +138,6 @@ and check_eval_of_type x y ~wanted_type =
 and check_binary_logical_operator x y =
 	check_eval_of_type x y ~wanted_type:(TYPE_bool 0)
 
-and def_func_head typ id params ~forward=
-	let symtbl_ret_type = map_to_symbol_table_type typ in
-	let brand_new_fun = newFunction (id_make id) true in
-	openScope ();
-	(match params with
-	| Some param_list -> 
-		(List.iter param_list
-		(function 
-			| P_byval (typ, id) -> let dmy = newParameter (id_make id) (map_to_symbol_table_type typ)  PASS_BY_VALUE brand_new_fun  true in ignore dmy;() 
-			| P_byref (typ, id) -> let dmy = newParameter (id_make id)  (map_to_symbol_table_type typ) PASS_BY_REFERENCE brand_new_fun  true  in ignore dmy; ()
-		))
-	| None -> ());
-	if forward then forwardFunction brand_new_fun;
-	endFunctionHeader brand_new_fun symtbl_ret_type
-
 and check ast =
 	match ast with
 	| None      -> raise (Terminate "AST is empty")
@@ -304,12 +153,22 @@ and check ast =
 and check_all_decls decls =
 	List.iter decls check_a_declaration;
 
-(* and assert_existance_of_main_function_in_top_level tree = *)
-(* 	if (List.exists (fun entry -> (lookup_name entry) = "main_0")) *) 
-(* 		then () *)
-(* 	else raise (Terminate "No Main Function Found") *)
-
 and check_a_declaration  = 
+	let def_func_head typ id params ~forward=
+		let symtbl_ret_type = map_to_symbol_table_type typ in
+		let brand_new_fun = newFunction (id_make id) true in
+		openScope ();
+		(match params with
+		| Some param_list -> 
+			(List.iter param_list
+			(function 
+				| P_byval (typ, id) -> let dmy = newParameter (id_make id) (map_to_symbol_table_type typ)  PASS_BY_VALUE brand_new_fun  true in ignore dmy;() 
+				| P_byref (typ, id) -> let dmy = newParameter (id_make id)  (map_to_symbol_table_type typ) PASS_BY_REFERENCE brand_new_fun  true  in ignore dmy; ()
+			))
+		| None -> ());
+		if forward then forwardFunction brand_new_fun;
+		endFunctionHeader brand_new_fun symtbl_ret_type
+	in
 	(function
     (***********************************************)
     (*** VARIABLES DECLARATION                   ***)
@@ -360,7 +219,8 @@ and check_a_declaration  =
 		end);
 
 
-and check_a_statement = (function 
+and check_a_statement = 
+	(function 
 	| S_None -> ()
 	| S_expr expr -> let _ = eval_expr expr in ()
 	| S_braces many_stmts -> 

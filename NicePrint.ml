@@ -1,18 +1,19 @@
+(******************************)
 (* Colored Printing Functions *)
-(******************************) 
+(******************************)
 
+
+(* Supported Colors *)
 type color = 
     | Normal 
     | Green
     | Red;;
 
-(******************************
-##| 
-##|  If you want to add additional colors, please adjust 'type color'
-##|  and add the corresponding code in the following function. More:
-##|  https://en.wikipedia.org/wiki/ANSI_escape_code 
-##| 
-*******************************)
+(********************************************************************)
+(* If you want to add additional colors, please adjust 'type color' *)
+(* and add the corresponding code in the following function. More:  *)
+(* https://en.wikipedia.org/wiki/ANSI_escape_code                   *)
+(********************************************************************)
 
 let colortxt = function
     | Normal -> "\x1B[0m" 

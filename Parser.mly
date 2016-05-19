@@ -73,7 +73,7 @@ let construct_binary_operation typ arg1 arg2 =
 %token <string> T_int_const 
 %token <char> T_char_const 
 %token T_true T_false     
-(*----------------------------------*)
+(*-----------------------------------*)
 %token T_null
 %token T_plu_assign T_min_assign T_mul_assign T_div_assign T_mod_assign
 %token T_assign /* "=" */
