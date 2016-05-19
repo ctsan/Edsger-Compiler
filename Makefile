@@ -24,7 +24,7 @@ TESTLIST  := $(wildcard $(TESTINPUT)*.txt)
 #| https://github.com/ocaml/ocamlbuild/blob/master/manual/manual.adoc
 #####################################################################
 
-$(EXENAME): Parser.mly Lexer.mll Compiler.ml Semantic.ml NicePrint.ml
+$(EXENAME): Parser.mly Lexer.mll Compiler.ml Semantic.ml NicePrint.ml Debug.ml
 	ocamlbuild $(FLAGS) $(PACKAGES) Compiler.native
 	mv $(EXENAME).native $(EXENAME)
 

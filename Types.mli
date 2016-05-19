@@ -5,7 +5,7 @@ type typ = TYPE_none
          | TYPE_double of int
          | TYPE_array of
              typ * int
-         | TYPE_proc
+         | TYPE_void
          | TYPE_null
 
 val sizeOfType : typ -> int

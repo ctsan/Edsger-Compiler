@@ -50,9 +50,10 @@ and temporary_info = {
 }
 
 and entry_info = ENTRY_none
-               | ENTRY_variable of variable_info
-               | ENTRY_function of function_info
+               | ENTRY_variable  of variable_info
+               | ENTRY_function  of function_info
                | ENTRY_parameter of parameter_info
+               | ENTRY_label	 of bool ref
                | ENTRY_temporary of temporary_info
 
 and entry = {
@@ -164,6 +165,14 @@ let newVariable id typ err =
   } in
   newEntry id (ENTRY_variable inf) err
 
+let newLabel id err =
+  newEntry id (ENTRY_label (ref true)) err
+
+let endLabelScope e =
+	match e.entry_info with
+	| ENTRY_label v -> v:= false;
+	| _ -> Printf.printf "cannot end Label scope of somethign that is not a label\n"
+	
 let newFunction id err =
   try
     let e = lookupEntry id LOOKUP_CURRENT_SCOPE false in

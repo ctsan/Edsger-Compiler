@@ -40,9 +40,10 @@ and temporary_info = {                        (** Προσωρινή μεταβ�
 }
 
 and entry_info = ENTRY_none
-               | ENTRY_variable of variable_info
-               | ENTRY_function of function_info
+               | ENTRY_variable  of variable_info
+               | ENTRY_function	 of function_info
                | ENTRY_parameter of parameter_info
+               | ENTRY_label	 of	bool ref  (* inside for-loop or not*)
                | ENTRY_temporary of temporary_info
 
 and entry = {
@@ -53,6 +54,7 @@ and entry = {
 
 type lookup_type = LOOKUP_CURRENT_SCOPE | LOOKUP_ALL_SCOPES
 
+val no_entry : Identifier.id -> entry
 val currentScope : scope ref              (* Τρέχουσα εμβέλεια         *)
 val quadNext : int ref                    (* Αριθμός επόμενης τετράδας *)
 val tempNumber : int ref                  (* Αρίθμηση των temporaries  *)
@@ -61,10 +63,13 @@ val initSymbolTable  : int -> unit
 val openScope        : unit -> unit
 val closeScope       : unit -> unit
 val newVariable      : Identifier.id -> Types.typ -> bool -> entry
+val newLabel         : Identifier.id -> bool -> entry
 val newFunction      : Identifier.id -> bool -> entry
 val newParameter     : Identifier.id -> Types.typ -> pass_mode ->
                                         entry -> bool -> entry
 val newTemporary     : Types.typ -> entry
+
+val endLabelScope	 : entry -> unit
 
 val forwardFunction   : entry -> unit
 val endFunctionHeader : entry -> Types.typ -> unit

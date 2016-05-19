@@ -34,7 +34,7 @@ let rec pretty_typ ppf typ =
         fprintf ppf " [%d]" sz
       else
         fprintf ppf " []"
-  | TYPE_proc ->
+  | TYPE_void ->
       fprintf ppf "proc"
   | TYPE_null ->
       fprintf ppf "null pointer"
@@ -102,7 +102,7 @@ let printSymbolTable () =
           fprintf ppf "<impossible>\n"
     end in
   let scope ppf scp =
-    if scp.sco_nesting = 0 then
+    if scp.sco_nesting = 0 then 
       fprintf ppf "no scope\n"
     else
       walk ppf scp in
@@ -323,28 +323,90 @@ and check_a_declaration  =
 			);
 			List.iter fun_stmts check_a_statement;
 			closeScope ();
-		end)
+		end);
 
-and check_a_statement stmt = ();
+
+and check_a_statement = (function 
+	| S_None -> ()
+	| S_expr expr -> let _ = eval_expr expr in ()
+	| S_braces many_stmts -> 
+		begin 
+			printf "New block\n";
+			(* openScope(); This Is probably not necessery *)
+			List.iter many_stmts check_a_statement
+			(* closeScope()  *)
+		end
+	| S_if (bool_expr,if_stmt,el_stmt) ->
+		begin
+			printf "new if statement\n"; 
+			if (equalType (eval_expr bool_expr) (TYPE_bool 0)) then
+				(check_a_statement if_stmt;	
+				(match el_stmt with
+				 | Some e -> printf "else stmt\n"; check_a_statement e
+				 | None -> ()))
+			else raise (Terminate "if statement lacks boolean check")
+		end
+	| S_for (label,expr1,expr2,expr3,stmt) ->
+		begin 
+			printf "new for statement\n";
+
+			(* manage label existance *)
+			let labl = (match label with
+			| Some l -> (newLabel (id_make l) true)
+			| None -> (let e =  no_entry (id_make "___trash") in e)) in 
+			let for_exps = (function
+			| Some exp -> 
+				eval_expr exp
+			| None -> TYPE_bool 0) in 
+			(* execute the analysis  of the first expression *)
+			let _ = for_exps expr1 in (); 
+			(* do the same for the second, while checking for being boolean*)
+			if not ( equalType (for_exps expr2) (TYPE_bool 0))then
+				raise (Terminate "guard in for statement should be boolean or empty\n");
+			(* third expression *)
+			let _ = for_exps expr3 in ();
+			check_a_statement stmt;
+			(* disable label acceptance *)
+			(match label with
+			| Some l -> endLabelScope labl
+			| None -> ());
+		end
+	| S_continue label | S_break label -> 
+		begin 
+			let labl = (match label with
+			| Some l -> l
+			| None -> "") in
+			if labl <> "" then begin
+				let lbl_entry = lookupEntry (id_make labl) LOOKUP_CURRENT_SCOPE true in
+				match lbl_entry.entry_info with
+				| ENTRY_label v -> 
+					if (not !v) then raise (Terminate "This label does not correspond to a valid loop")
+				| ENTRY_none ->  
+					();
+				| _ -> raise (Terminate "BAD ENTRY TYPE MISTER DEVELOPER")
+			end
+		end
+	| S_return r -> 
+			()
+			(* match r with *)
+			(* | Some expr -> *)
+			(* 	if ( not equalType (eval_expr expr) () ) raise (Terminate "return type is not correct") *)
+			(* | None -> *) 
+			(* 	if ( not equalType (eval_expr expr) TYPE_void ) raise (Terminate "return type is not correct") *)
+	)	
+
+	
+
+and eval_expr = function
+	| _ -> TYPE_bool 0;
 	
 	
-
-(* Params: Accumulated-Declarations, New Declaration *)
-(* and check_decls acc_decls new_decl = *) 
-(* 	match new_decl with *)
-(* 	| D_var_decl (defed_type,vars) -> *)
-(* 		List.iter (*Function:Add Variable of type defed_type*) vars *)
-(* 	| D_func_decl (ret_type,fun_id,params) -> *)
-(* 		let params =List.fold_left  ~f:(*Function:Add Fun Decl*) *) 
-(* 									~init:[] *)
-
 (****************************)
 (* and check_program decls = *)
 (* 	initSymbolTable 256; *)
 (* 	printSymbolTable (); *)
 (* 	openScope(); *)
 (* 	printSymbolTable (); *)
-(* 	let i1 = newVariable (id_make "i1") TYPE_int true in *)
 (* 	let i2 = newVariable (id_make "i2") TYPE_int true in *)
 (* 	ignore i1; ignore i2; *)
 (* 	printSymbolTable (); *)

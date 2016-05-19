@@ -11,6 +11,7 @@ _build/
 *.conflicts
 
 # Vim Backup files / OS-specific files
+*.swo
 *.swp
 *.DS_STORE
 
