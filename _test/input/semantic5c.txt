@@ -1,20 +1,36 @@
+// TEST: ternary operator, labels
+
 int j;
 char k[1000];
 char **z[390+250];
 double lol[1990+500*250/2];
 
+void main();
+
+int simple_function() {
+
+}
+
 int test() {
 	int mem(char x,double z) {
-		that: for (;;) break that;
+		that: for (;;) {
+				  for (;;) break that;
+			  }
+		// More Complex Ternary of 
+		(903 == 207) ? true:false;
+		// Simple Ternary of Result int
+		(true) ? 101:10;
+		(500 - 29 * 500 / 23 > 10*(123*345*99/110)) ? (true?150+19:250/19):10;
 	}
 
 	if (9==3) {
-		;;	
+		simple_function();
 	}	
 	for (j=0; j<= 1000; j++) {
 		;;;	
 	}
 }
 
+void main() {
 
-
+}

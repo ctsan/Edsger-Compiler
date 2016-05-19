@@ -58,6 +58,7 @@ let printSymbolTable () =
         | ENTRY_variable inf ->
             if show_offsets then
               fprintf ppf "[%d]" inf.variable_offset
+        | ENTRY_label _ -> fprintf ppf ""
         | ENTRY_function inf ->
             let param ppf e =
               match e.entry_info with
@@ -109,18 +110,24 @@ let printSymbolTable () =
   printf "%a----------------------------------------\n"
     scope !currentScope
 
-(* +------------------------------------------------------------------------------+ *)
-(* | Assertion of Return Types Through Lookup Tables                              | *)
-(* +------------------------------------------------------------------------------+ *)
-
 let map_to_symbol_table_type = function
 	| Ty_int n -> TYPE_int n
 	| Ty_char n -> TYPE_char n
 	| Ty_bool n -> TYPE_bool n
 	| Ty_double n -> TYPE_double n
+	| Ty_void -> TYPE_void
 	| _ -> raise (Terminate "Bad Type")
 
 let lookup_type str = 
+	let i1 = lookupEntry (id_make str) LOOKUP_ALL_SCOPES true in
+    match i1.entry_info with 
+        | ENTRY_function inf  -> inf.function_result
+        | ENTRY_variable inf  -> inf.variable_type
+        | ENTRY_parameter inf -> inf.parameter_type
+        | ENTRY_temporary inf -> inf.temporary_type
+        | _ -> raise (Terminate "Bad lookup") 
+
+let lookup_name str = 
 	let i1 = lookupEntry (id_make str) LOOKUP_ALL_SCOPES true in
     match i1.entry_info with 
         | ENTRY_function inf  -> inf.function_result
@@ -168,7 +175,17 @@ let rec eval_const_int = function
 	| _ -> raise (Terminate "Not Constant Int Expression")
 
 let rec eval_expr = function
-    | E_function_call (x,l) -> lookup_type x
+	| E_function_call (x,l) -> 
+		(* Doesn't check arguments yet, improve it to do so*)
+		begin 
+			let param_list =
+				match l with 
+				| Some lst -> lst
+				| None -> []
+			in 
+			let overloaded_name = x ^ "_" ^ (string_of_int (List.length param_list)) in
+			lookup_type overloaded_name
+		end
     | E_id str -> printf "will lookup for %s\n" str;lookup_type str
     | E_int _ -> TYPE_int 0
     | E_bool _ -> TYPE_bool 0
@@ -188,7 +205,7 @@ let rec eval_expr = function
 			else TYPE_bool 0
 	| E_lteq (x,y) | E_gteq (x,y) | E_lt  (x,y) | E_gt  (x,y) 
 	| E_neq (x,y) | E_eq  (x,y) -> 
-		check_eval_ar_op (x,y); TYPE_bool 0
+		let _ = check_eval_ar_op (x,y) in (); TYPE_bool 0
     | E_comma (x,y) -> (ignore (eval_expr x); eval_expr y)
     | E_assign (x,y) -> (ignore (eval_expr x); eval_expr y) (* LVALUE CHECK! *)
     | E_mul_assign (x,y) ->  if equalType (eval_expr y) (eval_expr x) then
@@ -234,11 +251,12 @@ let rec eval_expr = function
                            else
                                 raise (Terminate "Non int array size")
     | E_cast (x, y) -> (ignore (eval_expr y); map_to_symbol_table_type x) 
-    | E_ternary_op (x, y, z) -> if (equalType (eval_expr x) (TYPE_bool 0)) 
-            && (equalType (eval_expr y) (eval_expr z)) then
-                eval_expr z
-            else
-                raise (Terminate "Wrong types ternary")
+    | E_ternary_op (x, y, z) ->
+		if (equalType (eval_expr x) (TYPE_bool 0)) 
+		&& (equalType (eval_expr y) (eval_expr z)) then
+			eval_expr z
+		else
+			raise (Terminate "Wrong types ternary")
 
 and check_eval_ar_op = function
     | (x,y) ->
@@ -256,7 +274,7 @@ and check_eval_of_type x y ~wanted_type =
 and check_binary_logical_operator x y =
 	check_eval_of_type x y ~wanted_type:(TYPE_bool 0)
 
-let def_func_head typ id params ~forward=
+and def_func_head typ id params ~forward=
 	let symtbl_ret_type = map_to_symbol_table_type typ in
 	let brand_new_fun = newFunction (id_make id) true in
 	openScope ();
@@ -269,19 +287,27 @@ let def_func_head typ id params ~forward=
 		))
 	| None -> ());
 	if forward then forwardFunction brand_new_fun;
-	endFunctionHeader brand_new_fun symtbl_ret_type;;
+	endFunctionHeader brand_new_fun symtbl_ret_type
 
-let rec check ast =
+and check ast =
 	match ast with
 	| None      -> raise (Terminate "AST is empty")
 	| Some tree -> (
 		initSymbolTable 256;
 		openScope();
 		check_all_decls tree;
+		(* check for main -- TODO: check there is an implementation too *)
+		if (lookup_type "main_0" <> TYPE_void) 
+			then raise (Terminate "main should return void");
 		printSymbolTable())
 
 and check_all_decls decls =
-	List.iter decls check_a_declaration 
+	List.iter decls check_a_declaration;
+
+(* and assert_existance_of_main_function_in_top_level tree = *)
+(* 	if (List.exists (fun entry -> (lookup_name entry) = "main_0")) *) 
+(* 		then () *)
+(* 	else raise (Terminate "No Main Function Found") *)
 
 and check_a_declaration  = 
 	(function
@@ -402,54 +428,4 @@ and check_a_statement = (function
 			(* | None -> *) 
 			(* 	if ( not equalType (eval_expr expr) TYPE_void ) raise (Terminate "return type is not correct") *)
 	)	
-
-	
-(****************************)
-(* and check_program decls = *)
-(* 	initSymbolTable 256; *)
-(* 	printSymbolTable (); *)
-(* 	openScope(); *)
-(* 	printSymbolTable (); *)
-(* 	let i2 = newVariable (id_make "i2") TYPE_int true in *)
-(* 	ignore i1; ignore i2; *)
-(* 	printSymbolTable (); *)
-(* 	let p = newFunction (id_make "pr") true in *)
-(* 	openScope (); *)
-(* 	printSymbolTable (); *)
-(* 	let p1 = newParameter (id_make "p1") TYPE_int  PASS_BY_VALUE p true in *)
-(* 	let p2 = newParameter (id_make "p2") TYPE_int  PASS_BY_VALUE p true in *)
-(* 	let p3 = newParameter (id_make "p3") TYPE_char PASS_BY_REFERENCE p true in *)
-(* 	endFunctionHeader p TYPE_proc; *)
-(* 	ignore p1; ignore p2; ignore p3; *)
-(* 	printSymbolTable (); *)
-(* 	let b1 = newVariable (id_make "b1") TYPE_bool true in *)
-(* 	ignore b1; *)
-(* 	let i1 = newVariable (id_make "i1") TYPE_int true in *)
-(* 	ignore i1; *)
-(* 	printSymbolTable (); *)
-(* 	let i2 = lookupEntry (id_make "i2") LOOKUP_ALL_SCOPES true in *)
-(* 	let i1 = lookupEntry (id_make "i1") LOOKUP_ALL_SCOPES true in *)
-(* 	ignore i2; ignore i1; *)
-(* 	let t1 = newTemporary TYPE_int in *)
-(* 	let t2 = newTemporary TYPE_char in *)
-(* 	ignore t1; ignore t2; *)
-(* 	printSymbolTable (); *)
-(* 	closeScope (); *)
-(* 	printSymbolTable (); *)
-(* 	let p = newFunction (id_make "f") true in *)
-(* 	openScope (); *)
-(* 	printSymbolTable (); *)
-(* 	let x = newParameter (id_make "x") TYPE_int PASS_BY_VALUE p true in *)
-(* 	let y = newParameter (id_make "y") TYPE_char PASS_BY_REFERENCE p true in *)
-(* 	endFunctionHeader p TYPE_int; *)
-(* 	ignore x; ignore y; *)
-(* 	printSymbolTable (); *)
-(* 	closeScope (); *)
-(* 	printSymbolTable (); *)
-(* 	let t1 = newTemporary TYPE_int in *)
-(* 	let t2 = newTemporary TYPE_int in *)
-(* 	ignore t1; ignore t2; *)
-(* 	printSymbolTable (); *)
-(* 	closeScope (); *)
-(* 	printSymbolTable () *)
 
