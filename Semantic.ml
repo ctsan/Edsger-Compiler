@@ -9,33 +9,15 @@ open NiceDebug
 exception Terminate of string
 exception NoMainFunction
 
-let lookup_type str = 
-	let i1 = lookupEntry (id_make str) LOOKUP_ALL_SCOPES true in
-    match i1.entry_info with 
-        | ENTRY_function inf  -> inf.function_result
-        | ENTRY_variable inf  -> inf.variable_type
-        | ENTRY_parameter inf -> inf.parameter_type
-        | ENTRY_temporary inf -> inf.temporary_type
-        | _ -> raise (Terminate "Bad lookup") 
-
-let lookup_name str = 
-	let i1 = lookupEntry (id_make str) LOOKUP_ALL_SCOPES true in
-    match i1.entry_info with 
-        | ENTRY_function inf  -> inf.function_result
-        | ENTRY_variable inf  -> inf.variable_type
-        | ENTRY_parameter inf -> inf.parameter_type
-        | ENTRY_temporary inf -> inf.temporary_type
-        | _ -> raise (Terminate "Bad lookup") 
-
-(* TODO: needs refinement, for now check if int *)
+(* TODO: optionally could be refined, *)
 let rec eval_const_int = function
-	| E_int x -> int_of_string x 
+	| E_int x       -> int_of_string x
 	(*TODO:Tranform the parsing of int to Edsger Specific *)
-	| E_plus (x,y) ->((eval_const_int x)+(eval_const_int y))
+	| E_plus (x,y)  -> ((eval_const_int x)+(eval_const_int y))
 	| E_minus (x,y) -> ((eval_const_int x)-(eval_const_int y))
-	| E_div (x,y)  -> ((eval_const_int x)/(eval_const_int y))
-	| E_mult (x,y) ->((eval_const_int x)*(eval_const_int y))
-	| E_mod (x,y) -> ((eval_const_int x)mod(eval_const_int y)) 
+	| E_div (x,y)   -> ((eval_const_int x)/(eval_const_int y))
+	| E_mult (x,y)  -> ((eval_const_int x)*(eval_const_int y))
+	| E_mod (x,y)   -> ((eval_const_int x)mod(eval_const_int y))
 	| _ -> raise (Terminate "Not Constant Int Expression")
 
 let rec eval_expr = function
@@ -48,9 +30,9 @@ let rec eval_expr = function
 				| None -> []
 			in 
 			let overloaded_name = x ^ "_" ^ (string_of_int (List.length param_list)) in
-			lookup_type overloaded_name
+			lookup_result_type overloaded_name
 		end
-    | E_id str -> printf "will lookup for %s\n" str;lookup_type str
+    | E_id str -> printf "will lookup for %s\n" str;lookup_result_type str
     | E_int _ -> TYPE_int 0
     | E_bool _ -> TYPE_bool 0
     | E_char _ -> TYPE_char 0
@@ -146,7 +128,7 @@ and check ast =
 		openScope();
 		check_all_decls tree;
 		(* check for main -- TODO: check there is an implementation too *)
-		if (lookup_type "main_0" <> TYPE_void) 
+		if (lookup_result_type "main_0" <> TYPE_void) 
 			then raise (Terminate "main should return void");
 		printSymbolTable())
 
@@ -202,6 +184,7 @@ and check_a_declaration  =
 			def_func_head typ id params ~forward:true;
 			closeScope ();
 		end
+
     (***********************************************)
     (*** FUNCTION DEFINITION                     ***)
     (***********************************************)
@@ -214,30 +197,46 @@ and check_a_declaration  =
 				| Some declerations -> check_all_decls declerations
 				| None -> ()
 			);
-			List.iter fun_stmts check_a_statement;
+			(* This Folding Returns whether return statement is guaranteed or not *)
+			let guaranteed_return = 
+				List.fold fun_stmts ~init:false ~f:(check_a_statement id)
+			in
+			if (not guaranteed_return) && (not (equalType TYPE_void (lookup_result_type id))) then
+				raise (Terminate "return value is not guaranteed in a non-void function");
 			closeScope ();
 		end);
 
 
-and check_a_statement = 
+(* check_a_statement function takes three arguments *)
+(* 1st: function in which this statement executes *)
+(* 2nd: this argument states the current guarantee of return statement *)
+(* 3rd: this argument is the statement for semantic analysis *)
+
+and check_a_statement func_id status =  
 	(function 
-	| S_None -> ()
-	| S_expr expr -> let _ = eval_expr expr in ()
+	| S_None -> status
+	| S_expr expr -> let _ = eval_expr expr in status
 	| S_braces many_stmts -> 
 		begin 
 			printf "New block\n";
+			(* TODO: Double check that this is not necessery! *)
 			(* openScope(); This Is probably not necessery *)
-			List.iter many_stmts check_a_statement
+			List.fold many_stmts ~init:status ~f:(check_a_statement func_id)
 			(* closeScope()  *)
 		end
 	| S_if (bool_expr,if_stmt,el_stmt) ->
 		begin
 			printf "new if statement\n"; 
 			if (equalType (eval_expr bool_expr) (TYPE_bool 0)) then
-				(check_a_statement if_stmt;	
-				(match el_stmt with
-				 | Some e -> printf "else stmt\n"; check_a_statement e
-				 | None -> ()))
+				begin
+					let return_status_of_if = check_a_statement func_id status if_stmt in
+					let return_status_of_else = 
+						(match el_stmt with
+						 | Some e -> printf "else stmt\n"; check_a_statement func_id status e
+						 | None -> false)
+					 in 
+					 status || (return_status_of_else && return_status_of_if)
+				end
 			else raise (Terminate "if statement lacks boolean check")
 		end
 	| S_for (label,expr1,expr2,expr3,stmt) ->
@@ -258,12 +257,15 @@ and check_a_statement =
 			if not ( equalType (for_exps expr2) (TYPE_bool 0))then
 				raise (Terminate "guard in for statement should be boolean or empty\n");
 			(* third expression *)
-			let _ = for_exps expr3 in ();
-			check_a_statement stmt;
+			let _ = for_exps expr3 in 
+			let _ = check_a_statement func_id status stmt in 
 			(* disable label acceptance *)
 			(match label with
 			| Some l -> endLabelScope labl
 			| None -> ());
+			status 
+			(* Do not change return-existance status, since for loops may or may not*)
+			(* execute *)
 		end
 	| S_continue label | S_break label -> 
 		begin 
@@ -278,14 +280,18 @@ and check_a_statement =
 				| ENTRY_none ->  
 					();
 				| _ -> raise (Terminate "BAD ENTRY TYPE MISTER DEVELOPER")
-			end
+			end; 
+			status
 		end
 	| S_return r -> 
-			()
-			(* match r with *)
-			(* | Some expr -> *)
-			(* 	if ( not equalType (eval_expr expr) () ) raise (Terminate "return type is not correct") *)
-			(* | None -> *) 
-			(* 	if ( not equalType (eval_expr expr) TYPE_void ) raise (Terminate "return type is not correct") *)
+			(match r with
+			| Some expr ->
+				if not (equalType (eval_expr expr) (lookup_result_type func_id) ) then 
+					raise (Terminate "return type is not correct") 
+			| None -> 
+				if not (equalType TYPE_void (lookup_result_type func_id) ) then
+					raise (Terminate "return type is not correct")
+			); 
+			true (* found a RETURN ! so return true*)
 	)	
 

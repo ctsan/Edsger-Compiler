@@ -17,4 +17,5 @@ val equalType : typ -> typ -> bool
 val map_to_symbol_table_type :  ast_type ->typ
 val is_pointer :  typ ->bool
 val addr_of_point : typ -> typ 
-val deref_expr: typ ->  typ 
+val deref_expr: typ ->  typ
+

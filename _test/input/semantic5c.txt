@@ -8,7 +8,7 @@ double lol[1990+500*250/2];
 void main();
 
 int simple_function() {
-
+	return 9;
 }
 
 int test() {
@@ -21,6 +21,7 @@ int test() {
 		// Simple Ternary of Result int
 		(true) ? 101:10;
 		(500 - 29 * 500 / 23 > 10*(123*345*99/110)) ? (true?150+19:250/19):10;
+		return 50;
 	}
 
 	if (9==3) {
@@ -29,8 +30,9 @@ int test() {
 	for (j=0; j<= 1000; j++) {
 		;;;	
 	}
+	return 9;
 }
 
 void main() {
-
+	return ;
 }

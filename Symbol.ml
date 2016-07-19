@@ -157,6 +157,16 @@ let lookupEntry id how err =
   else
     lookup ()
 
+let lookup_result_type str = 
+	let i1 = lookupEntry (id_make str) LOOKUP_ALL_SCOPES true in
+    match i1.entry_info with 
+        | ENTRY_function inf  -> inf.function_result
+        | ENTRY_variable inf  -> inf.variable_type
+        | ENTRY_parameter inf -> inf.parameter_type
+        | ENTRY_temporary inf -> inf.temporary_type
+        | _ -> raise (Terminate "Bad lookup") 
+
+
 let newVariable id typ err =
   !currentScope.sco_negofs <- !currentScope.sco_negofs - sizeOfType typ;
   let inf = {

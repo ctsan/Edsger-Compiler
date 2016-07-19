@@ -20,10 +20,10 @@ and variable_info = {                         (******* Μεταβλητή ******
 }
 
 and function_info = {                         (******* Συνάρτηση *******)
-  mutable function_isForward : bool;          (* Δήλωση forward        *)
-  mutable function_paramlist : entry list;    (* Λίστα παραμέτρων      *)
+  mutable function_isForward : bool;          (* forward Functio       *)
+  mutable function_paramlist : entry list;    (* List Parameters       *)
   mutable function_redeflist : entry list;    (* Λίστα παραμέτρων (2η) *)
-  mutable function_result    : Types.typ;     (* Τύπος αποτελέσματος   *)
+  mutable function_result    : Types.typ;     (* Function  result      *)
   mutable function_pstatus   : param_status;  (* Κατάσταση παραμέτρων  *)
   mutable function_initquad  : int            (* Αρχική τετράδα        *)
 }
@@ -54,6 +54,8 @@ and entry = {
 
 type lookup_type = LOOKUP_CURRENT_SCOPE | LOOKUP_ALL_SCOPES
 
+
+
 val no_entry : Identifier.id -> entry
 val currentScope : scope ref              (* Τρέχουσα εμβέλεια         *)
 val quadNext : int ref                    (* Αριθμός επόμενης τετράδας *)
@@ -74,6 +76,7 @@ val endLabelScope	 : entry -> unit
 val forwardFunction   : entry -> unit
 val endFunctionHeader : entry -> Types.typ -> unit
 val lookupEntry       : Identifier.id -> lookup_type -> bool -> entry
+val lookup_result_type : string -> Types.typ
 
 val start_positive_offset : int   (* Αρχικό θετικό offset στο Ε.Δ.   *)
 val start_negative_offset : int   (* Αρχικό αρνητικό offset στο Ε.Δ. *)

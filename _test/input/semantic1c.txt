@@ -5,9 +5,9 @@ double *z;
 int my_fun(int***x, char y);
 
 // This is allowed since we have different amount of params
-int my_fun(int x, char y, int z);
+void main();
 
-int my_fun(int*** x, char y) {
+void main() {
 	double l;
 	double z[100];
 	if (9==9) {

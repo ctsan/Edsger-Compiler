@@ -32,19 +32,18 @@ let arguments =
      +> anon (maybe_with_default "-" ("filename" %: file))
 
 let command = 
- Command.basic
-    ~summary:"Edsger Compiler (C.Tsanikidis,A.Aggelakis)."
-    arguments
-    (fun optim assembly intermediary filename () ->
-       let file_channel = 
-           if filename="-" then stdin
-           else open_in filename
-       in
-       match (assembly,intermediary) with
-       | (true,true) ->
-            eprintf_color Red "Bad combination of flags. Aborting...\n"; eclear (); exit 124;
-       | _ -> compile_channel file_channel (* TODO Later Stages *)
-    )
+	Command.basic
+		~summary:"Edsger Compiler (C.Tsanikidis,A.Aggelakis)." arguments
+		(fun optim assembly intermediary filename () ->
+		   let file_channel = 
+			   if filename="-" then stdin
+			   else open_in filename
+		   in
+		   match (assembly,intermediary) with
+		   | (true,true) ->
+				eprintf_color Red "Bad combination of flags. Aborting...\n"; eclear (); exit 124;
+		   | _ -> compile_channel file_channel (* TODO Later Stages *)
+		)
 
 let main =
         Command.run ~version:"0.1" command
