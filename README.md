@@ -15,7 +15,7 @@
 * menhir (opam install menhir) 
 
 ## For Developers
-* OUnit (opam instal ounit )
+* OUnit (opam instal ounit)
 * utop (opam install utop)
 
 ## Error Codes

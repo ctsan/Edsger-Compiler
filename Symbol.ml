@@ -2,6 +2,8 @@ open Identifier
 open Error
 open Types
 
+exception Exit
+
 module H = Hashtbl.Make (
   struct
     type t = id

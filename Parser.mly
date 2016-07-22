@@ -127,7 +127,7 @@ let construct_binary_operation typ arg1 arg2 =
 program:
       declaration+ T_eof 
         {
-            eprintf_color Green "Passing Syntax :-) \n";
+            eprintf_color Green "Syntax Checking Completed Succesfully \n";
             eclear(); 
             ast_tree := Some $1
         }; 

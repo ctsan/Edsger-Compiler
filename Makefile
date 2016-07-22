@@ -17,7 +17,12 @@ PACKAGES      = -pkgs 'core'
 #####################################################################
 
 TESTINPUT  = _test/input/
-TESTLIST  := $(wildcard $(TESTINPUT)*.txt)
+
+TEST_LW  := $(wildcard $(TESTINPUT)lexer*w.txt)
+TEST_PW  := $(wildcard $(TESTINPUT)parser*w.txt)
+TEST_PC  := $(wildcard $(TESTINPUT)parser*c.txt)
+TEST_SW  := $(wildcard $(TESTINPUT)semantic*w.txt)
+TEST_SC  := $(wildcard $(TESTINPUT)semantic*c.txt)
 
 #####################################################################
 #| Refer to the following link for more info about ocamlbuild
@@ -25,7 +30,7 @@ TESTLIST  := $(wildcard $(TESTINPUT)*.txt)
 #####################################################################
 
 $(EXENAME): Parser.mly Lexer.mll $(wildcard *.ml) $(wildcard *.mli)
-	ocamlbuild $(FLAGS) $(PACKAGES) Compiler.native
+	ocamlbuild $(FLAGS) $(PACKAGES) $(EXENAME).native
 	mv $(EXENAME).native $(EXENAME)
 
 #####################################################################
@@ -45,11 +50,18 @@ clean:
 #######| Testing Targets 
 #####################################################################
 
-COMMAND = echo $(TESTLIST) | xargs -t -n 1 $(EXE_FULL_PATH) $(TEST) 
-test: Compiler
-	$(COMMAND) 1>/dev/null
-ftest: Compiler
-	$(COMMAND)
+TESTING_COMMAND = bash ./_test/Test.sh
+
+test: Compiler  # Test for errors
+	@printf "LEXER:\n"
+	@$(TESTING_COMMAND) $(EXE_FULL_PATH) 1 -eq $(TEST_LW) #LEXER
+	@printf "PARSER:\n"
+	@$(TESTING_COMMAND) $(EXE_FULL_PATH) 2 -eq $(TEST_PW) #PARSER
+	@$(TESTING_COMMAND) $(EXE_FULL_PATH) 2 -lt $(TEST_PC)
+	@printf "SEMANTIC:\n"
+	@$(TESTING_COMMAND) $(EXE_FULL_PATH) 3 -eq $(TEST_SW)
+	@$(TESTING_COMMAND) $(EXE_FULL_PATH) 0 -eq $(TEST_SC)
+
 
 #####################################################################
 #-----|                        THE END                        #-----|

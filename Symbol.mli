@@ -1,5 +1,7 @@
 (* Symbol table *)
 
+exception Exit
+
 type pass_mode = PASS_BY_VALUE | PASS_BY_REFERENCE
 
 type param_status =

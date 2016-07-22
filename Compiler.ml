@@ -10,7 +10,7 @@ let compile_channel channel =
         Semantic.check !ast_tree;
         exit 0
     with 
-        | Parsing.Parse_error | Parser.Error ->
+        | Parser.Error ->
             eprintf_color Red "[2] Syntax Error :(\n"; eclear ();
             exit 2
         | Lexer.Unexpected_character (chr,pos) ->
@@ -18,9 +18,10 @@ let compile_channel channel =
                 was found at offset %d. Aborting..\n"
                 chr (Char.to_int chr) (pos); eclear();
             exit 1
-        | Semantic.NoMainFunction ->
-            eprintf_color Red "[3] `main` function missing :(\n"; eclear ();
+		| Semantic.Terminate str ->
+			eprintf_color Red "[3] "; eprintf "%s\n" str; eclear ();
             exit 3
+		| Symbol.Exit -> exit 3
 
 (* Parse Flags and Provide Documentation for -help *) 
 let arguments = 

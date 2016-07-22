@@ -7,7 +7,6 @@ open Symbol
 open NiceDebug
 
 exception Terminate of string
-exception NoMainFunction
 
 (* TODO: optionally could be refined, *)
 let rec eval_const_int = function
