@@ -13,18 +13,6 @@ FLAGS         = -r -use-menhir -tag 'debug,thread' -use-ocamlfind -quiet
 PACKAGES      = -pkgs 'core'
 
 #####################################################################
-#| Testing Variables
-#####################################################################
-
-TESTINPUT  = _test/input/
-
-TEST_LW  := $(wildcard $(TESTINPUT)lexer*w.txt)
-TEST_PW  := $(wildcard $(TESTINPUT)parser*w.txt)
-TEST_PC  := $(wildcard $(TESTINPUT)parser*c.txt)
-TEST_SW  := $(wildcard $(TESTINPUT)semantic*w.txt)
-TEST_SC  := $(wildcard $(TESTINPUT)semantic*c.txt)
-
-#####################################################################
 #| Refer to the following link for more info about ocamlbuild
 #| https://github.com/ocaml/ocamlbuild/blob/master/manual/manual.adoc
 #####################################################################
@@ -49,6 +37,14 @@ clean:
 #####################################################################
 #######| Testing Targets 
 #####################################################################
+
+TESTINPUT  = _test/input/
+
+TEST_LW  := $(wildcard $(TESTINPUT)lexer*w.txt)
+TEST_PW  := $(wildcard $(TESTINPUT)parser*w.txt)
+TEST_PC  := $(wildcard $(TESTINPUT)parser*c.txt)
+TEST_SW  := $(wildcard $(TESTINPUT)semantic*w.txt)
+TEST_SC  := $(wildcard $(TESTINPUT)semantic*c.txt)
 
 TESTING_COMMAND = bash ./_test/Test.sh
 
