@@ -1,0 +1,13 @@
+void main () {
+    9+((5%(9/15))*9)-2;
+}
+void test() {
+    if (false < false && true < false) 
+    {
+        7*7;
+    }
+    else {
+        8*8; 
+    }
+    100*100;
+}

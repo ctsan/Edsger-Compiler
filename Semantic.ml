@@ -37,7 +37,7 @@ let rec eval_expr = function
     | E_bool _ -> TYPE_bool 0
     | E_char _ -> TYPE_char 0
     | E_double _ -> TYPE_double 0
-    | E_string x -> TYPE_array (TYPE_char 0, String.length x)
+    | E_string x -> TYPE_array (TYPE_char 0, 1+String.length x) (* NOTE: +1 for null check *)
     | E_null -> TYPE_null 
     | E_plus (x,y) -> check_eval_ar_op (x,y)
     | E_minus (x,y) -> check_eval_ar_op (x,y)
@@ -130,7 +130,10 @@ and check ast =
 		(* check for main -- TODO: check there is an implementation too *)
 		if (lookup_result_type "main_0" <> TYPE_void) 
 			then raise (Terminate "main should return void");
-		printSymbolTable())
+		printSymbolTable();
+		Printf.printf "%a" pprint_quads (List.rev !quads);
+		print_newline()
+		)
 
 and check_all_decls decls =
 	List.iter decls check_a_declaration;
@@ -200,13 +203,17 @@ and check_a_declaration  =
 				| None -> ()
 			);
 			(* This Folding Returns whether return statement is guaranteed or not *)
-			(* addQuad (genQuad Op_unit (UnitName id) Empty Empty); (1* IR add Function Quad *1) *)
+			addQuad (genQuad Op_unit (UnitName id) Empty Empty); (* IR add Function Quad *)
 			let guaranteed_return = 
 				List.fold fun_stmts ~init:false ~f:(check_a_statement id)
 			in
 			if (not guaranteed_return) && (not (equalType TYPE_void (lookup_result_type id))) then
 				raise (Terminate "return value is not guaranteed in a non-void function");
+			List.iter fun_stmts ~f:(fun ast -> 
+                 let prop = genquads_stmt ast in 
+                 closequad prop id; ());
 			printSymbolTable ();
+	        (* closeFinalQuad prop id; *)
 			closeScope ();
 		end);
 

@@ -1,18 +1,21 @@
 open Printf
+open Ast
 
 type operator = 
-   | Op_unit | Op_endu | Op_lt | Op_gt
-   | Op_plus | Op_minus | Op_mult | Op_assign |Op_jump
-   | Op_call | Op_par | Op_ret
+   | Op_unit | Op_endu | Op_lt | Op_gt | Op_eq
+   | Op_plus | Op_minus | Op_mult | Op_div | Op_mod | Op_assign |Op_jump
+   | Op_call | Op_par | Op_ret 
 
 and pass_type = 
    | V | R | RET
 
 and operand = 
    | Unit
-   | Var of char
+   | Var of string          (* TODO: Symbol Table Entry *)
    | UnitName of string
    | Int of int
+   | Bool of bool
+   | Float of float
    | Label of int
    | Temp of int
    | PassType of pass_type
@@ -42,6 +45,9 @@ let pprint_operator ppf op =
        | Op_plus       -> fprintf ppf "+"
        | Op_minus      -> fprintf ppf "-"
        | Op_mult       -> fprintf ppf "*"
+       | Op_div       -> fprintf ppf "/"
+       | Op_mod       -> fprintf ppf "%%"
+       | Op_eq         -> fprintf ppf "="
        | Op_lt         -> fprintf ppf "<"
        | Op_gt         -> fprintf ppf ">"
        | Op_assign     -> fprintf ppf ":="
@@ -59,9 +65,11 @@ let pprint_passtype ppf p =
 let rec pprint_operand ppf op = 
    match op with
    | Unit             -> fprintf ppf "()"
-   | Var v            -> fprintf ppf "%c" v
+   | Var v            -> fprintf ppf "%s" v
    | UnitName s       -> fprintf ppf "%s" s
    | Int i            -> fprintf ppf "%d" i
+   | Bool i            -> fprintf ppf "%b" i
+   | Float i          -> fprintf ppf "%f" i
    | Temp i           -> fprintf ppf "$%d" i
    | Label i          -> fprintf ppf "%d" i
    | PassType p       -> fprintf ppf "%a" pprint_passtype p
@@ -141,26 +149,177 @@ and closequad prop name =
   backpatch prop.next (nextQuad ());
   backpatch prop.trues (nextQuad ());
   backpatch prop.falses (nextQuad ());
-  addQuad (genQuad Op_endu Empty Empty (UnitName "main"))
+  
 
-(* and genquads_expr ast = *)
-(*   let prop = newProp () in *)
-(*   match ast with *)
-(*   | E_const n         -> prop.place <- Int n; *)
-(*                          prop *)
-(*   | E_var x           -> prop.place <- Var x; *)
-(*                          prop; *)
-(*   | E_op (e1, op, e2) -> let e1prop = genquads_expr e1 *)
-(*                          and e2prop = genquads_expr e2 *)
-(*                          and w = Temp (newTemp ()) in *)
-(*                          let q = genQuad (bnToOp op) e1prop.place e2prop.place w in *)
-(*                          addQuad q; *)
-(*                          prop.place <- w; *)
-(*                          prop *)
+and closeFinalQuad prop name =
+  backpatch prop.next (nextQuad ());
+  backpatch prop.trues (nextQuad ());
+  backpatch prop.falses (nextQuad ());
+  addQuad (genQuad Op_endu Empty Empty (UnitName name))
 
-(* and genquads_stmt ast = *)
-(*   let prop = newProp () in *)
-(*   match ast with *)
+
+
+and genquads_expr ast =
+  let prop = newProp () in
+  let bin_op_helper x y op = 
+        let e1prop = genquads_expr y
+        and e2prop = genquads_expr x
+        and w = Temp (newTemp ()) in
+        let q = genQuad op e1prop.place e2prop.place w in
+        addQuad q;
+        prop.place <- w;
+        prop
+  in
+  let logical_op_helper x y op =
+        let e1prop = genquads_expr x in
+        let e2prop = genquads_expr y in
+        prop.trues <- [nextQuad ()];
+        addQuad(genQuad op e1prop.place e2prop.place Star);
+        prop.falses <- [nextQuad ()];
+        addQuad(genQuad Op_jump Empty Empty Star);
+        prop 
+  in
+  match ast with
+  (* | E_const n         -> prop.place <- Int n; *)
+  (*                        prop *)
+  (* | E_var x           -> prop.place <- Var x; *)
+  (*                        prop; *)
+  (* | E_op (e1, op, e2) -> let e1prop = genquads_expr e1 *)
+  (*                        and e2prop = genquads_expr e2 *)
+  (*                        and w = Temp (newTemp ()) in *)
+  (*                        let q = genQuad (bnToOp op) e1prop.place e2prop.place w in *)
+  (*                        addQuad q; *)
+  (*                        prop.place <- w; *)
+  (*                        prop *)
+    (* | E_function_call (x,l) -> *) 
+    (*     (* Doesn't check arguments yet, improve it to do so*) *)
+    (*     begin *) 
+    (*         let param_list = *)
+    (*             match l with *) 
+    (*             | Some lst -> lst *)
+    (*             | None -> [] *)
+    (*         in *) 
+    (*         let overloaded_name = x ^ "_" ^ (string_of_int (List.length param_list)) in *)
+    (*         lookup_result_type overloaded_name *)
+    (*     end *)
+    | E_id str -> prop.place <- Var str; prop
+    | E_int n -> prop.place <- Int (int_of_string n); prop
+    | E_bool n -> prop.place <- Bool (n); prop
+    (* | E_char _ -> TYPE_char 0 *)
+    (* | E_double _ -> TYPE_double 0 *)
+    (* | E_string x -> TYPE_array (TYPE_char 0, 1+String.length x) (1* NOTE: +1 for null check *1) *)
+    (* | E_null -> TYPE_null *) 
+    | E_plus (x,y) -> bin_op_helper x y Op_plus
+    | E_minus (x,y) -> bin_op_helper x y Op_minus
+    | E_div (x,y) -> bin_op_helper x y Op_div
+    | E_mult (x,y) -> bin_op_helper x y Op_mult
+    | E_mod (x,y) ->  bin_op_helper x y Op_mod
+    (* (* Logical Operator*) *)
+    | E_and (x,y) -> 
+        let e1prop = genquads_expr x in
+        backpatch e1prop.trues (nextQuad ());
+        let e2prop = genquads_expr y in
+        prop.falses <- e1prop.falses @ e2prop.falses;
+        prop.trues <- e2prop.trues;
+        prop
+    (* | E_or (x,y) -> *) 
+    (* | E_lteq (x,y) | E_gteq (x,y) | E_lt  (x,y) | E_gt  (x,y) *) 
+    (* | E_eq (x,y) -> bin_op_helper x y Op_eq *)
+    | E_lt (x,y) -> logical_op_helper x y Op_lt
+    | E_gt (x,y) -> logical_op_helper x y Op_gt
+    (* | E_gt (x,y) -> bin_op_helper x y Op_gt *)
+    (* | E_lteq (x,y) -> bin_op_helper x y Op_eq *)
+    (* | E_gteq (x,y) -> bin_op_helper x y Op_eq *)
+    (* | E_neq (x,y) | E_eq  (x,y) -> *) 
+    (*     let _ = check_eval_ar_op (x,y) in (); TYPE_bool 0 *)
+    (* | E_comma (x,y) -> (ignore (eval_expr x); eval_expr y) *)
+    (* | E_assign (x,y) -> (ignore (eval_expr x); eval_expr y) (1* LVALUE CHECK! *1) *)
+    (* | E_mul_assign (x,y) ->  if equalType (eval_expr y) (eval_expr x) then *)
+    (*                             eval_expr y *)
+    (*                         else *)
+    (*                             raise (Terminate "Non-matching types assignment") *)
+    (* | E_div_assign (x,y) ->  if equalType (eval_expr y) (eval_expr x) then *)
+    (*                             eval_expr y *)
+    (*                         else *)
+    (*                             raise (Terminate "Non-matching types assignment") *)
+    (* | E_mod_assign (x,y) ->  if equalType (eval_expr y) (eval_expr x) then *)
+    (*                             eval_expr y *)
+    (*                         else *)
+    (*                             raise (Terminate "Non-matching types assignment") *)
+    (* | E_plu_assign (x,y) ->  if equalType (eval_expr y) (eval_expr x) then *)
+    (*                             eval_expr y *)
+    (*                         else *)
+    (*                             raise (Terminate "Non-matching types assignment") *)
+    (* | E_min_assign (x,y) -> if equalType (eval_expr y) (eval_expr x) then *)
+    (*                             eval_expr y *)
+    (*                         else *)
+    (*                             raise (Terminate "Non-matching types assignment") *)
+    (* | E_negate x -> (ignore (eval_expr x); TYPE_bool 0) *)
+    (* | E_uplus x -> eval_expr x *)
+    (* | E_uminus x -> eval_expr x *)
+    (* | E_addr x ->  addr_of_point (eval_expr x) *)
+    (* | E_deref x -> deref_expr (eval_expr x) *)
+    (* | E_incr_bef x -> (ignore (eval_expr x); TYPE_int 0) *)
+    (* | E_decr_bef x -> (ignore (eval_expr x); TYPE_int 0) *)
+    (* | E_incr_aft x -> (ignore (eval_expr x); TYPE_int 0) *)
+    (* | E_decr_aft x -> (ignore (eval_expr x); TYPE_int 0) (*we need an lvalue check function*) *)
+    (* | E_array_access (x,y) -> if (equalType (eval_expr y) (TYPE_int 0)) then *)
+    (*                               eval_expr x *) 
+    (*                           else *)
+    (*                               raise (Terminate "Array index not int") *)
+    (* | E_delete x -> if is_pointer (eval_expr x) then *)
+    (*                     eval_expr x *)
+    (*                 else *)
+    (*                     raise (Terminate "Can't delete non-point") *)
+    (* | E_new (x, None) -> addr_of_point (map_to_symbol_table_type x) *)
+    (* | E_new (x, Some y) -> if equalType (eval_expr y) (TYPE_int 0) then *)
+    (*                             addr_of_point (map_to_symbol_table_type x) *)
+    (*                        else *)
+    (*                             raise (Terminate "Non int array size") *)
+    (* | E_cast (x, y) -> (ignore (eval_expr y); map_to_symbol_table_type x) *) 
+    (* | E_ternary_op (x, y, z) -> *)
+    (*     if (equalType (eval_expr x) (TYPE_bool 0)) *) 
+    (*     && (equalType (eval_expr y) (eval_expr z)) then *)
+    (*         eval_expr z *)
+    (*     else *)
+    (*         raise (Terminate "Wrong types ternary") *)
+    | _ -> prop
+
+
+
+and genquads_stmt ast =
+  let prop = newProp () in
+  match ast with
+  | S_expr expr -> printf "(expr)\n"; genquads_expr expr
+  | S_if (cond, ifstmt,None)  -> 
+                    let cprop = genquads_expr cond in
+                    backpatch cprop.trues (nextQuad ());
+                    let sprop = genquads_stmt ifstmt in
+                    prop.next <- cprop.falses @ sprop.next;
+                    prop
+  | S_if (cond, ifstmt, Some elstmt) ->
+                    let cprop = genquads_expr cond in
+                    backpatch cprop.trues (nextQuad ());
+                    let sprop = genquads_stmt ifstmt in
+                    let l1    = [ nextQuad () ] in           
+                    addQuad(genQuad Op_jump Empty Empty Star);  
+                    backpatch cprop.falses (nextQuad ());
+                    let eprop = genquads_stmt elstmt in
+                    prop.next <- l1 @ eprop.next  @ sprop.next; 
+                    (* TODO: REFACTOR for better Efficiency instead of using '@' *)
+                    prop
+
+  | S_braces bl   -> (match bl with
+                      | b :: bs -> let bprop = genquads_stmt b in
+                                   (match bs with
+                                     | [] -> prop.next <- bprop.next;
+                                             prop
+                                     | _  -> backpatch bprop.next (nextQuad ());
+                                             let bsprop = genquads_stmt (S_braces bs) in
+                                             prop.next <- bsprop.next;
+                                             prop))
+
+  | _ -> printf "(else)\n"; prop 
 (*   | S_print e    -> let eprop = genquads_expr e in *)
 (*                     let q1 = genQuad Op_par eprop.place (PassType V) Empty in *)
 (*                     let q2 = genQuad Op_call Empty Empty (UnitName "print") in *)
@@ -185,15 +344,6 @@ and closequad prop name =
 (*                     addQuad (genQuad Op_assign w2 Empty w); *)
 (*                     addQuad (genQuad Op_jump Empty Empty (Label l)); *)
 (*                     prop *)
-(*   | S_block bl   -> (match bl with *)
-(*                       | b :: bs -> let bprop = genquads_stmt b in *)
-(*                                    (match bs with *)
-(*                                      | [] -> prop.next <- bprop.next; *)
-(*                                              prop *)
-(*                                      | _  -> backpatch bprop.next (nextQuad ()); *)
-(*                                              let bsprop = genquads_stmt (S_block bs) in *)
-(*                                              prop.next <- bsprop.next; *)
-(*                                              prop)) *)
 (*   | S_if (e, s)  -> let eprop = genquads_expr e in *)
 (*                     let l = nextQuad () in *)
 (*                     addQuad (genQuad Op_gt eprop.place (Int 0) (Label (l + 2))); *)
