@@ -5,6 +5,7 @@ open Identifier
 open Types
 open Symbol
 open NiceDebug
+open Intermediary 
 
 exception Terminate of string
 
@@ -31,7 +32,7 @@ let rec eval_expr = function
 			let overloaded_name = x ^ "_" ^ (string_of_int (List.length param_list)) in
 			lookup_result_type overloaded_name
 		end
-    | E_id str -> printf "will lookup for %s\n" str;lookup_result_type str
+    | E_id str -> lookup_result_type str
     | E_int _ -> TYPE_int 0
     | E_bool _ -> TYPE_bool 0
     | E_char _ -> TYPE_char 0
@@ -157,17 +158,19 @@ and check_a_declaration  =
 
 	| D_var_decl (typ,defines) -> 
 		let sym_tbl_type = map_to_symbol_table_type typ in
-		let _ = printf "- var definition\n" in 
+		let _ = printf "- var definition" in 
 		List.iter 
 			defines (* Check and Register Definitions*) 
 			(function 
 			| (id,Some expr) -> 
+				printf " %s\n" id;
 				let dmy = 
 					newVariable (id_make id)
 						(TYPE_array (sym_tbl_type,eval_const_int expr))
 						true 
 				in ignore dmy; ()
 			| (id,None) -> 
+				printf " %s\n" id;
 				let dmy = newVariable (id_make id)
 					sym_tbl_type true 
 				in ignore dmy; ()
@@ -197,11 +200,13 @@ and check_a_declaration  =
 				| None -> ()
 			);
 			(* This Folding Returns whether return statement is guaranteed or not *)
+			(* addQuad (genQuad Op_unit (UnitName id) Empty Empty); (1* IR add Function Quad *1) *)
 			let guaranteed_return = 
 				List.fold fun_stmts ~init:false ~f:(check_a_statement id)
 			in
 			if (not guaranteed_return) && (not (equalType TYPE_void (lookup_result_type id))) then
 				raise (Terminate "return value is not guaranteed in a non-void function");
+			printSymbolTable ();
 			closeScope ();
 		end);
 
@@ -217,7 +222,6 @@ and check_a_statement func_id status =
 	| S_expr expr -> let _ = eval_expr expr in status
 	| S_braces many_stmts -> 
 		begin 
-			printf "New block\n";
 			(* TODO: Double check that this is not necessery! *)
 			(* openScope(); This Is probably not necessery *)
 			List.fold many_stmts ~init:status ~f:(check_a_statement func_id)
@@ -225,13 +229,12 @@ and check_a_statement func_id status =
 		end
 	| S_if (bool_expr,if_stmt,el_stmt) ->
 		begin
-			printf "new if statement\n"; 
 			if (equalType (eval_expr bool_expr) (TYPE_bool 0)) then
 				begin
 					let return_status_of_if = check_a_statement func_id status if_stmt in
 					let return_status_of_else = 
 						(match el_stmt with
-						 | Some e -> printf "else stmt\n"; check_a_statement func_id status e
+						 | Some e -> check_a_statement func_id status e
 						 | None -> false)
 					 in 
 					 status || (return_status_of_else && return_status_of_if)
@@ -240,8 +243,6 @@ and check_a_statement func_id status =
 		end
 	| S_for (label,expr1,expr2,expr3,stmt) ->
 		begin 
-			printf "new for statement\n";
-
 			(* manage label existance *)
 			let labl = (match label with
 			| Some l -> (newLabel (id_make l) true)

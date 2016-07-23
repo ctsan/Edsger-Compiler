@@ -47,4 +47,10 @@ let command =
 		)
 
 let main =
-        Command.run ~version:"0.1" command
+	if Array.length Sys.argv = 1 then
+		begin
+		eprintf "You should provide more information. Try -help\n"; 
+		exit 100
+		end
+	else
+		Command.run ~version:"0.1" command

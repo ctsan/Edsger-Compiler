@@ -50,9 +50,9 @@ TESTING_COMMAND = bash ./_test/Test.sh
 
 test: Compiler  # Test for errors
 	@printf "LEXER:\n"
-	@$(TESTING_COMMAND) $(EXE_FULL_PATH) 1 -eq $(TEST_LW) #LEXER
+	@$(TESTING_COMMAND) $(EXE_FULL_PATH) 1 -eq $(TEST_LW) 
 	@printf "PARSER:\n"
-	@$(TESTING_COMMAND) $(EXE_FULL_PATH) 2 -eq $(TEST_PW) #PARSER
+	@$(TESTING_COMMAND) $(EXE_FULL_PATH) 2 -eq $(TEST_PW)
 	@$(TESTING_COMMAND) $(EXE_FULL_PATH) 2 -lt $(TEST_PC)
 	@printf "SEMANTIC:\n"
 	@$(TESTING_COMMAND) $(EXE_FULL_PATH) 3 -eq $(TEST_SW)

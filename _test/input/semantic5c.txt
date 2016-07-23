@@ -12,7 +12,10 @@ int simple_function() {
 }
 
 int test() {
+	int testm;
 	int mem(char x,double z) {
+		int l;
+		testm = 9;
 		that: for (;;) {
 				  for (;;) break that;
 			  }

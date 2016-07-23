@@ -133,22 +133,22 @@ program:
         }; 
 
 declaration_list:
-       declaration_list declaration { $2::$1 }
+     | declaration declaration_list { $1::$2 }
      | declaration                  { $1::[] }
      ;
 
 declaration:
-    vd = variable_declaration; { vd }
-     | fd = function_declaration; { fd }
+    | vd = variable_declaration; { vd }
+    | fd = function_declaration; { fd }
     | fd = function_definition;  { fd }
     ;
 
 %inline variable_declaration:
-     | ct = ctype; md = more_declarators; T_semicolon  { D_var_decl (ct,md) }
+    | ct = ctype; md = more_declarators; T_semicolon  { D_var_decl (ct,md) }
     ;
 
 more_declarators:
-      declarator { $1::[]} 
+    | declarator { $1::[]} 
     | declarator T_comma more_declarators { $1::$3}
     
 ctype: 
@@ -156,12 +156,12 @@ ctype:
     ;
 
 pointer_asterisk_e: 
-      %prec LOWEST               { 0   }
+    | %prec LOWEST               { 0   }
     | T_times pointer_asterisk_e { 1+$2}
     ;
 
 basic_type:
-      T_int    { T_int    }
+    | T_int    { T_int    }
     | T_bool   { T_bool   }
     | T_char   { T_char   }
     | T_double { T_double }
