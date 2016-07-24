@@ -23,6 +23,15 @@ void test_neg() {
         8*8; 
     }
 }
+void test_neg2() {
+    if ((false >= false)) 
+    {
+        7*7;
+    }
+    else{
+        8*8; 
+    }
+}
 
 void testfor () {
     int i;

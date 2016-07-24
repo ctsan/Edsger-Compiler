@@ -78,7 +78,8 @@ val endLabelScope	 : entry -> unit
 val forwardFunction   : entry -> unit
 val endFunctionHeader : entry -> Types.typ -> unit
 val lookupEntry       : Identifier.id -> lookup_type -> bool -> entry
-val lookup_result_type : string -> Types.typ
+val lookup_result_type: string -> Types.typ
+val lookup_pass_styles : Identifier.id -> pass_mode list
 
 val start_positive_offset : int   (* Αρχικό θετικό offset στο Ε.Δ.   *)
 val start_negative_offset : int   (* Αρχικό αρνητικό offset στο Ε.Δ. *)

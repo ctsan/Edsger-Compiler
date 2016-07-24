@@ -135,6 +135,7 @@ let newEntry id inf err =
     error "duplicate identifier %a" pretty_id id;
     e
 
+	
 let lookupEntry id how err =
   let scc = !currentScope in
   let lookup () =
@@ -160,6 +161,7 @@ let lookupEntry id how err =
     lookup ()
 
 let lookup_result_type str = 
+	(* TODO: Make function take as input an Identifier instead of String for Type Safety *)
 	let i1 = lookupEntry (id_make str) LOOKUP_ALL_SCOPES true in
     match i1.entry_info with 
         | ENTRY_function inf  -> inf.function_result
@@ -168,6 +170,16 @@ let lookup_result_type str =
         | ENTRY_temporary inf -> inf.temporary_type
         | _ -> raise (Terminate "Bad lookup") 
 
+let lookup_pass_styles f = 
+	let open Core.Std in 
+	let i = lookupEntry f LOOKUP_ALL_SCOPES true in
+	match i.entry_info with
+	| ENTRY_function inf -> List.map inf.function_paramlist ~f:(fun arg ->
+			match arg.entry_info with
+			| ENTRY_parameter pinfo -> pinfo.parameter_mode
+			| _ -> raise (Failure "Invariant violated\n")
+		)
+	| _ -> raise (Failure "This is intended to take a function id")
 
 let newVariable id typ err =
   !currentScope.sco_negofs <- !currentScope.sco_negofs - sizeOfType typ;

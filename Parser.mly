@@ -1,7 +1,9 @@
 %{
 open NicePrint
-open Printf
+open Core.Std
 open Ast
+
+let (>>|) =  Option.(>>|)
 
 exception UnexpectedType 
 let construct_binary_assign typ arg1 arg2 =
@@ -176,7 +178,7 @@ declarator:
     rt = result_type; id = T_id;  T_lparen; par=parameter_list?; T_rparen; T_semicolon; 
         {
             let total_parameters = get_size_of_param_list par
-            in D_func_decl (rt,id ^ "_" ^ total_parameters ,par) 
+            in D_func_decl (rt,id ^ "_" ^ total_parameters , par >>| List.rev ) 
         }
     ;
 
@@ -200,7 +202,7 @@ parameter:
     derlst =declaration_list?; st =  statement*; T_rbrace;
         {
             let total_parameters = get_size_of_param_list par in
-            D_func_def (rt,id ^ "_" ^ total_parameters,par,derlst,st)
+            D_func_def (rt,id ^ "_" ^ total_parameters, par >>| List.rev ,derlst,st)
         };
 
 statement:
@@ -232,7 +234,7 @@ label_e:
 
 expression:
     T_id                                 { E_id $1 }
-    (*--------------------  (x+y) * 3 ------------------------------*)
+    (*--------------------  (x+y) * 3 ------ ------------------------*)
     | T_lparen expression T_rparen       { $2 }
     (*---------------------------------------------------------------*)
     | T_true                             { E_bool true  }
@@ -242,9 +244,25 @@ expression:
     | T_char_const                       { E_char $1    }
     | T_double_const                     { E_double $1  }
     | T_string                           { E_string $1  }
-    (*---------------------------------------------------------------*)
-    | name = T_id ; T_lparen ; params = expression_list? ; T_rparen                
-        { E_function_call (name,params) }
+    (*------------------------- f(x+2,y,..z)  -----------------------*)
+    | name = T_id ; T_lparen ; params = expression_list? ; T_rparen  
+    (* TODO: Refactor function calls to have an actual expression list without extra code *)
+    (* This will make the design better, but special attention should be given to priority against common commas*)
+        { let params = match params with
+           | None -> None
+           | Some (hd::tl) -> 
+                   printf "some chosen\n";
+                   let rec flatten_commas acc expr =
+                       match expr with
+                       | E_comma (x,y) -> flatten_commas (y::acc) x
+                       | _ -> expr::acc
+                   in Some (flatten_commas [] hd)
+          in
+          let params_num = match params with 
+           | None -> "0" 
+           | Some lst -> string_of_int (List.length lst)
+          in
+          E_function_call (name ^ "_" ^ params_num,params) }
     (*-----------------------------   x[z]  -------------------------*)
     | expression T_lbrack expression T_rbrack  { E_array_access ($1,$3)}
     (*-------------------   &x,-x,*x,!x,+x  -------------------------*)

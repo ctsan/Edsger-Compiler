@@ -1,0 +1,6 @@
+
+void test (byref int i,int j, int k) {
+}
+void main () {
+    test(9,8,6);
+}

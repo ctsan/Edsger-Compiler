@@ -3,6 +3,8 @@ open Printf
 open Symbol
 open Ast
 
+let (>>|) = Option.(>>|) 
+
 type operator = 
    | Op_unit | Op_endu | Op_lt | Op_gt | Op_eq
    | Op_plus | Op_minus | Op_mult | Op_div | Op_mod | Op_assign |Op_jump
@@ -164,8 +166,8 @@ and closeFinalQuad prop name =
 and genquads_expr ast =
   let prop = newProp () in
   let bin_op_helper x y op = 
-        let e1prop = genquads_expr y
-        and e2prop = genquads_expr x
+        let e1prop = genquads_expr x
+        and e2prop = genquads_expr y
         and w = Temp (newTemp ()) in
         let q = genQuad op e1prop.place e2prop.place w in
         addQuad q;
@@ -181,6 +183,10 @@ and genquads_expr ast =
         addQuad(genQuad Op_jump Empty Empty Star);
         prop 
   in
+  let pass_of_style = function
+      | PASS_BY_VALUE     -> PassType V
+      | PASS_BY_REFERENCE -> PassType R
+  in
   match ast with
   (* | E_const n         -> prop.place <- Int n; *)
   (*                        prop *)
@@ -193,17 +199,15 @@ and genquads_expr ast =
   (*                        addQuad q; *)
   (*                        prop.place <- w; *)
   (*                        prop *)
-    (* | E_function_call (x,l) -> *) 
-    (*     (* Doesn't check arguments yet, improve it to do so*) *)
-    (*     begin *) 
-    (*         let param_list = *)
-    (*             match l with *) 
-    (*             | Some lst -> lst *)
-    (*             | None -> [] *)
-    (*         in *) 
-    (*         let overloaded_name = x ^ "_" ^ (string_of_int (List.length param_list)) in *)
-    (*         lookup_result_type overloaded_name *)
-    (*     end *)
+    | E_function_call (x,l) -> 
+        Printf.printf "%d\n" (List.length (lookup_pass_styles (Identifier.id_make x)));
+        let _ =  l >>| (List.iter2_exn (lookup_pass_styles (Identifier.id_make x)) ~f:(fun style par ->
+            let pprop = genquads_expr par in
+            addQuad (genQuad Op_par pprop.place (pass_of_style style)  Empty); 
+        )) 
+        in (* TODO Pass return value *)
+        addQuad(genQuad Op_call Empty Empty (UnitName x));
+        prop;
     | E_id str -> prop.place <- Var str; prop
     | E_int n -> prop.place <- Int (int_of_string n); prop
     | E_bool n -> prop.place <- Bool (n); prop
@@ -224,42 +228,41 @@ and genquads_expr ast =
         prop.falses <- e1prop.falses @ e2prop.falses;
         prop.trues <- e2prop.trues;
         prop
-    (* | E_or (x,y) -> *) 
-    (* | E_lteq (x,y) | E_gteq (x,y) | E_lt  (x,y) | E_gt  (x,y) *) 
-    (* | E_eq (x,y) -> bin_op_helper x y Op_eq *)
+    | E_or (x,y) -> 
+        let e1prop = genquads_expr x in
+        backpatch e1prop.falses (nextQuad ());
+        let e2prop = genquads_expr y in
+        prop.trues  <- e2prop.trues @ e1prop.trues;
+        prop.falses <- e2prop.falses;
+        prop
+    | E_lteq (x,y)  -> genquads_expr (E_negate (E_gt (x,y)))  (* Making these OPs Syntantic sugar *)
+    | E_gteq (x,y) ->  genquads_expr (E_negate (E_lt (x,y)))  (* For Previously Defined relops   *)
+    | E_eq (x,y) -> logical_op_helper  x y Op_eq 
     | E_lt (x,y) -> logical_op_helper x y Op_lt
     | E_gt (x,y) -> logical_op_helper x y Op_gt
     (* | E_gt (x,y) -> bin_op_helper x y Op_gt *)
-    (* | E_lteq (x,y) -> bin_op_helper x y Op_eq *)
-    (* | E_gteq (x,y) -> bin_op_helper x y Op_eq *)
     (* | E_neq (x,y) | E_eq  (x,y) -> *) 
     (*     let _ = check_eval_ar_op (x,y) in (); TYPE_bool 0 *)
-    (* | E_comma (x,y) -> (ignore (eval_expr x); eval_expr y) *)
+    | E_comma (x,y) -> 
+            let xprop = genquads_expr x in
+            let yprop = genquads_expr y in
+            prop.place <- yprop.place;
+            prop
     | E_assign (x,y) -> 
             let yprop = genquads_expr y in
             let xprop = genquads_expr x in
             addQuad(genQuad Op_assign yprop.place Empty xprop.place ); 
             prop
-    (* | E_mul_assign (x,y) ->  if equalType (eval_expr y) (eval_expr x) then *)
-    (*                             eval_expr y *)
-    (*                         else *)
-    (*                             raise (Terminate "Non-matching types assignment") *)
-    (* | E_div_assign (x,y) ->  if equalType (eval_expr y) (eval_expr x) then *)
-    (*                             eval_expr y *)
-    (*                         else *)
-    (*                             raise (Terminate "Non-matching types assignment") *)
-    (* | E_mod_assign (x,y) ->  if equalType (eval_expr y) (eval_expr x) then *)
-    (*                             eval_expr y *)
-    (*                         else *)
-    (*                             raise (Terminate "Non-matching types assignment") *)
-    (* | E_plu_assign (x,y) ->  if equalType (eval_expr y) (eval_expr x) then *)
-    (*                             eval_expr y *)
-    (*                         else *)
-    (*                             raise (Terminate "Non-matching types assignment") *)
-    (* | E_min_assign (x,y) -> if equalType (eval_expr y) (eval_expr x) then *)
-    (*                             eval_expr y *)
-    (*                         else *)
-    (*                             raise (Terminate "Non-matching types assignment") *)
+    | E_mul_assign (x,y) ->  (* Implement as Syntantic Sugar *)
+            genquads_expr (E_assign (x, E_mult (x,y)))
+    | E_div_assign (x,y) -> 
+            genquads_expr (E_assign (x, E_div (x,y)))
+    | E_mod_assign (x,y) ->  
+            genquads_expr (E_assign (x, E_mod (x,y)))
+    | E_plu_assign (x,y) -> 
+            genquads_expr (E_assign (x, E_plus (x,y)))
+    | E_min_assign (x,y) -> 
+            genquads_expr (E_assign (x, E_minus (x,y)))
      | E_negate x -> 
              let rprop = genquads_expr x in
              prop.trues <- rprop.falses;
@@ -318,7 +321,6 @@ and genquads_stmt ast =
         (* TODO: REFACTOR for better Efficiency instead of using '@' *)
         prop
     | S_for (_,expr1,expr2,expr3,stmt) ->
-        let (>>|) = Option.(>>|) in
         let initprop   = expr1 >>| genquads_expr in  
         let start_loop = nextQuad () in
         let guardprop  = expr2 >>| genquads_expr in
