@@ -1,4 +1,6 @@
+open Core.Std;;
 open Printf
+open Symbol
 open Ast
 
 type operator = 
@@ -82,7 +84,7 @@ let pprint_quad ppf q =
       pprint_operand q.quad_argX pprint_operand q.quad_argY pprint_operand q.quad_argZ
 
 let pprint_quads ppf ql = 
-   List.iter (fun q -> fprintf ppf "\n%a" pprint_quad q) ql
+   List.iter ql (fun q -> fprintf ppf "\n%a" pprint_quad q)
 
 
 (* Empty Quad  *)
@@ -122,14 +124,14 @@ let newTemp () =
 
 (* INPUT: List of INTs*)
 (* OUTP : BackPatching quads with labels with these INTS *)
-let rec backpatch il z =
-   match il with
+let rec backpatch ~quad_tags ~label =
+   match quad_tags with
    | [] -> ()
    | _ ->
-      List.iter (fun q -> 
-         if List.mem q.quad_tag il then
+      List.iter !quads (fun q -> 
+         if List.mem quad_tags q.quad_tag then
          if q.quad_argZ = Star then
-            q.quad_argZ <- Label z ) !quads
+            q.quad_argZ <- Label label )
 
 (* let bnToOp bn = *)
 (*    match bn with *)
@@ -233,7 +235,11 @@ and genquads_expr ast =
     (* | E_neq (x,y) | E_eq  (x,y) -> *) 
     (*     let _ = check_eval_ar_op (x,y) in (); TYPE_bool 0 *)
     (* | E_comma (x,y) -> (ignore (eval_expr x); eval_expr y) *)
-    (* | E_assign (x,y) -> (ignore (eval_expr x); eval_expr y) (1* LVALUE CHECK! *1) *)
+    | E_assign (x,y) -> 
+            let yprop = genquads_expr y in
+            let xprop = genquads_expr x in
+            addQuad(genQuad Op_assign yprop.place Empty xprop.place ); 
+            prop
     (* | E_mul_assign (x,y) ->  if equalType (eval_expr y) (eval_expr x) then *)
     (*                             eval_expr y *)
     (*                         else *)
@@ -254,7 +260,11 @@ and genquads_expr ast =
     (*                             eval_expr y *)
     (*                         else *)
     (*                             raise (Terminate "Non-matching types assignment") *)
-    (* | E_negate x -> (ignore (eval_expr x); TYPE_bool 0) *)
+     | E_negate x -> 
+             let rprop = genquads_expr x in
+             prop.trues <- rprop.falses;
+             prop.falses <- rprop.trues;
+             prop
     (* | E_uplus x -> eval_expr x *)
     (* | E_uminus x -> eval_expr x *)
     (* | E_addr x ->  addr_of_point (eval_expr x) *)
@@ -286,38 +296,50 @@ and genquads_expr ast =
     | _ -> prop
 
 
-
 and genquads_stmt ast =
-  let prop = newProp () in
-  match ast with
-  | S_expr expr -> printf "(expr)\n"; genquads_expr expr
-  | S_if (cond, ifstmt,None)  -> 
-                    let cprop = genquads_expr cond in
-                    backpatch cprop.trues (nextQuad ());
-                    let sprop = genquads_stmt ifstmt in
-                    prop.next <- cprop.falses @ sprop.next;
-                    prop
-  | S_if (cond, ifstmt, Some elstmt) ->
-                    let cprop = genquads_expr cond in
-                    backpatch cprop.trues (nextQuad ());
-                    let sprop = genquads_stmt ifstmt in
-                    let l1    = [ nextQuad () ] in           
-                    addQuad(genQuad Op_jump Empty Empty Star);  
-                    backpatch cprop.falses (nextQuad ());
-                    let eprop = genquads_stmt elstmt in
-                    prop.next <- l1 @ eprop.next  @ sprop.next; 
-                    (* TODO: REFACTOR for better Efficiency instead of using '@' *)
-                    prop
+    let prop = newProp () in
+    match ast with
+    | S_expr expr -> printf "(expr)\n"; genquads_expr expr
+    | S_if (cond, ifstmt,None)  -> 
+        let cprop = genquads_expr cond in
+        backpatch cprop.trues (nextQuad ());
+        let sprop = genquads_stmt ifstmt in
+        prop.next <- cprop.falses @ sprop.next;
+        prop
+    | S_if (cond, ifstmt, Some elstmt) ->
+        let cprop = genquads_expr cond in
+        backpatch cprop.trues (nextQuad ());
+        let sprop = genquads_stmt ifstmt in
+        let l1    = [ nextQuad () ] in           
+        addQuad(genQuad Op_jump Empty Empty Star);  
+        backpatch cprop.falses (nextQuad ());
+        let eprop = genquads_stmt elstmt in
+        prop.next <- l1 @ eprop.next  @ sprop.next; 
+        (* TODO: REFACTOR for better Efficiency instead of using '@' *)
+        prop
+    | S_for (_,expr1,expr2,expr3,stmt) ->
+        let (>>|) = Option.(>>|) in
+        let initprop   = expr1 >>| genquads_expr in  
+        let start_loop = nextQuad () in
+        let guardprop  = expr2 >>| genquads_expr in
+        (match guardprop with
+        | Some grop -> backpatch grop.trues (nextQuad ())
+        | None -> ());
+        let stmts      = genquads_stmt stmt  in
+        let update     = expr3 >>| genquads_expr in
+        addQuad(genQuad Op_jump Empty Empty (Label start_loop));
+        prop.next <- (match guardprop with None -> [] | Some gprop -> gprop.falses);
+        prop
 
   | S_braces bl   -> (match bl with
-                      | b :: bs -> let bprop = genquads_stmt b in
-                                   (match bs with
-                                     | [] -> prop.next <- bprop.next;
-                                             prop
-                                     | _  -> backpatch bprop.next (nextQuad ());
-                                             let bsprop = genquads_stmt (S_braces bs) in
-                                             prop.next <- bsprop.next;
-                                             prop))
+        | b :: bs -> let bprop = genquads_stmt b in
+                   (match bs with
+                     | [] -> prop.next <- bprop.next;
+                             prop
+                     | _  -> backpatch bprop.next (nextQuad ());
+                             let bsprop = genquads_stmt (S_braces bs) in
+                             prop.next <- bsprop.next;
+                             prop))
 
   | _ -> printf "(else)\n"; prop 
 (*   | S_print e    -> let eprop = genquads_expr e in *)

@@ -53,7 +53,7 @@ let rec eval_expr = function
 	| E_neq (x,y) | E_eq  (x,y) -> 
 		let _ = check_eval_ar_op (x,y) in (); TYPE_bool 0
     | E_comma (x,y) -> (ignore (eval_expr x); eval_expr y)
-    | E_assign (x,y) -> (ignore (eval_expr x); eval_expr y) (* LVALUE CHECK! *)
+    | E_assign (x,y) -> (ignore (eval_expr x); eval_expr y) (* TODO: LVALUE CHECK! *)
     | E_mul_assign (x,y) ->  if equalType (eval_expr y) (eval_expr x) then
                                 eval_expr y
                             else
@@ -209,12 +209,13 @@ and check_a_declaration  =
 			in
 			if (not guaranteed_return) && (not (equalType TYPE_void (lookup_result_type id))) then
 				raise (Terminate "return value is not guaranteed in a non-void function");
-			List.iter fun_stmts ~f:(fun ast -> 
-                 let prop = genquads_stmt ast in 
-                 closequad prop id; ());
+			let lst_prop = List.fold fun_stmts ~init:(newProp ()) ~f:(fun _ ast -> 
+					let prop = genquads_stmt ast in 
+					closequad prop id; prop)
+			in
 			printSymbolTable ();
-	        (* closeFinalQuad prop id; *)
-			closeScope ();
+	        closeFinalQuad lst_prop id;
+			closeScope ()
 		end);
 
 

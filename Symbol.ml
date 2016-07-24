@@ -183,7 +183,7 @@ let newLabel id err =
 let endLabelScope e =
 	match e.entry_info with
 	| ENTRY_label v -> v:= false;
-	| _ -> Printf.printf "cannot end Label scope of somethign that is not a label\n"
+	| _ -> Printf.printf "cannot end Label scope of something that is not a label\n"
 	
 let newFunction id err =
   try
