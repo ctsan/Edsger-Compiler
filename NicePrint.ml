@@ -28,3 +28,9 @@ let eprintf_color color =
     Printf.eprintf;;
 
 let eclear () = prerr_string @@ colortxt Normal
+
+let printf_color color = 
+    print_string @@ colortxt color;
+    Printf.printf;;
+
+let clear () = print_string @@ colortxt Normal

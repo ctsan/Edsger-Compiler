@@ -44,7 +44,7 @@ let pretty_mode ppf mode =
       ()
 
 let printSymbolTable () =
-  printf "\t PRINTING SYMBOL TABLE\n";
+  printf "-------[ PRINTING SYMBOL TABLE ]--------\n";
   let rec walk ppf scp =
     if scp.sco_nesting <> 0 then begin
       fprintf ppf "scope: ";
