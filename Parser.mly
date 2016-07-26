@@ -100,10 +100,9 @@ let construct_binary_operation typ arg1 arg2 =
 %token T_mod T_div 
 
 %left LOWEST
-%nonassoc T_lbrack 
 %left T_comma
 %left COMMAND
-%nonassoc T_assign T_plu_assign T_min_assign T_mul_assign T_div_assign T_mod_assign
+%right T_assign T_plu_assign T_min_assign T_mul_assign T_div_assign T_mod_assign
 %nonassoc TERNARY T_qmark 
 %left T_or
 %left T_and
@@ -114,6 +113,7 @@ let construct_binary_operation typ arg1 arg2 =
 %left UNARY
 %right T_incr T_dcr CAST
 %nonassoc T_else
+%nonassoc T_lbrack 
 
 %start program
 %type <unit> program
@@ -248,7 +248,7 @@ expression:
     | name = T_id ; T_lparen ; params = expression_list? ; T_rparen  
     (* TODO: Refactor function calls to have an actual expression list without extra code *)
     (* This will make the design better, but special attention should be given to priority against common commas*)
-        { let params = match params with
+        { let params = (match params with
            | None -> None
            | Some (hd::tl) -> 
                    printf "some chosen\n";
@@ -257,6 +257,7 @@ expression:
                        | E_comma (x,y) -> flatten_commas (y::acc) x
                        | _ -> expr::acc
                    in Some (flatten_commas [] hd)
+            | _ -> printf "This should not happen!\n"; None )
           in
           let params_num = match params with 
            | None -> "0" 

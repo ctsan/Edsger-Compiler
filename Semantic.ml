@@ -22,17 +22,8 @@ let rec eval_const_int = function
 
 let rec eval_expr = function
 	| E_function_call (x,l) -> 
-		(* Doesn't check arguments yet, improve it to do so*)
+		(* TODO: Doesn't check arguments yet, improve it to do so*)
 		lookup_result_type x
-		(* begin *) 
-		(* 	let param_list = *)
-		(* 		match l with *) 
-		(* 		| Some lst -> lst *)
-		(* 		| None -> [] *)
-		(* 	in *) 
-		(* 	let overloaded_name = x ^ "_" ^ (string_of_int (List.length param_list)) in *)
-		(* 	lookup_result_type overloaded_name *)
-		(* end *)
     | E_id str -> lookup_result_type str
     | E_int _ -> TYPE_int 0
     | E_bool _ -> TYPE_bool 0
