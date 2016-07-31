@@ -22,7 +22,7 @@ let asrt ~condition ~msg=
 let rec eval_const_int = function
   | E_int x       -> int_of_string x
   (* TODO Expand to support arbitrary float computations before a cast *)
-  | E_cast (Ty_int 0,E_double x)   -> int_of_float (float_of_string x) (* TODO: Refactor *)
+  | E_cast (Ty_int 0,E_double x)   -> Int.of_float (Float.of_string x) (* TODO: Refactor *)
   | E_cast (Ty_int 0,E_char x)     -> int_of_char x                    (* TODO: Use edsger specific conversions *)
   | E_plus (x,y)  -> ((eval_const_int x)+(eval_const_int y))
   | E_minus (x,y) -> ((eval_const_int x)-(eval_const_int y))

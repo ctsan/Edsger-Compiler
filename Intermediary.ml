@@ -218,7 +218,7 @@ and genquads_expr ast =
     | E_int n  -> prop.place <- Int (int_of_string n); prop
     | E_bool n -> prop.place <- Bool (n); prop
     | E_char n -> prop.place <- Char n; prop
-    | E_double n -> prop.place <- Double (float_of_string n); prop
+    | E_double n -> prop.place <- Double (Float.of_string n); prop
     | E_string s -> prop.place <- String s; prop
     | E_null -> prop.place <- Int 0; prop (* TODO: Is this the best idea? Null as a zero integer? *)
     | E_plus (x,y)  ->
