@@ -75,11 +75,21 @@ val newTemporary     : Types.typ -> entry
 
 val endLabelScope	 : entry -> unit
 
-val forwardFunction   : entry -> unit
-val endFunctionHeader : entry -> Types.typ -> unit
-val lookupEntry       : Identifier.id -> lookup_type -> bool -> entry
-val lookup_result_type: string -> Types.typ
+val forwardFunction    : entry -> unit
+val endFunctionHeader  : entry -> Types.typ -> unit
+val lookupEntry        : Identifier.id -> lookup_type -> bool -> entry
+
+(* NOTE: Result type of `int a[N];` is transformed to `int *` *)
+val lookup_result_type : Identifier.id -> Types.typ
+
+
+(* NOTE: The following functions take as input an identifier of a function. *)
 val lookup_pass_styles : Identifier.id -> pass_mode list
+val lookup_pass_types  : Identifier.id -> Types.typ list
+(* return true if a function has been defined *)
+val fun_is_defined : Identifier.id -> bool
+
+val is_mutable: Identifier.id -> bool
 
 val start_positive_offset : int   (* Αρχικό θετικό offset στο Ε.Δ.   *)
 val start_negative_offset : int   (* Αρχικό αρνητικό offset στο Ε.Δ. *)

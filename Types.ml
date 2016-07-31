@@ -1,7 +1,7 @@
 open Ast
 exception Terminate of string
 
-type typ = 
+type typ =
 	  TYPE_none
 	| TYPE_int    of int
 	| TYPE_char   of int
@@ -24,16 +24,15 @@ let rec sizeOfType t =
    | TYPE_array (et, sz) 	-> sz * sizeOfType et
    | _						 -> 0
 
-let rec equalType t1 t2 =
-   match t1, t2 with
-   | TYPE_array (et1, sz1), TYPE_array (et2, sz2) -> equalType et1 et2
-   | et1, TYPE_null when et1 <> TYPE_null         -> equalType t2 t1
-   | TYPE_null, TYPE_null                         -> true
-   | TYPE_null, TYPE_int n when n > 0             -> true
-   | TYPE_null, TYPE_bool n when n > 0            -> true
-   | TYPE_null, TYPE_char n when n > 0            -> true
-   | TYPE_null, TYPE_double n when n > 0          -> true
-   | _                                            -> t1 = t2
+let is_pointer = function
+    | TYPE_int    x when x>0        -> true
+    | TYPE_char   x when x>0        -> true
+    | TYPE_bool   x when x>0        -> true
+    | TYPE_double x when x>0        -> true
+    | TYPE_null                     -> true
+    | TYPE_array (x,y)              -> true (* immutable pointer to type x, with size y *)
+    | _                             -> false
+
 
 let map_to_symbol_table_type = function
 	| Ty_int n -> TYPE_int n
@@ -43,13 +42,6 @@ let map_to_symbol_table_type = function
 	| Ty_void -> TYPE_void
 	(* | _ -> raise (Terminate "Bad Type") *)
 
-let is_pointer = function
-    | TYPE_int x when x>0           -> true
-    | TYPE_char x when x>0          -> true
-    | TYPE_bool x when x>0          -> true
-    | TYPE_double x when x>0        -> true
-    | TYPE_array (x,y)              -> true
-    | _                             -> false
 
 let rec addr_of_point = function
     | TYPE_int x        -> TYPE_int (x+1)
@@ -68,3 +60,35 @@ let rec deref_expr = function
     | TYPE_array (x,y)              -> TYPE_array (deref_expr x,y)
     | _                             -> raise (Terminate "deref non-pointer")
 
+let rec equalType t1 t2 =
+   (let open Core.Std in
+   match t1, t2 with
+   (*-------------------- Manage Arrays ---------------------------*)
+   | TYPE_array (et1, sz1), TYPE_array (et2, sz2) -> printf "c1\n";equalType et1 et2
+   | _, TYPE_array _                              -> printf "c2\n";equalType t2 t1
+   | TYPE_array (et1, sz1), t2                    -> equalType (addr_of_point et1) t2
+   (*-------------------- Manage Nulls ----------------------------*)
+   | t1, TYPE_null  when t1 <> TYPE_null          -> printf "c3\n";equalType t2 t1
+   | TYPE_null, t2 when is_pointer t2             -> printf "c4\n";true
+   | _                                            -> printf "c5\n";t1 = t2
+   )
+
+module H_expr = Hashtbl.Make (
+  struct
+    type t = Ast.ast_expr
+    let equal = (=)
+    let hash = Hashtbl.hash
+  end
+)
+
+(* Hashtbl ast_expr -> Types.typ *)
+let expr_ht:(typ H_expr.t) = H_expr.create 1000
+
+(** This Function Takes as input an expression and it's mapping, and results the mapping*)
+let register_n_return_expr ~expr ~result =
+  H_expr.add expr_ht expr result;
+  result
+
+(* This Function gets the result *)
+let lookup_type_of_expr expr =
+  H_expr.find expr_ht expr

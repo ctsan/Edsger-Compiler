@@ -8,7 +8,7 @@ let show_offsets = true
 
 
 let rec pretty_typ ppf typ =
-  let pretty_pointer n = 
+  let pretty_pointer n =
 	let rec aux str = function
 	| 0 -> str
 	| n -> aux (str ^ "*") (n-1)
