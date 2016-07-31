@@ -71,9 +71,8 @@ let rec eval_expr expression =
   | E_bool _   -> TYPE_bool 0
   | E_char _   -> TYPE_char 0
   | E_double _ -> TYPE_double 0
-  | E_string x -> printf "array of chars with %d\n" (String.length x);
-                  TYPE_array (TYPE_char 0, 1+String.length x) (* NOTE: +1 for null check *)
-  | E_null -> TYPE_null
+  | E_string x -> TYPE_array (TYPE_char 0, 1+String.length x) (* NOTE: +1 for null check *)
+  | E_null     -> TYPE_null
   | E_plus (x,y)  -> plus_minus_check (x,y)
   | E_minus (x,y) -> plus_minus_check (x,y)
   | E_div (x,y)   -> check_eval_ar_op (x,y) (* TODO FIX so you can't use the following ops with anything different *)
@@ -97,55 +96,56 @@ let rec eval_expr expression =
   | E_mul_assign (x,y) ->  if equalType (eval_expr y) (eval_expr x) then
       eval_expr y
     else
-      raise (Terminate "Non-matching types assignment")
+      raise (Terminate "Not-matching types assignment")
   | E_div_assign (x,y) ->  if equalType (eval_expr y) (eval_expr x) then
       eval_expr y
     else
-      raise (Terminate "Non-matching types assignment")
+      raise (Terminate "Not-matching types assignment")
   | E_mod_assign (x,y) ->  if equalType (eval_expr y) (eval_expr x) then
       eval_expr y
     else
-      raise (Terminate "Non-matching types assignment")
-  | E_plu_assign (x,y) ->  if equalType (eval_expr y) (eval_expr x) then
-      eval_expr y
+      raise (Terminate "Not-matching types assignment")
+  | E_plu_assign (x,y) ->
+    let x_expr = eval_expr x in
+    let y_expr = eval_expr y in
+    if (ptr_arithmetic_type x_expr y_expr) ||  eq_arithmetic_type x_expr y_expr then
+      x_expr
     else
-      raise (Terminate "Non-matching types assignment")
+      raise (Terminate "Not-matching types assignment")
   | E_min_assign (x,y) -> if equalType (eval_expr y) (eval_expr x) then
       eval_expr y
     else
-      raise (Terminate "Non-matching types assignment")
-  | E_negate x -> (ignore (eval_expr x); TYPE_bool 0)
-  | E_uplus x ->  eval_expr x  (* TODO operand should be Arithmetic Type! *)
-  | E_uminus x -> eval_expr x  (* TODO operand should be Arithmetic Type! *)
-  | E_addr x ->
+      raise (Terminate "Not-matching types assignment")
+  | E_negate x -> (* BOOL -> BOOL *)
+    let x_expr = eval_expr x  in
+    asrt ~condition:(equalType x_expr (TYPE_bool 0)) ~msg:"Not Valid operand of unary operator";
+    x_expr
+  | E_uplus x | E_uminus x -> (* 'a ARITHMETIC -> 'a ARITHMETIC *)
+    let x_expr = eval_expr x  in
+    asrt ~condition:(arithmetic_type x_expr) ~msg:"Not Valid operand of unary operator";
+    x_expr
+  | E_addr x -> 
     if (is_valid_lvalue x) then
       addr_of_point (eval_expr x) (* TODO assert Pointer is not NULL *)
     else
       raise (Terminate "operator '&' should have an l-value as operand")
   | E_deref x ->  deref_expr (eval_expr x) (* TODO Ask a teacher whether we should check if operand is l-value *)
   (* TODO check if operands are l-values and of Arithmetic Type or Poitner Type *)
-  | E_incr_bef x -> (ignore (eval_expr x); TYPE_int 0)
-  | E_decr_bef x -> (ignore (eval_expr x); TYPE_int 0)
-  | E_incr_aft x -> (ignore (eval_expr x); TYPE_int 0)
-  | E_decr_aft x -> (ignore (eval_expr x); TYPE_int 0) (*we need an lvalue check function*)
+  | E_incr_bef x | E_decr_bef x | E_incr_aft x | E_decr_aft x ->
+    let x_expr = eval_expr x  in
+    asrt ~condition:(arithmetic_type x_expr || is_pointer x_expr) ~msg: "operands of ++/-- operator are not suitable";
+    x_expr
   | E_array_access (x,y) ->
-    if (equalType (eval_expr y) (TYPE_int 0)) then
-      begin
-        deref_expr (eval_expr x);
-      end
-    else
-      raise (Terminate "Array index not int")
+    asrt ~condition:(equalType (eval_expr y) (TYPE_int 0)) ~msg:"Array index not int";
+    deref_expr (eval_expr x)
   | E_delete x ->
-    if is_pointer (eval_expr x) then
-      (ignore (eval_expr x); TYPE_null)
-    else
-      raise (Terminate "Can't delete non-point")
-  | E_new (x, None) -> addr_of_point (map_to_symbol_table_type x)
+    asrt ~condition:(is_pointer (eval_expr x)) ~msg:"can't delete something that isn't a pointer";
+    TYPE_null 
+  | E_new (x, None) ->
+    addr_of_point (map_to_symbol_table_type x)
   | E_new (x, Some y) ->
-    if equalType (eval_expr y) (TYPE_int 0) then
-      addr_of_point (map_to_symbol_table_type x)
-    else
-      raise (Terminate "Non int array size")
+    asrt ~condition:(eval_expr y |> integer_type) ~msg:"Non-int size of dynamic allocation";
+    addr_of_point (map_to_symbol_table_type x)
   | E_cast (x, y) -> (ignore (eval_expr y); map_to_symbol_table_type x)
   | E_ternary_op (x, y, z) ->
       if (equalType (eval_expr x) (TYPE_bool 0))

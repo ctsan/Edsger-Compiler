@@ -144,7 +144,7 @@ let newTemp () =
   incr tmp;
   !tmp
 
-let arithm_or_ptr ~expr ~(if_int: 'a lazy_t) ~if_double ~if_pointer =
+let match_ar_or_ptr ~expr ~(if_int: 'a lazy_t) ~if_double ~if_pointer =
   force (match lookup_type_of_expr expr with
    | TYPE_int 0 -> if_int
    | n when is_pointer n -> if_pointer
@@ -226,7 +226,7 @@ and genquads_expr ast =
         let e1prop = genquads_expr x
         and e2prop = genquads_expr y
         and w = Temp (newTemp ()) in
-        let q = arithm_or_ptr ~expr:x
+        let q = match_ar_or_ptr ~expr:x
                             ~if_int:(lazy (genQuad Op_plus e1prop.place e2prop.place w))
                         ~if_pointer:(lazy (genQuad Op_array e1prop.place e2prop.place w))
                          ~if_double:(lazy (genQuad Op_plus e1prop.place e2prop.place w))
@@ -306,14 +306,31 @@ and genquads_expr ast =
     | E_incr_bef x ->
             let expand_as_sum one_of_type =
               E_plu_assign (x,one_of_type)
-            in let rs = arithm_or_ptr ~expr:x
+            in let rs = match_ar_or_ptr ~expr:x
                                     ~if_int:(lazy (E_int "1"))
                                 ~if_pointer:(lazy (E_int "1"))
                                  ~if_double:(lazy (E_double "1.0"))
             in genquads_expr (expand_as_sum rs)
+    | E_incr_aft x ->
+            let ww    = Temp(newTemp ()) in
+            let rprop = genquads_expr x in
+            addQuad (genQuad Op_assign rprop.place Empty ww);
+            let rs = match_ar_or_ptr ~expr:x
+                                    ~if_int:(lazy (E_int "1"))
+                                ~if_pointer:(lazy (E_int "1"))
+                                 ~if_double:(lazy (E_double "1.0"))
+            in
+            let w = Temp(newTemp ()) in
+            let _ = match_ar_or_ptr ~expr:x
+                                ~if_int:(lazy (genQuad Op_plus  rprop.place (genquads_expr rs).place w))
+                            ~if_pointer:(lazy (genQuad Op_array rprop.place (genquads_expr rs).place w))
+                            ~if_double:(lazy (genQuad Op_plus   rprop.place (genquads_expr rs).place w))
+            in
+            addQuad (genQuad Op_assign w Empty rprop.place);
+            prop.place <- ww;
+            prop
     (* | E_decr_bef x -> (ignore (eval_expr x); TYPE_int 0) *)
-    (* | E_incr_aft x -> (ignore (eval_expr x); TYPE_int 0) *)
-    (* | E_decr_aft x -> (ignore (eval_expr x); TYPE_int 0) (*we need an lvalue check function*) *)
+    (* | E_decr_aft x -> (ignore (eval_expr x); TYPE_int 0) (\*we need an lvalue check function*\) *)
     | E_array_access (x,y) ->  (* TODO FIX *)
             let aprop = genquads_expr x in
             let iprop = genquads_expr y in

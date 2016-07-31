@@ -73,6 +73,26 @@ let rec equalType t1 t2 =
    | _                                            -> printf "c5\n";t1 = t2
    )
 
+let arithmetic_type = function
+  | TYPE_int 0 -> true
+  | TYPE_double 0 -> true
+  | _ -> false
+
+let integer_type = function
+  | TYPE_int 0 -> true
+  | _ -> false
+
+(* check if types: (t*,int) *)
+let ptr_arithmetic_type ptr t =
+  is_pointer ptr && integer_type t 
+
+let eq_arithmetic_type t1 t2 =
+  arithmetic_type t1 && equalType t1 t2
+
+(* true if operands are valid for plus minus operators *)
+let valid_pm_operands t1 t2 = 
+  ptr_arithmetic_type t1 t2 || eq_arithmetic_type t1 t2
+
 module H_expr = Hashtbl.Make (
   struct
     type t = Ast.ast_expr

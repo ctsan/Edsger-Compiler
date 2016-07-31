@@ -276,7 +276,7 @@ expression:
     | unary_assignment expression %prec T_dcr 
         { construct_unary_assign $1 $2 ~before:true }
     | expression unary_assignment  
-        { construct_unary_assign $2 $1 ~before:true }
+        { construct_unary_assign $2 $1 ~before:false }
     (*---------------------  %=, *=, +=, /=, ..  --------------------*)
     | expression binary_assignment expression %prec T_assign    
         { construct_binary_assign $2 $1 $3          }

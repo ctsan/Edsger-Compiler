@@ -22,3 +22,9 @@ val deref_expr: typ ->  typ
 
 val register_n_return_expr : expr:ast_expr -> result:typ -> typ
 val lookup_type_of_expr : ast_expr -> typ
+
+val arithmetic_type      : typ -> bool
+val integer_type         : typ -> bool
+val ptr_arithmetic_type  : typ ->typ -> bool
+val eq_arithmetic_type   : typ -> typ-> bool
+val valid_pm_operands    : typ -> typ -> bool
