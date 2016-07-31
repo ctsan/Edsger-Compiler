@@ -49,7 +49,6 @@ and semantic_properties = {
    mutable falses : int list;
 }
 
-
 let string_of_operator = function
     | Op_unit       -> "unit"
     | Op_endu       -> "endu"
@@ -99,10 +98,10 @@ let rec pprint_operand ppf op =
    | Empty            -> fprintf ppf "-"
 
 let pprint_quad ppf q =
-   if q.quad_op = Op_unit then
-        fprintf ppf "\n";
-   fprintf ppf "%d :\t%a, %a, %a, %a" q.quad_tag pprint_operator q.quad_op
-      pprint_operand q.quad_argX pprint_operand q.quad_argY pprint_operand q.quad_argZ
+  if q.quad_op = Op_unit then
+    fprintf ppf "\n";
+  fprintf ppf "%d :\t%a, %a, %a, %a" q.quad_tag pprint_operator q.quad_op
+    pprint_operand q.quad_argX pprint_operand q.quad_argY pprint_operand q.quad_argZ
 
 let pprint_quads ppf ql =
    List.iter ql (fun q -> fprintf ppf "\n%a" pprint_quad q)
@@ -338,7 +337,6 @@ and genquads_expr ast =
             addQuad(genQuad Op_array aprop.place iprop.place w);
             prop.place <- Deref (w); (* The result should be the deref of this *)
             prop
-
     (* | E_delete x -> if is_pointer (eval_expr x) then *)
     (*                     eval_expr x *)
     (*                 else *)
