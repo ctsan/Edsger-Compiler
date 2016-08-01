@@ -11,6 +11,7 @@ type operator =
    | Op_unit | Op_endu | Op_lt | Op_gt | Op_eq | Op_ifb
    | Op_plus | Op_minus | Op_mult | Op_div | Op_mod | Op_assign |Op_jump
    | Op_call | Op_par | Op_ret | Op_retv | Op_array
+   | Op_malloc | Op_free | Op_cast
 
 and pass_type =
    | V | R | RET
@@ -68,6 +69,9 @@ let string_of_operator = function
     | Op_par        -> "par"
     | Op_ret        -> "ret"
     | Op_retv       -> "retv"
+    | Op_cast       -> "cast"
+    | Op_malloc     -> "alloc"
+    | Op_free       -> "free"
 
 let string_of_passtype = function
    | V   -> "V"
@@ -79,23 +83,24 @@ let pprint_operator ppf op = string_of_operator op |> fprintf ppf "%s"
 let pprint_passtype ppf p  = string_of_passtype p |> fprintf ppf "%s"
 
 let rec pprint_operand ppf op =
-   match op with
-   | Unit             -> fprintf ppf "()"
-   | Var v            -> fprintf ppf "%s" v
-   | UnitName s       -> fprintf ppf "%s" s
-   | Int i            -> fprintf ppf "%d" i
-   | String s         -> fprintf ppf "\"%s\"" s
-   | Char i            ->fprintf ppf "'%c'" i
-   | Bool i           -> fprintf ppf "%b" i
-   | Double i         -> fprintf ppf "%F" i (* NOTE change this to %f or %.f possibly *)
-   | Temp i           -> fprintf ppf "$%d" i
-   | Address op       -> fprintf ppf "{"; pprint_operand ppf op; fprintf ppf "}"
-   | Deref   op       -> fprintf ppf "["; pprint_operand ppf op; fprintf ppf "]"
-   | Label i          -> fprintf ppf "%d" i
-   | PassType p       -> fprintf ppf "%a" pprint_passtype p
-   | Star             -> fprintf ppf "*"
-   | InitPlace        -> fprintf ppf "<undef>"
-   | Empty            -> fprintf ppf "-"
+  let f = fprintf in
+  match op with
+  | Unit             -> f ppf "()"
+  | Var v            -> f ppf "%s" v
+  | UnitName s       -> f ppf "%s" s
+  | Int i            -> f ppf "%d" i
+  | String s         -> f ppf "\"%s\"" s
+  | Char i            ->f ppf "'%c'" i
+  | Bool i           -> f ppf "%b" i
+  | Double i         -> f ppf "%F" i (* NOTE change this to %f or %.f possibly *)
+  | Temp i           -> f ppf "$%d" i
+  | Address op       -> f ppf "{"; pprint_operand ppf op; fprintf ppf "}"
+  | Deref   op       -> f ppf "["; pprint_operand ppf op; fprintf ppf "]"
+  | Label i          -> f ppf "%d" i
+  | PassType p       -> f ppf "%a" pprint_passtype p
+  | Star             -> f ppf "*"
+  | InitPlace        -> f ppf "<undef>"
+  | Empty            -> f ppf "-"
 
 let pprint_quad ppf q =
   if q.quad_op = Op_unit then
@@ -142,6 +147,7 @@ let addQuad q =
 let newTemp () =
   incr tmp;
   !tmp
+
 
 let match_ar_or_ptr ~expr ~(if_int: 'a lazy_t) ~if_double ~if_pointer =
   force (match lookup_type_of_expr expr with
@@ -321,9 +327,9 @@ and genquads_expr ast =
             in
             let w = Temp(newTemp ()) in
             let _ = match_ar_or_ptr ~expr:x
-                                ~if_int:(lazy (genQuad Op_plus  rprop.place (genquads_expr rs).place w))
-                            ~if_pointer:(lazy (genQuad Op_array rprop.place (genquads_expr rs).place w))
-                            ~if_double:(lazy (genQuad Op_plus   rprop.place (genquads_expr rs).place w))
+                                ~if_int:(lazy (addQuad(genQuad Op_plus  rprop.place (genquads_expr rs).place w)))
+                            ~if_pointer:(lazy (addQuad(genQuad Op_array rprop.place (genquads_expr rs).place w)))
+                             ~if_double:(lazy (addQuad(genQuad Op_plus   rprop.place (genquads_expr rs).place w)))
             in
             addQuad (genQuad Op_assign w Empty rprop.place);
             prop.place <- ww;
@@ -346,7 +352,7 @@ and genquads_expr ast =
     (*                             addr_of_point (map_to_symbol_table_type x) *)
     (*                        else *)
     (*                             raise (Terminate "Non int array size") *)
-    (* | E_cast (x, y) -> (ignore (eval_expr y); map_to_symbol_table_type x) *)
+    (* | E_cast (x, y) ->  *)
     | E_ternary_op (con, tr_expr, fal_expr) ->
         let cprop = genquads_expr con in
         backpatch cprop.trues (nextQuad ());

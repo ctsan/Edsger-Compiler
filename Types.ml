@@ -90,7 +90,7 @@ let eq_arithmetic_type t1 t2 =
   arithmetic_type t1 && equalType t1 t2
 
 (* true if operands are valid for plus minus operators *)
-let valid_pm_operands t1 t2 = 
+let valid_pm_operands t1 t2 =
   ptr_arithmetic_type t1 t2 || eq_arithmetic_type t1 t2
 
 module H_expr = Hashtbl.Make (

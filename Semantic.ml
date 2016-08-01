@@ -38,7 +38,6 @@ let is_valid_lvalue = function
   | E_deref _        -> true
   | _ -> false
 
-(* TODO  Alter Eval-expr to calculate whether the epxression is l-value or r-value  *)
 let rec eval_expr expression =
   let plus_minus_check (x,y) =
     (* There are three cases of acceptable arguments *)
