@@ -16,6 +16,7 @@ type operator =
 and pass_type =
   | V | R | RET
 
+
 and operand =
   | Unit
   | Var of string          (* TODO: MAYBE Change it to be Symbol Table Entry *)
@@ -34,6 +35,7 @@ and operand =
   | InitPlace (* For Place Initialization *)
   | Empty
 
+
 and quad =  {
   mutable quad_tag  : int;
   mutable quad_op   : operator;
@@ -45,6 +47,7 @@ and quad =  {
 and semantic_properties = {
   mutable place  : operand;
   (* mutable typ    : Types.typ; *)
+  (* mutable cond   : bool;  *)
   mutable next   : int list;
   mutable trues  : int list;
   mutable falses : int list;
@@ -90,7 +93,7 @@ let rec pprint_operand ppf op =
   | UnitName s       -> f ppf "%s" s
   | Int i            -> f ppf "%d" i
   | String s         -> f ppf "\"%s\"" s
-  | Char i            ->f ppf "'%c'" i
+  | Char i           ->f ppf "'%c'" i
   | Bool i           -> f ppf "%b" i
   | Double i         -> f ppf "%F" i (* NOTE change this to %f or %.f possibly *)
   | Temp i           -> f ppf "$%d" i
@@ -148,11 +151,16 @@ let newTemp () =
   incr tmp;
   !tmp
 
+(* condition or expression?  *)
+let is_condition prop =
+  not (prop.trues=[] && prop.falses=[])
+
 let match_ar ~expr ~(if_int: 'a lazy_t) ~if_double=
   force (match lookup_type_of_expr expr with
       | TYPE_int 0 -> if_int
       | TYPE_double 0 -> if_double
       | _ -> raise (Failure "This should not happen!"))
+
 
 let match_ar_or_ptr ~expr ~(if_int: 'a lazy_t) ~if_double ~if_pointer =
   force (match lookup_type_of_expr expr with
@@ -163,6 +171,8 @@ let match_ar_or_ptr ~expr ~(if_int: 'a lazy_t) ~if_double ~if_pointer =
 
 (* INPUT: List of INTs*)
 (* OUTP : BackPatching quads with labels with these INTS *)
+
+
 let rec backpatch ~quad_tags ~label =
   match quad_tags with
   | [] -> ()
@@ -172,6 +182,30 @@ let rec backpatch ~quad_tags ~label =
           if q.quad_argZ = Star then
             q.quad_argZ <- Label label )
 
+let rec conv_expr_to_cond pr =
+  let npr = newProp () in
+  npr.trues <- [nextQuad ()];
+  addQuad(genQuad Op_ifb pr.place Empty Star);
+  npr.falses <- [nextQuad ()];
+  addQuad(genQuad Op_jump Empty Empty Star);
+  npr
+
+let rec conv_cond_to_expr pr =
+  (* npr.trues <- [nextQuad ()]; *)
+  (* addQuad(genQuad Op_ifb pr.place Empty Star); *)
+  (* npr.falses <- [nextQuad ()]; *)
+  (* addQuad(genQuad Op_jump Empty Empty Star); *)
+  let npr = newProp () in 
+  let w = Temp(newTemp()) in
+  backpatch pr.trues (nextQuad());
+  addQuad(genQuad Op_assign (Bool true) Empty w); 
+  npr.next <-[nextQuad ()];
+  addQuad(genQuad Op_jump (Bool true) Empty Star);
+  backpatch pr.falses (nextQuad());
+  addQuad(genQuad Op_assign (Bool false) Empty w);
+  npr.place <- w;
+  npr
+  (* backpatch npr.next (nextQuad()); *)
 
 and closequad prop name =
   backpatch prop.next (nextQuad ());
@@ -227,7 +261,14 @@ and genquads_expr ast =
     prop;
   | E_id str -> prop.place <- Var str;  prop
   | E_int n  -> prop.place <- Int (int_of_string n); prop
-  | E_bool n -> prop.place <- Bool (n); prop
+  | E_bool n ->
+     (* prop.place <- Bool (n); *)
+     (* prop.trues <- [ nextQuad () ]; *)
+     (* addQuad(genQuad Op_ifb (Bool n) Empty Star); *)
+     (* prop.falses <- [ nextQuad () ]; *)
+     (* addQuad(genQuad Op_jump Empty Empty Star); *)
+     prop.place <- Bool n;
+     prop
   | E_char n -> prop.place <- Char n; prop
   | E_double n -> prop.place <- Double (Float.of_string n); prop
   | E_string s -> prop.place <- String s; prop
@@ -250,18 +291,22 @@ and genquads_expr ast =
   | E_mod (x,y)   -> bin_op_helper x y Op_mod
   (* (* Logical Operator*) *)
   | E_and (x,y) ->
-    let e1prop = genquads_expr x in
-    backpatch e1prop.trues (nextQuad ());
-    let e2prop = genquads_expr y in
-    prop.falses <- e1prop.falses @ e2prop.falses;
-    prop.trues  <- e2prop.trues;
+    let e1prop = ref (genquads_expr x) in
+    if not (is_condition !e1prop) then e1prop := conv_expr_to_cond !e1prop;
+    backpatch !e1prop.trues (nextQuad ());
+    let e2prop = ref (genquads_expr y) in
+    if not (is_condition !e2prop) then e2prop := conv_expr_to_cond !e2prop;
+    prop.falses <- !e1prop.falses @ !e2prop.falses;
+    prop.trues  <- !e2prop.trues;
     prop
   | E_or (x,y) ->
-    let e1prop = genquads_expr x in
-    backpatch e1prop.falses (nextQuad ());
-    let e2prop = genquads_expr y in
-    prop.trues  <- e2prop.trues @ e1prop.trues;
-    prop.falses <- e2prop.falses;
+    let e1prop = ref (genquads_expr x) in
+    if not (is_condition !e1prop) then e1prop := conv_expr_to_cond !e1prop;
+    backpatch !e1prop.falses (nextQuad ());
+    let e2prop = ref (genquads_expr y) in
+    if not (is_condition !e2prop) then e2prop := conv_expr_to_cond !e2prop;
+    prop.trues  <- !e2prop.trues @ !e1prop.trues;
+    prop.falses <- !e2prop.falses;
     prop
   | E_lteq (x,y)  -> genquads_expr (E_negate (E_gt (x,y)))  (* Making these OPs Syntactic sugar *)
   | E_gteq (x,y) ->  genquads_expr (E_negate (E_lt (x,y)))  (* For Previously Defined relops   *)
@@ -277,8 +322,18 @@ and genquads_expr ast =
   | E_assign (x,y) ->
     let yprop = genquads_expr y in
     let xprop = genquads_expr x in
-    addQuad(genQuad Op_assign yprop.place Empty xprop.place );
-    prop.place <- xprop.place;
+    if not (is_condition yprop) then
+      begin
+        printf "hi from expr\n";
+        addQuad(genQuad Op_assign yprop.place Empty xprop.place )
+      end
+    else(
+      printf "hi from cond\n";
+      let nprop = conv_cond_to_expr yprop in
+      backpatch nprop.next (nextQuad ());
+      addQuad(genQuad Op_assign nprop.place Empty xprop.place );
+    );
+    prop.place <- xprop.place; (* TODO Test this againt yprop.place *)
     prop
   | E_mul_assign (x,y) ->  (* This can't be syntactic sugar of E_assign since we will evaluate x only once *)
     let yprop = genquads_expr y in
