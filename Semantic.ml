@@ -38,7 +38,6 @@ let is_valid_lvalue = function
   | E_deref _        -> true
   | _ -> false
 
-(* TODO  Alter Eval-expr to calculate whether the epxression is l-value or r-value  *)
 let rec eval_expr expression =
   let result = match expression with
   | E_function_call (x,l) ->

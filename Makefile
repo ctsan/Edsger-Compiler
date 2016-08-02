@@ -11,6 +11,7 @@ EXENAME       = Compiler
 EXE_FULL_PATH = ./$(EXENAME)
 FLAGS         = -r -use-menhir -tag 'debug,thread' -use-ocamlfind -quiet
 PACKAGES      = -pkgs 'core'
+# add if needed: ppx_deriving,ppx_deriving.show
 
 #####################################################################
 #| Refer to the following link for more info about ocamlbuild
