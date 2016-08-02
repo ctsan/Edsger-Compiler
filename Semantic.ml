@@ -10,7 +10,6 @@ open Intermediary
 
 exception Terminate of string
 
-
 type storage =
   | L_VALUE
   | R_VALUE
@@ -123,7 +122,7 @@ let rec eval_expr expression =
     let x_expr = eval_expr x  in
     asrt ~condition:(arithmetic_type x_expr) ~msg:"Not Valid operand of unary operator";
     x_expr
-  | E_addr x -> 
+  | E_addr x ->
     if (is_valid_lvalue x) then
       addr_of_point (eval_expr x) (* TODO assert Pointer is not NULL *)
     else
@@ -139,7 +138,7 @@ let rec eval_expr expression =
     deref_expr (eval_expr x)
   | E_delete x ->
     asrt ~condition:(is_pointer (eval_expr x)) ~msg:"can't delete something that isn't a pointer";
-    TYPE_null 
+    TYPE_null
   | E_new (x, None) ->
     addr_of_point (map_to_symbol_table_type x)
   | E_new (x, Some y) ->
@@ -271,10 +270,10 @@ and check_a_declaration  =
       end);
 
 
-  (* check_a_statement function takes three arguments *)
-  (* 1st: function in which this statement executes *)
-  (* 2nd: this argument states the current guarantee of return statement *)
-  (* 3rd: this argument is the statement for semantic analysis *)
+(* check_a_statement function takes three arguments *)
+(* 1st: function in which this statement executes *)
+(* 2nd: this argument states the current guarantee of return statement *)
+(* 3rd: this argument is the statement for semantic analysis *)
 
 and check_a_statement func_id status =
   (function

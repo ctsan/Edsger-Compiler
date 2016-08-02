@@ -25,35 +25,35 @@ let position_dummy = PosDummy
 let print_position ppf pos =
   match pos with
   | PosPoint lpos ->
-      fprintf ppf "@[file \"%s\",@ line %d,@ character %d:@]@ "
-        lpos.pos_fname lpos.pos_lnum (lpos.pos_cnum - lpos.pos_bol)
+    fprintf ppf "@[file \"%s\",@ line %d,@ character %d:@]@ "
+      lpos.pos_fname lpos.pos_lnum (lpos.pos_cnum - lpos.pos_bol)
   | PosContext (lpos_start, lpos_end) ->
-      if lpos_start.pos_fname != lpos_end.pos_fname then
-        fprintf ppf "@[file \"%s\",@ line %d,@ character %d to@ \
-                     file %s,@ line %d,@ character %d:@]@ "
-          lpos_start.pos_fname lpos_start.pos_lnum
-          (lpos_start.pos_cnum - lpos_start.pos_bol)
-          lpos_end.pos_fname lpos_end.pos_lnum
-          (lpos_end.pos_cnum - lpos_end.pos_bol)
-      else if lpos_start.pos_lnum != lpos_end.pos_lnum then
-        fprintf ppf "@[file \"%s\",@ line %d,@ character %d to@ \
-                     line %d,@ character %d:@]@ "
-          lpos_start.pos_fname lpos_start.pos_lnum
-          (lpos_start.pos_cnum - lpos_start.pos_bol)
-          lpos_end.pos_lnum
-          (lpos_end.pos_cnum - lpos_end.pos_bol)
-      else if lpos_start.pos_cnum - lpos_start.pos_bol !=
-              lpos_end.pos_cnum - lpos_end.pos_bol then
-        fprintf ppf "@[file \"%s\",@ line %d,@ characters %d to %d:@]@ "
-          lpos_start.pos_fname lpos_start.pos_lnum
-          (lpos_start.pos_cnum - lpos_start.pos_bol)
-          (lpos_end.pos_cnum - lpos_end.pos_bol)
-      else
-        fprintf ppf "@[file \"%s\", line %d, character %d:@]@ "
-          lpos_start.pos_fname lpos_start.pos_lnum
-          (lpos_start.pos_cnum - lpos_start.pos_bol)
+    if lpos_start.pos_fname != lpos_end.pos_fname then
+      fprintf ppf "@[file \"%s\",@ line %d,@ character %d to@ \
+                   file %s,@ line %d,@ character %d:@]@ "
+        lpos_start.pos_fname lpos_start.pos_lnum
+        (lpos_start.pos_cnum - lpos_start.pos_bol)
+        lpos_end.pos_fname lpos_end.pos_lnum
+        (lpos_end.pos_cnum - lpos_end.pos_bol)
+    else if lpos_start.pos_lnum != lpos_end.pos_lnum then
+      fprintf ppf "@[file \"%s\",@ line %d,@ character %d to@ \
+                   line %d,@ character %d:@]@ "
+        lpos_start.pos_fname lpos_start.pos_lnum
+        (lpos_start.pos_cnum - lpos_start.pos_bol)
+        lpos_end.pos_lnum
+        (lpos_end.pos_cnum - lpos_end.pos_bol)
+    else if lpos_start.pos_cnum - lpos_start.pos_bol !=
+            lpos_end.pos_cnum - lpos_end.pos_bol then
+      fprintf ppf "@[file \"%s\",@ line %d,@ characters %d to %d:@]@ "
+        lpos_start.pos_fname lpos_start.pos_lnum
+        (lpos_start.pos_cnum - lpos_start.pos_bol)
+        (lpos_end.pos_cnum - lpos_end.pos_bol)
+    else
+      fprintf ppf "@[file \"%s\", line %d, character %d:@]@ "
+        lpos_start.pos_fname lpos_start.pos_lnum
+        (lpos_start.pos_cnum - lpos_start.pos_bol)
   | PosDummy ->
-      ()
+    ()
 
 let no_out buf pos len = ()
 let no_flush () = ()
@@ -88,20 +88,19 @@ and error fmt =
 and warning fmt =
   let fmt = "@[<v 2>Warning: " ^^ fmt ^^ "@]@;@?" in
   if !flagWarnings then
-  begin
-    incr numWarnings;
-    if !numWarnings >= !maxWarnings then
-      let cont ppf =
-        eprintf "Too many warnings, no more will be shown...\n";
-        flagWarnings := false in
-      kfprintf cont err_formatter fmt
-    else
-      eprintf fmt
-  end
+    begin
+      incr numWarnings;
+      if !numWarnings >= !maxWarnings then
+        let cont ppf =
+          eprintf "Too many warnings, no more will be shown...\n";
+          flagWarnings := false in
+        kfprintf cont err_formatter fmt
+      else
+        eprintf fmt
+    end
   else
     fprintf null_formatter fmt
 
 and message fmt =
   let fmt = "@[<v 2>" ^^ fmt ^^ "@]@;@?" in
   eprintf fmt
-

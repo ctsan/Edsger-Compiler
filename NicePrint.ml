@@ -4,8 +4,8 @@
 
 
 (* Supported Colors *)
-type color = 
-    | Normal 
+type color =
+    | Normal
     | Green
     | Red;;
 
@@ -16,20 +16,19 @@ type color =
 (********************************************************************)
 
 let colortxt = function
-    | Normal -> "\x1B[0m" 
+    | Normal -> "\x1B[0m"
     | Green  -> "\x1B[32m"
-    | Red    -> "\x1B[31m";;
-
+    | Red    -> "\x1B[31m"
 
 (* These Functions Print on Standard Error *)
 
-let eprintf_color color = 
+let eprintf_color color =
     prerr_string @@ colortxt color;
     Printf.eprintf;;
 
 let eclear () = prerr_string @@ colortxt Normal
 
-let printf_color color = 
+let printf_color color =
     print_string @@ colortxt color;
     Printf.printf;;
 
