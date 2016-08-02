@@ -38,20 +38,6 @@ let is_valid_lvalue = function
   | _ -> false
 
 let rec eval_expr expression =
-  let plus_minus_check (x,y) =
-    (* There are three cases of acceptable arguments *)
-    (* add doubles, add integers, add pointer with integer *)
-    let rsx = eval_expr x in
-    let rsy = eval_expr y in
-    (* Integer+Integer, Double+Double *)
-    if (equalType rsx rsy) && (equalType rsx (TYPE_int 0) || equalType rsy (TYPE_double 0)) then
-      rsx
-    (* Pointer+Integer *)
-    else if is_pointer rsx && equalType rsy (TYPE_int 0) then
-      rsx
-    else
-      raise (Terminate "Operands of operator +/- have bad types!")
-  in
   let result = match expression with
   | E_function_call (x,l) ->
     let param_types = id_make x |> lookup_pass_types in
@@ -61,7 +47,7 @@ let rec eval_expr expression =
           raise (Terminate ("passing type does not agree with function type")) (* TODO Print Types *)
       ) in
     (* Check if applied with no arguments when arguments are required*)
-    if res = None then asrt (List.length param_types = 0) "There is function with 0 arguments";
+    if res = None then asrt ~condition:(List.length param_types = 0) ~msg:"Function with 0 arguments";
     lookup_result_type (id_make x)
   | E_poly_type _ -> raise (Failure "This should not happen")
   | E_id str   -> lookup_result_type (id_make str)
@@ -71,16 +57,22 @@ let rec eval_expr expression =
   | E_double _ -> TYPE_double 0
   | E_string x -> TYPE_array (TYPE_char 0, 1+String.length x) (* NOTE: +1 for null check *)
   | E_null     -> TYPE_null
-  | E_plus (x,y)  -> plus_minus_check (x,y)
-  | E_minus (x,y) -> plus_minus_check (x,y)
-  | E_div (x,y)   -> check_eval_ar_op (x,y) (* TODO FIX so you can't use the following ops with anything different *)
-  | E_mult (x,y)  -> check_eval_ar_op (x,y) (*          than Int/Float *)
-  | E_mod (x,y)   -> check_eval_ar_op (x,y) (* TODO Only Integers *)
+  | E_plus (x,y)  | E_minus(x,y) -> 
+    asrt ~condition:(valid_pm_operands (eval_expr x) (eval_expr y))
+    ~msg:"Operands of operator +/- have bad types!";
+    (eval_expr x)
+  | E_mult (x,y) | E_div (x,y)   ->
+    asrt ~condition:(eq_arithmetic_type (eval_expr x) (eval_expr y))
+    ~msg:"Operands of operator * or / have bad types!";
+    (eval_expr x)
+  | E_mod (x,y)   -> 
+    asrt ~condition:(integer_type (eval_expr x) && integer_type (eval_expr y))
+    ~msg:"Operands of operator mod not integers!";
+    (eval_expr x)
   (*------------------ Logical Operator -----------------------------*)
   | E_and (x,y) | E_or (x,y) ->
-    if (not (check_binary_logical_operator x y))
-    then raise (Terminate "operands of and/or should be booleans\n")
-    else TYPE_bool 0
+    asrt ~condition:(check_binary_logical_operator x y) ~msg:"operands of and/or not boolean";
+    TYPE_bool 0
   | E_lteq (x,y) | E_gteq (x,y) | E_lt  (x,y) | E_gt  (x,y)
   | E_neq (x,y) | E_eq  (x,y) ->
     let _ = check_eval_ar_op (x,y) in (); TYPE_bool 0 (* TODO: spec pg10, fix pointers *)
@@ -88,32 +80,14 @@ let rec eval_expr expression =
   | E_assign (x,y) ->
     let lval = eval_expr x in
     let rval = eval_expr y in
-    asrt (is_valid_lvalue x) "This is not a valid l-value"; (* TODO Assert this is a valid l-value *)
-    if equalType rval lval then rval
-      else raise (Terminate "l-value doesn't have the same type as r-value")
-  | E_mul_assign (x,y) ->  if equalType (eval_expr y) (eval_expr x) then
-      eval_expr y
-    else
-      raise (Terminate "Not-matching types assignment")
-  | E_div_assign (x,y) ->  if equalType (eval_expr y) (eval_expr x) then
-      eval_expr y
-    else
-      raise (Terminate "Not-matching types assignment")
-  | E_mod_assign (x,y) ->  if equalType (eval_expr y) (eval_expr x) then
-      eval_expr y
-    else
-      raise (Terminate "Not-matching types assignment")
-  | E_plu_assign (x,y) ->
-    let x_expr = eval_expr x in
-    let y_expr = eval_expr y in
-    if (ptr_arithmetic_type x_expr y_expr) ||  eq_arithmetic_type x_expr y_expr then
-      x_expr
-    else
-      raise (Terminate "Not-matching types assignment")
-  | E_min_assign (x,y) -> if equalType (eval_expr y) (eval_expr x) then
-      eval_expr y
-    else
-      raise (Terminate "Not-matching types assignment")
+    asrt ~condition:(is_valid_lvalue x) ~msg:"This is not a valid l-value";
+    asrt ~condition:(equalType rval lval) ~msg:"l-value different type from r-value";
+    rval
+  | E_mul_assign (x,y) -> eval_expr (E_assign (x, E_mult (x,y)))
+  | E_div_assign (x,y) -> eval_expr (E_assign (x, E_div (x,y)))
+  | E_mod_assign (x,y) -> eval_expr (E_assign (x, E_mod (x,y)))
+  | E_plu_assign (x,y) -> eval_expr (E_assign (x, E_plus (x,y)))
+  | E_min_assign (x,y) -> eval_expr (E_assign (x, E_minus (x,y)))
   | E_negate x -> (* BOOL -> BOOL *)
     let x_expr = eval_expr x  in
     asrt ~condition:(equalType x_expr (TYPE_bool 0)) ~msg:"Not Valid operand of unary operator";
@@ -127,7 +101,9 @@ let rec eval_expr expression =
       addr_of_point (eval_expr x) (* TODO assert Pointer is not NULL *)
     else
       raise (Terminate "operator '&' should have an l-value as operand")
-  | E_deref x ->  deref_expr (eval_expr x) (* TODO Ask a teacher whether we should check if operand is l-value *)
+  | E_deref x ->  
+
+    deref_expr (eval_expr x) (* TODO Ask a teacher whether we should check if operand is l-value *)
   (* TODO check if operands are l-values and of Arithmetic Type or Poitner Type *)
   | E_incr_bef x | E_decr_bef x | E_incr_aft x | E_decr_aft x ->
     let x_expr = eval_expr x  in
