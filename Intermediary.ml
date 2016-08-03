@@ -463,6 +463,7 @@ and genquads_expr ast =
     prop.place <- w;
     prop
   | _ -> prop
+    (*t*)
 
 (* Associate labels to qtags for 'continue' stmt*)
 let label_to_qtag = String.Table.create ();;
