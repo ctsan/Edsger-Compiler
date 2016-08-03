@@ -97,8 +97,8 @@ let rec pprint_operand ppf op =
   | Bool i           -> f ppf "%b" i
   | Double i         -> f ppf "%F" i (* NOTE change this to %f or %.f possibly *)
   | Temp i           -> f ppf "$%d" i
-  | Address op       -> f ppf "{"; pprint_operand ppf op; fprintf ppf "}"
-  | Deref   op       -> f ppf "["; pprint_operand ppf op; fprintf ppf "]"
+  | Address op       -> f ppf "{"; pprint_operand ppf op; f ppf "}"
+  | Deref   op       -> f ppf "["; pprint_operand ppf op; f ppf "]"
   | Label i          -> f ppf "%d" i
   | PassType p       -> f ppf "%a" pprint_passtype p
   | Star             -> f ppf "*"
@@ -182,32 +182,36 @@ let rec backpatch ~quad_tags ~label =
           if q.quad_argZ = Star then
             q.quad_argZ <- Label label )
 
-let rec conv_expr_to_cond pr =
-  let npr = newProp () in
-  npr.trues <- [nextQuad ()];
-  addQuad(genQuad Op_ifb pr.place Empty Star);
-  npr.falses <- [nextQuad ()];
-  addQuad(genQuad Op_jump Empty Empty Star);
-  npr
+let rec output_condition pr =
+  if is_condition pr then pr
+  else
+    begin
+      let npr = newProp () in
+      npr.trues <- [nextQuad ()];
+      addQuad(genQuad Op_ifb pr.place Empty Star);
+      npr.falses <- [nextQuad ()];
+      addQuad(genQuad Op_jump Empty Empty Star);
+      npr
+    end
 
-let rec conv_cond_to_expr pr =
-  (* npr.trues <- [nextQuad ()]; *)
-  (* addQuad(genQuad Op_ifb pr.place Empty Star); *)
-  (* npr.falses <- [nextQuad ()]; *)
-  (* addQuad(genQuad Op_jump Empty Empty Star); *)
-  let npr = newProp () in 
-  let w = Temp(newTemp()) in
-  backpatch pr.trues (nextQuad());
-  addQuad(genQuad Op_assign (Bool true) Empty w); 
-  npr.next <-[nextQuad ()];
-  addQuad(genQuad Op_jump (Bool true) Empty Star);
-  backpatch pr.falses (nextQuad());
-  addQuad(genQuad Op_assign (Bool false) Empty w);
-  npr.place <- w;
-  npr
-  (* backpatch npr.next (nextQuad()); *)
+let rec output_expression pr =
+  if not (is_condition pr) then pr
+  else
+    begin
+      let npr = newProp () in
+      let w = Temp(newTemp()) in
+      backpatch pr.next (nextQuad());
+      backpatch pr.trues (nextQuad());
+      addQuad(genQuad Op_assign (Bool true) Empty w);
+      npr.next <-[nextQuad ()];
+      addQuad(genQuad Op_jump Empty Empty Star);
+      backpatch pr.falses (nextQuad());
+      addQuad(genQuad Op_assign (Bool false) Empty w);
+      npr.place <- w;
+      npr
+    end
 
-and closequad prop name =
+and closequad prop =
   backpatch prop.next (nextQuad ());
   backpatch prop.trues (nextQuad ());
   backpatch prop.falses (nextQuad ());
@@ -262,17 +266,12 @@ and genquads_expr ast =
   | E_id str -> prop.place <- Var str;  prop
   | E_int n  -> prop.place <- Int (int_of_string n); prop
   | E_bool n ->
-     (* prop.place <- Bool (n); *)
-     (* prop.trues <- [ nextQuad () ]; *)
-     (* addQuad(genQuad Op_ifb (Bool n) Empty Star); *)
-     (* prop.falses <- [ nextQuad () ]; *)
-     (* addQuad(genQuad Op_jump Empty Empty Star); *)
      prop.place <- Bool n;
      prop
-  | E_char n -> prop.place <- Char n; prop
+  | E_char n   -> prop.place <- Char n; prop
   | E_double n -> prop.place <- Double (Float.of_string n); prop
   | E_string s -> prop.place <- String s; prop
-  | E_null -> prop.place <- Int 0; prop (* TODO: Is this the best idea? Null as a zero integer? *)
+  | E_null     -> prop.place <- Int 0; prop (* TODO: Is this the best idea? Null as a zero integer? *)
   | E_plus (x,y)  ->
     let e1prop = genquads_expr x
     and e2prop = genquads_expr y
@@ -285,32 +284,39 @@ and genquads_expr ast =
     addQuad q;
     prop.place <- w;
     prop
-  | E_minus (x,y) -> bin_op_helper x y Op_minus
+  | E_minus (x,y) ->
+    let e1prop = genquads_expr x
+    and e2prop = genquads_expr y
+    and w = Temp (newTemp ()) in
+    let q = match_ar_or_ptr ~expr:x
+            ~if_int:(lazy (genQuad Op_minus e1prop.place e2prop.place w))
+        ~if_pointer:(lazy (genQuad Op_array e1prop.place e2prop.place w)) (* TODO MINUS! FIX!*)
+         ~if_double:(lazy (genQuad Op_minus e1prop.place e2prop.place w))
+    in
+    addQuad q;
+    prop.place <- w;
+    prop
   | E_div (x,y)   -> bin_op_helper x y Op_div
   | E_mult (x,y)  -> bin_op_helper x y Op_mult
   | E_mod (x,y)   -> bin_op_helper x y Op_mod
   (* (* Logical Operator*) *)
   | E_and (x,y) ->
-    let e1prop = ref (genquads_expr x) in
-    if not (is_condition !e1prop) then e1prop := conv_expr_to_cond !e1prop;
-    backpatch !e1prop.trues (nextQuad ());
-    let e2prop = ref (genquads_expr y) in
-    if not (is_condition !e2prop) then e2prop := conv_expr_to_cond !e2prop;
-    prop.falses <- !e1prop.falses @ !e2prop.falses;
-    prop.trues  <- !e2prop.trues;
+    let e1prop = genquads_expr x |> output_condition in
+    backpatch e1prop.trues (nextQuad ());
+    let e2prop = genquads_expr y |> output_condition in
+    prop.falses <- e1prop.falses @ e2prop.falses;
+    prop.trues  <- e2prop.trues;
     prop
   | E_or (x,y) ->
-    let e1prop = ref (genquads_expr x) in
-    if not (is_condition !e1prop) then e1prop := conv_expr_to_cond !e1prop;
-    backpatch !e1prop.falses (nextQuad ());
-    let e2prop = ref (genquads_expr y) in
-    if not (is_condition !e2prop) then e2prop := conv_expr_to_cond !e2prop;
-    prop.trues  <- !e2prop.trues @ !e1prop.trues;
-    prop.falses <- !e2prop.falses;
+    let e1prop = genquads_expr x |> output_condition in
+    backpatch e1prop.falses (nextQuad ());
+    let e2prop = genquads_expr y |> output_condition in
+    prop.trues  <- e2prop.trues @ e1prop.trues;
+    prop.falses <- e2prop.falses;
     prop
   | E_lteq (x,y)  -> genquads_expr (E_negate (E_gt (x,y)))  (* Making these OPs Syntactic sugar *)
   | E_gteq (x,y) ->  genquads_expr (E_negate (E_lt (x,y)))  (* For Previously Defined relops   *)
-  | E_eq (x,y) -> logical_op_helper  x y Op_eq
+  | E_eq (x,y) -> logical_op_helper x y Op_eq
   | E_lt (x,y) -> logical_op_helper x y Op_lt
   | E_gt (x,y) -> logical_op_helper x y Op_gt
   | E_neq (x,y) -> genquads_expr (E_negate (E_eq(x,y)))   (* Syntactic Sugar of !(x==y) *)
@@ -320,21 +326,24 @@ and genquads_expr ast =
     prop.place <- yprop.place;
     prop
   | E_assign (x,y) ->
-    let yprop = genquads_expr y in
+    let yprop = genquads_expr y |> output_expression in
+    closequad yprop;
+    (* backpatch yprop.next (nextQuad ()); *)
     let xprop = genquads_expr x in
-    if not (is_condition yprop) then
-      begin
-        printf "hi from expr\n";
-        addQuad(genQuad Op_assign yprop.place Empty xprop.place )
-      end
-    else(
-      printf "hi from cond\n";
-      let nprop = conv_cond_to_expr yprop in
-      backpatch nprop.next (nextQuad ());
-      addQuad(genQuad Op_assign nprop.place Empty xprop.place );
-    );
+    addQuad(genQuad Op_assign yprop.place Empty xprop.place ); 
     prop.place <- xprop.place; (* TODO Test this againt yprop.place *)
     prop
+    (* if not (is_condition yprop) then *)
+    (*   begin *)
+    (*     printf "hi from expr\n"; *)
+    (*     addQuad(genQuad Op_assign yprop.place Empty xprop.place ) *)
+    (*   end *)
+    (* else( *)
+    (*   printf "hi from cond\n"; *)
+    (*   let nprop = conv_cond_to_expr yprop in *)
+    (*   backpatch nprop.next (nextQuad ()); *)
+    (*   addQuad(genQuad Op_assign nprop.place Empty xprop.place ); *)
+    (* ); *)
   | E_mul_assign (x,y) ->  (* This can't be syntactic sugar of E_assign since we will evaluate x only once *)
     let yprop = genquads_expr y in
     let xprop = genquads_expr x in
@@ -358,7 +367,7 @@ and genquads_expr ast =
   | E_min_assign (x,y) ->
     genquads_expr (E_assign (x, E_minus (x,y)))
   | E_negate x ->
-    let rprop = genquads_expr x in
+    let rprop = genquads_expr x |> output_condition in
     prop.trues <- rprop.falses;
     prop.falses <- rprop.trues;
     prop
@@ -438,7 +447,7 @@ and genquads_expr ast =
     prop
   (* | E_cast (x, y) -> TODO Check this again when we know more about code-generation *)
   | E_ternary_op (con, tr_expr, fal_expr) ->
-    let cprop = genquads_expr con in
+    let cprop = genquads_expr con |> output_condition in
     backpatch cprop.trues (nextQuad ());
     let w = Temp (newTemp ()) in
     let tprop = genquads_expr tr_expr in
@@ -448,7 +457,9 @@ and genquads_expr ast =
     backpatch cprop.falses (nextQuad ());
     let fprop = genquads_expr fal_expr in
     addQuad (genQuad Op_assign fprop.place Empty w);
-    prop.next <- l1 @ fprop.next  @ tprop.next;
+    prop.trues  <- tprop.trues @ fprop.trues;
+    prop.falses <- tprop.falses @ fprop.falses;
+    prop.next   <- l1 @ fprop.next  @ tprop.next;
     prop.place <- w;
     prop
   | _ -> prop
@@ -467,13 +478,13 @@ let rec genquads_stmt ast =
   match ast with
   | S_expr expr -> printf "(expr)\n"; genquads_expr expr
   | S_if (cond, ifstmt,None)  ->
-    let cprop = genquads_expr cond in
+    let cprop = genquads_expr cond |> output_condition in
     backpatch cprop.trues (nextQuad ());
     let sprop = genquads_stmt ifstmt in
     prop.next <- cprop.falses @ sprop.next;
     prop
   | S_if (cond, ifstmt, Some elstmt) ->
-    let cprop = genquads_expr cond in
+    let cprop = genquads_expr cond |> output_condition in
     backpatch cprop.trues (nextQuad ());
     let sprop = genquads_stmt ifstmt in
     let l1    = [ nextQuad () ] in
@@ -488,7 +499,7 @@ let rec genquads_stmt ast =
     let start_loop = nextQuad () in
     let _ = label >>| (fun label -> Hashtbl.set label_to_qtag ~key:label ~data:start_loop) in
     Stack.push fors_qtags start_loop; (* store this for keeping track of the most recent for*)
-    let guardprop  = expr2 >>| genquads_expr in
+    let guardprop  = expr2 >>| genquads_expr >>| output_condition in
     (match guardprop with
      | Some grop -> backpatch grop.trues (nextQuad ())
      | None -> ());

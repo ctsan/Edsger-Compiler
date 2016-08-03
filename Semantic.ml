@@ -238,7 +238,7 @@ and check_a_declaration  =
           raise (Terminate "return value is not guaranteed in a non-void function");
         let lst_prop = List.fold fun_stmts ~init:(newProp ()) ~f:(fun _ ast ->
             let prop = genquads_stmt ast in
-            closequad prop id; prop)
+            closequad prop; prop)
         in
         printSymbolTable ();
         closeFinalQuad lst_prop id;

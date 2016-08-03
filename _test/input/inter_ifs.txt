@@ -1,6 +1,13 @@
 void main () {
      int x;
-     if (x<1) {
+    if (true) {
+       99999999*9;
+    } else if (true) 
+       88888888*8;
+    else {
+       77777777*7;
+    }
+    if (x<1) {
        100*100;
     }
 }
@@ -53,5 +60,5 @@ void main9 () {
 
 void main10 () {
      bool a;
-     a = (9<2 || 10<3)?(true || false) : (true && true);
+     a = (9<2 || 10<3)?(true) : (true && true);
 }
