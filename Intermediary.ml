@@ -93,8 +93,8 @@ let rec pprint_operand ppf op =
   | UnitName s       -> f ppf "%s" s
   | Int i            -> f ppf "%d" i
   | String s         -> f ppf "\"%s\"" s
-  | Char i           ->f ppf "'%c'" i
-  | Bool i           -> f ppf "%b" i
+  | Char i           ->f ppf "%C" i
+  | Bool i           -> f ppf "%B" i
   | Double i         -> f ppf "%F" i (* NOTE change this to %f or %.f possibly *)
   | Temp i           -> f ppf "$%d" i
   | Address op       -> f ppf "{"; pprint_operand ppf op; f ppf "}"
