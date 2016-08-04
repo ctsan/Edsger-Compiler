@@ -37,7 +37,7 @@ type ins_86_64 =
   | D_str   of label_id * string
   | D_byte  of label_id * imm  (* 8bit  *)
   | D_short of label_id * imm  (* 16bit *)
-  | D_long  of label_id * imm       (* 32bit integer *)
+  | D_long  of label_id * imm  (* 32bit integer *)
   | D_zero  of label_id * int  (* number of bytes initialized as zero *)
   | M_Label of label_id
 
@@ -78,7 +78,7 @@ let string_of_imm = function
   | Imm16 i
   | Imm32 i
   | Imm64 i ->
-     sprintf "$%d" i
+     sprintf "$%d\n" i (* NOTE: Added \n *)
 
 let string_of_reg_form n = "" (* TODO !*)
 let string_of_memory_location n = "" (* TODO !*)
@@ -90,8 +90,38 @@ let string_of_operand = function
 
 let string_of_ins_86_64 = function
   | D_str  (label,str)   -> (string_of_label label) ^ sprintf "\t.string %S\n" str
-  | D_zero (label,total) -> (string_of_label label) ^ sprintf "\t.zero %d\n" total
+  | D_byte  (label,num)   -> (string_of_label label) ^ sprintf "\t.byte " ^ string_of_imm num 
+  | D_short  (label,num)   -> (string_of_label label) ^ sprintf "\t.short " ^ string_of_imm num 
+  | D_long  (label,num)   -> (string_of_label label) ^ sprintf "\t.long " ^ string_of_imm num 
+  | D_zero (label,total) -> (string_of_label label) ^ sprintf "\t.zero %d\n" totala
+  | M_Label label        -> sprintf "%S:\m" (string of_label label) 
+  | I_movb (op1,op2)     -> sprintf "\tmovb %s,%s\n" (string_of_operand op1) (string_of_operand op2)
+  | I_movw (op1,op2)     -> sprintf "\tmovw %s,%s\n" (string_of_operand op1) (string_of_operand op2)
+  | I_movl (op1,op2)     -> sprintf "\tmovl %s,%s\n" (string_of_operand op1) (string_of_operand op2)
   | I_movq (op1,op2)     -> sprintf "\tmovq %s,%s\n" (string_of_operand op1) (string_of_operand op2)
+  | I_pushq op           -> sprintf "\tpushq %s\n" (string_of_operand op)
+  | I_popq op            -> sprintf "\tpopq %s\n" (string_of_operand op)
+  | I_leaq (mem,reg1)    -> sprintf "\tleaq %s,%s\n" (string_of_memory_location mem) (string_of_reg_form reg1)
+  | I_addb (op1,op2)     -> sprintf "\taddb %s,%s\n" (string_of_operand op1) (string_of_operand op2)
+  | I_addw (op1,op2)     -> sprintf "\taddw %s,%s\n" (string_of_operand op1) (string_of_operand op2)
+  | I_addl (op1,op2)     -> sprintf "\taddl %s,%s\n" (string_of_operand op1) (string_of_operand op2)
+  | I_addq (op1,op2)     -> sprintf "\taddq %s,%s\n" (string_of_operand op1) (string_of_operand op2)
+  | I_subb (op1,op2)     -> sprintf "\tsubb %s,%s\n" (string_of_operand op1) (string_of_operand op2)
+  | I_subw (op1,op2)     -> sprintf "\tsubw %s,%s\n" (string_of_operand op1) (string_of_operand op2)
+  | I_subl (op1,op2)     -> sprintf "\tsubl %s,%s\n" (string_of_operand op1) (string_of_operand op2)
+  | I_subq (op1,op2)     -> sprintf "\tsubq %s,%s\n" (string_of_operand op1) (string_of_operand op2)
+  | I_imul (op1,reg1)    -> sprintf "\timul %s,%s\n" (string_of_operand op1) (string_of_reg_form reg1) 
+  | I_idiv reg1          -> sprintf "\tidiv %s\n" (string_of_reg_form reg1) 
+  | I_idivw mem          -> sprintf "\tidivw %s\n" (string_of_memory_location mem)
+  | I_jmp label          -> sprintf "\tjmp %s\n" (string_of_label label)
+  | I_cmp (op1,op2)      -> sprintf "\tcmp %s,%s\n" (string_of_operand op1) (string_of_operand op2)
+  | I_je label           -> sprintf "\tje %s\n" (string_of_label label)
+  | I_jne label          -> sprintf "\tjne %s\n" (string_of_label label)
+  | I_jz label           -> sprintf "\tjz %s\n" (string_of_label label)
+  | I_jg label           -> sprintf "\tjg %s\n" (string_of_label label)
+  | I_jge label          -> sprintf "\tjge %s\n" (string_of_label label)
+  | I_jl label           -> sprintf "\tjl %s\n" (string_of_label label)
+  | I_jle label          -> sprintf "\tjle %s\n" (string_of_label label)
   | _ -> sprintf "this is not implemented\n"
 
 let instructions = ref []
