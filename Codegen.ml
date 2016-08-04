@@ -13,7 +13,8 @@ type reg =
   | Rsi | Rdi | Rbp | Rsp
   | Rth of int (* R8,R9,R10,R11,R12,R13,R14,R15 *)
 
-type rtype =  B64 | B32  | B16L | B16H
+     (* e.g. rax,   eax,   ax,   ah,   al *)
+type rtype =  B64 | B32  | B16 | B8H | B8L
 
 type reg_form = reg * rtype
 
