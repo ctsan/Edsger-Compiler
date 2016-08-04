@@ -39,7 +39,12 @@ type ins_86_64 =
   | D_long  of label_id * imm       (* 32bit integer *)
   | D_zero  of label_id * int  (* number of bytes initialized as zero *)
   | M_Label of label_id
-  | I_movq   of operand * operand
+
+  | I_movb  of operand * operand
+  | I_movw  of operand * operand
+  | I_movl  of operand * operand
+  | I_movq  of operand * operand
+
   | I_pushq of operand (* reg64, mem, const64 *)
   | I_popq  of operand   (* reg64, mem *)
   | I_leaq  of memory_location * reg (* move the address of memory location, to 64bit-register *)
@@ -87,7 +92,6 @@ let string_of_ins_86_64 = function
   | D_zero (label,total) -> (string_of_label label) ^ sprintf "\t.zero %d\n" total
   | I_movq (op1,op2)     -> sprintf "\tmovq %s,%s\n" (string_of_operand op1) (string_of_operand op2)
   | _ -> sprintf "this is not implemented\n"
-
 
 let instructions = ref []
 
