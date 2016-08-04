@@ -19,8 +19,8 @@ and pass_type =
 
 and operand =
   | Unit
-  | Var of string          (* TODO: MAYBE Change it to be Symbol Table Entry *)
-  | UnitName of string
+  | Var of entry          (* TODO: MAYBE Change it to be Symbol Table Entry *)
+  | UnitName of entry
   | Char of char
   | String of string
   | Int of int
@@ -89,8 +89,8 @@ let rec pprint_operand ppf op =
   let f = fprintf in
   match op with
   | Unit             -> f ppf "()"
-  | Var v            -> f ppf "%s" v
-  | UnitName s       -> f ppf "%s" s
+  | Var v            -> f ppf "%s" (string_of_entry v)
+  | UnitName s       -> f ppf "%s" (string_of_entry s)
   | Int i            -> f ppf "%d" i
   | String s         -> f ppf "\"%s\"" s
   | Char i           ->f ppf "%C" i

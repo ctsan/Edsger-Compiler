@@ -57,6 +57,7 @@ and entry = {
 type lookup_type = LOOKUP_CURRENT_SCOPE | LOOKUP_ALL_SCOPES
 
 
+val string_of_entry  : entry -> string
 
 val no_entry : Identifier.id -> entry
 val currentScope : scope ref              (* Τρέχουσα εμβέλεια         *)

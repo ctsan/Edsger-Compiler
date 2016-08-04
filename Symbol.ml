@@ -135,6 +135,8 @@ let newEntry id inf err =
     error "duplicate identifier %a" pretty_id id;
     e
 
+let string_of_entry e =
+  id_name e.entry_id
 
 let lookupEntry id how err =
   let scc = !currentScope in
