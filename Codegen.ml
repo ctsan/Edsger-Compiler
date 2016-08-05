@@ -1,10 +1,10 @@
 open Core.Std
-open Core.Core_stack
 open Printf
 open Symbol
 open Ast
 open Types
 open Identifier
+open Intermediary
 
 type label_id = string
 let string_of_label l = sprintf "%s:\n" l
@@ -25,8 +25,7 @@ type imm =
   | Imm32 of int
   | Imm64 of int
 
-type memory_location =
-  | Effective of int option * reg * reg option
+type memory_location = int option * reg * reg option
 
 type operand =
   | Reg   of reg_form
@@ -95,7 +94,7 @@ let string_of_ins_86_64 = function
   | D_short  (label,num)   -> (string_of_label label) ^ sprintf "\t.short " ^ string_of_imm num
   | D_long  (label,num)   -> (string_of_label label) ^ sprintf "\t.long " ^ string_of_imm num
   | D_zero (label,total) -> (string_of_label label) ^ sprintf "\t.zero %d\n" total
-  | M_Label label        -> sprintf "%S:\m" (string of_label label) 
+  | M_Label label        -> sprintf "%S:\m" (string_of_label label)
   | I_movb (op1,op2)     -> sprintf "\tmovb %s,%s\n" (string_of_operand op1) (string_of_operand op2)
   | I_movw (op1,op2)     -> sprintf "\tmovw %s,%s\n" (string_of_operand op1) (string_of_operand op2)
   | I_movl (op1,op2)     -> sprintf "\tmovl %s,%s\n" (string_of_operand op1) (string_of_operand op2)
@@ -111,8 +110,8 @@ let string_of_ins_86_64 = function
   | I_subw (op1,op2)     -> sprintf "\tsubw %s,%s\n" (string_of_operand op1) (string_of_operand op2)
   | I_subl (op1,op2)     -> sprintf "\tsubl %s,%s\n" (string_of_operand op1) (string_of_operand op2)
   | I_subq (op1,op2)     -> sprintf "\tsubq %s,%s\n" (string_of_operand op1) (string_of_operand op2)
-  | I_imul (op1,reg1)    -> sprintf "\timul %s,%s\n" (string_of_operand op1) (string_of_reg_form reg1) 
-  | I_idiv reg1          -> sprintf "\tidiv %s\n" (string_of_reg_form reg1) 
+  | I_imul (op1,reg1)    -> sprintf "\timul %s,%s\n" (string_of_operand op1) (string_of_reg_form reg1)
+  | I_idiv reg1          -> sprintf "\tidiv %s\n" (string_of_reg_form reg1)
   | I_idivw mem          -> sprintf "\tidivw %s\n" (string_of_memory_location mem)
   | I_jmp label          -> sprintf "\tjmp %s\n" (string_of_label label)
   | I_cmp (op1,op2)      -> sprintf "\tcmp %s,%s\n" (string_of_operand op1) (string_of_operand op2)
@@ -126,59 +125,79 @@ let string_of_ins_86_64 = function
   | _ -> sprintf "this is not implemented\n"
 
 let instructions = ref []
+let call_stack = Stack.create ()
 
 let add_instruction i =
   instructions := i :: !instructions
 
-let get_AR l = 
-  let base = I_movq (Reg (Rsi, B64), Mem (Effective (Some 4, Rbp, None))) in
+(* TODO Document what this function takes, what gives *)
+let get_AR l =
+  let base = I_movq (Reg (Rsi, B64), Mem (Some 4, Rbp, None)) in
   let ncur = l.entry_scope.sco_nesting in
-  let na = (Stack.top_exn func_stack).entry_scope.sco_nesting in
+  let na = (Stack.top_exn call_stack).entry_scope.sco_nesting in
   let rec loopins acc = function
-    | 0 -> 
+    | 0 ->
         acc
-    | n -> 
-        loopins ((I_movq (Mem (Effective (Some 4, Rsi, None)), Reg (Rsi, B64)))::acc) (n-1)
+    | n ->
+        loopins ((I_movq (Mem (Some 4, Rsi, None), Reg (Rsi, B64)))::acc) (n-1)
   in
     base::(loopins [] (ncur-na-1))
 
-let update_AR callee called = 
+(* TODO Document what this function takes, what gives *)
+let update_AR callee called =
   let np = callee.entry_scope.sco_nesting in
   let nx = called.entry_scope.sco_nesting in
   if (np > nx) then
     [I_pushq (Reg (Rbp, B64))]
   else if (np = nx) then
-    [I_pushq (Mem (Effective (Some 4, Rbp, None)))]
+    [I_pushq (Mem (Some 4, Rbp, None))]
   else
-    let fst = I_movq (Mem (Effective (Some 4, Rbp, None)),Reg (Rsi, B64)) in
-    let lst = [I_pushq (Mem (Effective (Some 4, Rsi, None)))] in
+    let fst = I_movq (Mem (Some 4, Rbp, None),Reg (Rsi, B64)) in
+    let lst = [I_pushq (Mem (Some 4, Rsi, None))] in
     let rec loopins acc = function
     | 0 ->
         acc
     | n ->
-        loopins ((I_movq (Mem (Effective (Some 4, Rsi, None), Reg (Rsi, B64))))::acc) (n-1)
+        loopins ((I_movq (Mem (Some 4, Rsi, None), Reg (Rsi, B64)))::acc) (n-1)
   in
     fst::(loopins [] (np-nx-1)) @ lst
 
-let rec load reg a = 
+(* input: This function takes a destination register, and a source argument *)
+(* outpt: a list of the necessery assembly instructions *)
+let rec load reg a =
   match a with
-  | Int n -> 
-      [I_movq (reg, Const (Imm64 a))]
-  | Bool false ->
-      [I_movq (reg, Const (Imm64 0))]
-  | Bool true ->
-      [I_movq (reg, Const (Imm64 1))]
+  | Int n ->
+    [I_movw(Const (Imm16 n),reg)]
+  | Bool b ->
+    [I_movb(Const (Imm8 (Bool.to_int b)),reg)]
   | Char chr ->
-      [I_movq (reg, Const (Imm64 (Char.code chr)))]
+    [I_movb(Const (Imm8 (Char.to_int chr)),reg)]
   | Var ent ->
-      [] (* TODO Create local ent function to use *)
+    (* TODO: implement is_local, which takes an entry, and decides if it is local *)
+    (* TODO: Create local ent function to use *)
+    if is_local ent then
+     []
+    else
+     []
+  | Address i -> load_addr reg i
+  (* TODO use proper `mov` later later. *)
+  | Deref i -> load (Reg (Rdi,B64)) i @ [I_movq (Mem (None,Rdi,None),reg) ]
   | _ -> raise (Terminate "bad quad entry")
 
+(* TODO Document what this function takes, what gives *)
+and load_addr dst src = []
 
-      
+(* Generates assembly instructions to store a register to a memory location *)
+and store src dst = []
 
-let load_addr dst src = 100
+(* generate a label for the beginning of a unit *)
+and label_name p = []
 
-let asm_of_quad qd = 9
+(* generate a label for the end of a unit *)
+and label_end_of p = []
 
+(* genearte a label for a quad with label `label_name` *)
+and label_general p = []
 
+(* TODO Document what this function takes, what gives *)
+and asm_of_quad qd = ()

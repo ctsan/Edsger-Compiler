@@ -20,7 +20,7 @@ and pass_type =
 and operand =
   | Unit
   | Var of entry          (* TODO: MAYBE Change it to be Symbol Table Entry *)
-  | UnitName of entry
+  | UnitName of string
   | Char of char
   | String of string
   | Int of int
@@ -90,7 +90,7 @@ let rec pprint_operand ppf op =
   match op with
   | Unit             -> f ppf "()"
   | Var v            -> f ppf "%s" (string_of_entry v)
-  | UnitName s       -> f ppf "%s" (string_of_entry s)
+  | UnitName s       -> f ppf "%s" s
   | Int i            -> f ppf "%d" i
   | String s         -> f ppf "\"%s\"" s
   | Char i           ->f ppf "%C" i
@@ -261,9 +261,11 @@ and genquads_expr ast =
      | _ -> let w = Temp (newTemp()) in
        addQuad(genQuad Op_par w (PassType RET) Empty);
        prop.place <- w);
-    addQuad(genQuad Op_call Empty Empty (UnitName (x));
+    addQuad(genQuad Op_call Empty Empty (UnitName x));
     prop;
-  | E_id str -> prop.place <- Var str;  prop
+  | E_id str ->
+      let st_entry = lookupEntry (id_make str) LOOKUP_ALL_SCOPES true in
+      prop.place <- Var st_entry;  prop
   | E_int n  -> prop.place <- Int (int_of_string n); prop
   | E_bool n ->
      prop.place <- Bool n;
@@ -271,7 +273,9 @@ and genquads_expr ast =
   | E_char n   -> prop.place <- Char n; prop
   | E_double n -> prop.place <- Double (Float.of_string n); prop
   | E_string s -> prop.place <- String s; prop
-  | E_null     -> prop.place <- Int 0; prop (* TODO: Is this the best idea? Null as a zero integer? *)
+  (* TODO: Refactor the following, to delegate the implementation of this abstraction
+     decision in the next-layer *)
+  | E_null     -> prop.place <- Int 0; prop 
   | E_plus (x,y)  ->
     let e1prop = genquads_expr x
     and e2prop = genquads_expr y

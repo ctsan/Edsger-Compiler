@@ -57,6 +57,9 @@ and entry = {
 type lookup_type = LOOKUP_CURRENT_SCOPE | LOOKUP_ALL_SCOPES
 
 
+(** returns true if entry is local to the current scope. *)
+val is_local : entry -> bool
+
 val string_of_entry  : entry -> string
 
 val no_entry : Identifier.id -> entry
