@@ -1,4 +1,5 @@
 open Core.Std
+open Core.Core_stack
 open Printf
 open Symbol
 open Ast
@@ -129,10 +130,53 @@ let instructions = ref []
 let add_instruction i =
   instructions := i :: !instructions
 
-let get_AR l = 100
+let get_AR l = 
+  let base = I_movq (Reg (Rsi, B64), Mem (Effective (Some 4, Rbp, None))) in
+  let ncur = l.entry_scope.sco_nesting in
+  let na = (Stack.top_exn func_stack).entry_scope.sco_nesting in
+  let rec loopins acc = function
+    | 0 -> 
+        acc
+    | n -> 
+        loopins ((I_movq (Mem (Effective (Some 4, Rsi, None)), Reg (Rsi, B64)))::acc) (n-1)
+  in
+    base::(loopins [] (ncur-na-1))
 
-let update_AR l = 100
-let load dst src = 100
+let update_AR callee called = 
+  let np = callee.entry_scope.sco_nesting in
+  let nx = called.entry_scope.sco_nesting in
+  if (np > nx) then
+    [I_pushq (Reg (Rbp, B64))]
+  else if (np = nx) then
+    [I_pushq (Mem (Effective (Some 4, Rbp, None)))]
+  else
+    let fst = I_movq (Mem (Effective (Some 4, Rbp, None)),Reg (Rsi, B64)) in
+    let lst = [I_pushq (Mem (Effective (Some 4, Rsi, None)))] in
+    let rec loopins acc = function
+    | 0 ->
+        acc
+    | n ->
+        loopins ((I_movq (Mem (Effective (Some 4, Rsi, None), Reg (Rsi, B64))))::acc) (n-1)
+  in
+    fst::(loopins [] (np-nx-1)) @ lst
+
+let rec load reg a = 
+  match a with
+  | Int n -> 
+      [I_movq (reg, Const (Imm64 a))]
+  | Bool false ->
+      [I_movq (reg, Const (Imm64 0))]
+  | Bool true ->
+      [I_movq (reg, Const (Imm64 1))]
+  | Char chr ->
+      [I_movq (reg, Const (Imm64 (Char.code chr)))]
+  | Var ent ->
+      [] (* TODO Create local ent function to use *)
+  | _ -> raise (Terminate "bad quad entry")
+
+
+      
+
 let load_addr dst src = 100
 
 let asm_of_quad qd = 9
