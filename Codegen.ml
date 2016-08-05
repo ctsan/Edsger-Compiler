@@ -200,4 +200,12 @@ and label_end_of p = []
 and label_general p = []
 
 (* TODO Document what this function takes, what gives *)
-and asm_of_quad qd = ()
+and asm_of_quad qd =
+  (* match qd.quad_op with *)
+  (* | Op_assign -> *)
+  (*   if is_int_op qd.quad_argX then *)
+  (*     let _ = load Rsi qd.quad_argX in *)
+  (*     store Rsi qd.quad_argZ *)
+  (* | Op_array  -> *)
+  (* | Op_call   -> *)
+  (* | _ -> () *)
