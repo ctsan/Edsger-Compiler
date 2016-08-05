@@ -261,7 +261,7 @@ and genquads_expr ast =
      | _ -> let w = Temp (newTemp()) in
        addQuad(genQuad Op_par w (PassType RET) Empty);
        prop.place <- w);
-    addQuad(genQuad Op_call Empty Empty (UnitName x));
+    addQuad(genQuad Op_call Empty Empty (UnitName (x));
     prop;
   | E_id str -> prop.place <- Var str;  prop
   | E_int n  -> prop.place <- Int (int_of_string n); prop

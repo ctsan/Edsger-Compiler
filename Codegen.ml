@@ -90,10 +90,10 @@ let string_of_operand = function
 
 let string_of_ins_86_64 = function
   | D_str  (label,str)   -> (string_of_label label) ^ sprintf "\t.string %S\n" str
-  | D_byte  (label,num)   -> (string_of_label label) ^ sprintf "\t.byte " ^ string_of_imm num 
-  | D_short  (label,num)   -> (string_of_label label) ^ sprintf "\t.short " ^ string_of_imm num 
-  | D_long  (label,num)   -> (string_of_label label) ^ sprintf "\t.long " ^ string_of_imm num 
-  | D_zero (label,total) -> (string_of_label label) ^ sprintf "\t.zero %d\n" totala
+  | D_byte  (label,num)   -> (string_of_label label) ^ sprintf "\t.byte " ^ string_of_imm num
+  | D_short  (label,num)   -> (string_of_label label) ^ sprintf "\t.short " ^ string_of_imm num
+  | D_long  (label,num)   -> (string_of_label label) ^ sprintf "\t.long " ^ string_of_imm num
+  | D_zero (label,total) -> (string_of_label label) ^ sprintf "\t.zero %d\n" total
   | M_Label label        -> sprintf "%S:\m" (string of_label label) 
   | I_movb (op1,op2)     -> sprintf "\tmovb %s,%s\n" (string_of_operand op1) (string_of_operand op2)
   | I_movw (op1,op2)     -> sprintf "\tmovw %s,%s\n" (string_of_operand op1) (string_of_operand op2)
