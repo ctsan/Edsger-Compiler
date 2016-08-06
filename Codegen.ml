@@ -233,7 +233,7 @@ and load_addr reg a =
 
 
 (* Generates assembly instructions to store a register to a memory location *)
-and store src dst = 
+and store reg a = 
   match a with
   | Var ent ->
     let par_info = 
@@ -257,19 +257,29 @@ and store src dst =
           get_AR(a) @
           [I_movq (Mem (Some par_info.parameter_offset, Rsi, None),Reg (Rsi, B64)),
           I_movq (reg,Mem (None, Rsi, None))]
-  (* TODO use proper `mov` later later. *)
-  | Deref i -> load reg i 
+  | Deref i -> load (Reg (Rdi, B64)) i @ [I_movq (reg,Mem (None, Rdi, None))]
   | _ -> raise (Terminate "bad quad entry")
 
 
 (* generate a label for the beginning of a unit *)
-and label_name p = []
+and label_name p = 
+    (* TODO: WE NEED A QUEUE *)
+    let id = id_name p.entry_id
+    let n = 1 in
+    sprintf "_%s_%d" id n
 
 (* generate a label for the end of a unit *)
-and label_end_of p = []
+and label_end_of p = 
+    (* TODO: WE NEED A QUEUE *)
+    let id = id_name p.entry_id
+    let n = 1 in
+    sprintf "@%s_%d" id n
 
 (* genearte a label for a quad with label `label_name` *)
-and label_general p = []
+and label_general p = 
+    (* TODO: need a counter of sorts or hashtbl *)
+    let n = 1 in
+    sprintf "@%d" n
 
 (* TODO Document what this function takes, what gives *)
 and asm_of_quad qd = ()
