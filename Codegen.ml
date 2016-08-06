@@ -165,7 +165,7 @@ let update_AR callee called =
     fst::(loopins [] (np-nx-1)) @ lst
 
 (* input: This function takes a destination register, and a source argument *)
-(* outpt: a list of the necessery assembly instructions *)
+(* output: a list of the necessery assembly instructions *)
 let rec load reg a =
   match a with
   | Int n ->
@@ -200,11 +200,67 @@ let rec load reg a =
   | Deref i -> load (Reg (Rdi,B64)) i @ [I_movq (Mem (None,Rdi,None),reg) ]
   | _ -> raise (Terminate "bad quad entry")
 
-(* TODO Document what this function takes, what gives *)
-and load_addr dst src = []
+(* input: This function takes a destination register, and a source argument *)
+(* output: a list of the necessery assembly instructions *)
+(* Pretty much the same as load but with lea *)
+and load_addr reg a = 
+  match a with
+  | String str ->
+      []
+      (* [I_leaq(reg, )], String to memory location function or sth needed? *)
+  | Var ent ->
+    let par_info = 
+      match ent.entry_info with
+      | Entry_parameter par -> par
+      | _ -> raise (Terminate "Bad entry to load")
+    if is_local ent then
+      match par_info.pass_mode with (* TODO: maybe abstract this check with a function *)
+      | PASS_BY_VALUE -> 
+          [I_leaq (Mem (Some par_info.parameter_offset, Rbp, None),reg)]
+      | PASS_BY_REFERENCE ->
+          [I_movq (Mem (Some par_info.parameter_offset, Rbp, None),reg)]
+    else
+      match par_info.pass_mode with 
+      | PASS_BY_VALUE ->
+          get_AR(a) @ 
+          [I_leaq (Mem (Some par_info.parameter_offset, Rsi, None),reg)]
+      | PASS_BY_REFERENCE ->
+          get_AR(a) @
+          [I_movq (Mem (Some par_info.parameter_offset, Rsi, None), reg)]
+  (* TODO use proper `mov` later later. *)
+  | Deref i -> load reg i 
+  | _ -> raise (Terminate "bad quad entry")
+
 
 (* Generates assembly instructions to store a register to a memory location *)
-and store src dst = []
+and store src dst = 
+  match a with
+  | Var ent ->
+    let par_info = 
+      match ent.entry_info with
+      | Entry_parameter par -> par
+      | _ -> raise (Terminate "Bad entry to load")
+    if is_local ent then
+      match par_info.pass_mode with (* TODO: maybe abstract this check with a function *)
+      | PASS_BY_VALUE -> 
+          [I_movq (reg, Mem (Some par_info.parameter_offset, Rbp, None))]
+      | PASS_BY_REFERENCE ->
+          [I_movq (Reg (Rsi, B64),Mem (Some par_info.parameter_offset, Rbp, None)),
+          I_movq (reg,Mem (None, Rsi, None))]
+
+    else
+      match par_info.pass_mode with 
+      | PASS_BY_VALUE ->
+          get_AR(a) @ 
+          [I_movq (reg,Mem (Some par_info.parameter_offset, Rsi, None))]
+      | PASS_BY_REFERENCE ->
+          get_AR(a) @
+          [I_movq (Mem (Some par_info.parameter_offset, Rsi, None),Reg (Rsi, B64)),
+          I_movq (reg,Mem (None, Rsi, None))]
+  (* TODO use proper `mov` later later. *)
+  | Deref i -> load reg i 
+  | _ -> raise (Terminate "bad quad entry")
+
 
 (* generate a label for the beginning of a unit *)
 and label_name p = []
