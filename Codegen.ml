@@ -130,7 +130,8 @@ let call_stack = Stack.create ()
 let add_instruction i =
   instructions := i :: !instructions
 
-(* TODO Document what this function takes, what gives *)
+(* input: Takes entry l of parameter *)
+(* output: returns  ins_86_64 list *)
 let get_AR l =
   let base = I_movq (Reg (Rsi, B64), Mem (Some 4, Rbp, None)) in
   let ncur = l.entry_scope.sco_nesting in
@@ -143,7 +144,8 @@ let get_AR l =
   in
     base::(loopins [] (ncur-na-1))
 
-(* TODO Document what this function takes, what gives *)
+(* input: Takes callee and called function entries *)
+(* output: returns ins_86_64 list *)
 let update_AR callee called =
   let np = callee.entry_scope.sco_nesting in
   let nx = called.entry_scope.sco_nesting in
@@ -167,18 +169,32 @@ let update_AR callee called =
 let rec load reg a =
   match a with
   | Int n ->
-    [I_movw(Const (Imm16 n),reg)]
+      [I_movw(Const (Imm16 n),reg)]
   | Bool b ->
-    [I_movb(Const (Imm8 (Bool.to_int b)),reg)]
+      [I_movb(Const (Imm8 (Bool.to_int b)),reg)]
   | Char chr ->
-    [I_movb(Const (Imm8 (Char.to_int chr)),reg)]
+      [I_movb(Const (Imm8 (Char.to_int chr)),reg)]
   | Var ent ->
-    (* TODO: implement is_local, which takes an entry, and decides if it is local *)
-    (* TODO: Create local ent function to use *)
+    let par_info = 
+      match ent.entry_info with
+      | Entry_parameter par -> par
+      | _ -> raise (Terminate "Bad entry to load")
     if is_local ent then
-     []
+      match par_info.pass_mode with (* TODO: maybe abstract this check with a function *)
+      | PASS_BY_VALUE -> 
+          [I_movq (Mem (Some par_info.parameter_offset, Rbp, None),reg)]
+      | PASS_BY_REFERENCE ->
+          [I_movq (Mem (Some par_info.parameter_offset, Rbp, None),Reg (Rsi, B64)),
+          I_movq (Mem (None, Rsi, None), reg)]
     else
-     []
+      match par_info.pass_mode with 
+      | PASS_BY_VALUE ->
+          get_AR(a) @ 
+          [I_movq (Mem (Some par_info.parameter_offset, Rsi, None),reg)]
+      | PASS_BY_REFERENCE ->
+          get_AR(a) @
+          [I_movq (Mem (Some par_info.parameter_offset, Rsi, None),Reg (Rsi, B64)),
+          I_movq (Mem (None, Rsi, None), reg)]
   | Address i -> load_addr reg i
   (* TODO use proper `mov` later later. *)
   | Deref i -> load (Reg (Rdi,B64)) i @ [I_movq (Mem (None,Rdi,None),reg) ]
