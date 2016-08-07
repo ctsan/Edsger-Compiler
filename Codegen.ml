@@ -80,8 +80,53 @@ let string_of_imm = function
   | Imm64 i ->
      sprintf "$%d\n" i (* NOTE: Added \n *)
 
-let string_of_reg_form n = "" (* TODO !*)
-let string_of_memory_location n = "" (* TODO !*)
+let string_of_reg r = 
+  match r with
+  | Rax -> "%rax"
+  | Rbx -> "%rbx"
+  | Rcx -> "%rcx"
+  | Rdx -> "%rdx"
+  | Rsi -> "%rsi"
+  | Rdi -> "%rdi"
+  | Rbp -> "%rbp"
+  | Rsp -> "%rsx"
+  | Rth i -> "%r" ^ Int.to_string i
+
+let string_of_reg_form rf =
+  let (^$) c s = s ^ (String.make 1 c) in
+  match rf with
+  | (r, B64) -> 
+      string_of_reg r
+  | (r, B32) ->
+      let str = string_of_reg r in
+      (match r with
+      | Rth _ -> (^$) 'd' str
+      | _ -> String.tr 'r' 'e' str)
+  | (r, B16) -> 
+      let str = string_of_reg r in
+      (match r with
+      | Rth _ -> (^$) 'w' str
+      | _ -> String.filter str (fun c -> c <> 'r'))
+  | (r, B8L) ->
+     let str = string_of_reg r in
+     let filt = fun c -> c <> 'r' && c <> 'x' in
+     (match r with
+     | Rth _ -> (^$) 'b' str
+     | _ -> (^$) 'l' (String.filter str filt))
+  | (r, B8H) ->
+      raise (Terminate "Better not use B8H")
+     
+let string_of_memory_location mloc =  
+  match mloc with
+  | (None, r, None) | (Some 0, r, None) ->
+     sprintf "(%s)" (string_of_reg r)
+  | (Some x, r, None) when x > 0 ->
+      "+" ^ Int.to_string x ^ (sprintf "(%s)" (string_of_reg r))
+  | (Some x, r, None) ->
+      Int.to_string x ^ (sprintf "(%s)" (string_of_reg r))
+  | _ ->
+      "No clue what's this or if it's needed"
+  (* TODO: ^ ???? *)           
 
 let string_of_operand = function
   | Reg r     -> string_of_reg_form r
@@ -101,7 +146,7 @@ let string_of_ins_86_64 = function
   | I_movq (op1,op2)     -> sprintf "\tmovq %s,%s\n" (string_of_operand op1) (string_of_operand op2)
   | I_pushq op           -> sprintf "\tpushq %s\n" (string_of_operand op)
   | I_popq op            -> sprintf "\tpopq %s\n" (string_of_operand op)
-  | I_leaq (mem,reg1)    -> sprintf "\tleaq %s,%s\n" (string_of_memory_location mem) (string_of_reg_form reg1)
+  | I_leaq (mem,reg1)    -> sprintf "\tleaq %s,%s\n" (string_of_memory_location mem) (string_of_reg reg1)
   | I_addb (op1,op2)     -> sprintf "\taddb %s,%s\n" (string_of_operand op1) (string_of_operand op2)
   | I_addw (op1,op2)     -> sprintf "\taddw %s,%s\n" (string_of_operand op1) (string_of_operand op2)
   | I_addl (op1,op2)     -> sprintf "\taddl %s,%s\n" (string_of_operand op1) (string_of_operand op2)
@@ -110,8 +155,8 @@ let string_of_ins_86_64 = function
   | I_subw (op1,op2)     -> sprintf "\tsubw %s,%s\n" (string_of_operand op1) (string_of_operand op2)
   | I_subl (op1,op2)     -> sprintf "\tsubl %s,%s\n" (string_of_operand op1) (string_of_operand op2)
   | I_subq (op1,op2)     -> sprintf "\tsubq %s,%s\n" (string_of_operand op1) (string_of_operand op2)
-  | I_imul (op1,reg1)    -> sprintf "\timul %s,%s\n" (string_of_operand op1) (string_of_reg_form reg1)
-  | I_idiv reg1          -> sprintf "\tidiv %s\n" (string_of_reg_form reg1)
+  | I_imul (op1,reg1)    -> sprintf "\timul %s,%s\n" (string_of_operand op1) (string_of_reg reg1)
+  | I_idiv reg1          -> sprintf "\tidiv %s\n" (string_of_operand reg1)
   | I_idivw mem          -> sprintf "\tidivw %s\n" (string_of_memory_location mem)
   | I_jmp label          -> sprintf "\tjmp %s\n" (string_of_label label)
   | I_cmp (op1,op2)      -> sprintf "\tcmp %s,%s\n" (string_of_operand op1) (string_of_operand op2)
