@@ -94,7 +94,7 @@ let string_of_ins_86_64 = function
   | D_short  (label,num)   -> (string_of_label label) ^ sprintf "\t.short " ^ string_of_imm num
   | D_long  (label,num)   -> (string_of_label label) ^ sprintf "\t.long " ^ string_of_imm num
   | D_zero (label,total) -> (string_of_label label) ^ sprintf "\t.zero %d\n" total
-  | M_Label label        -> sprintf "%S:\m" (string_of_label label)
+  | M_Label label        -> sprintf "%S:\n" (string_of_label label)
   | I_movb (op1,op2)     -> sprintf "\tmovb %s,%s\n" (string_of_operand op1) (string_of_operand op2)
   | I_movw (op1,op2)     -> sprintf "\tmovw %s,%s\n" (string_of_operand op1) (string_of_operand op2)
   | I_movl (op1,op2)     -> sprintf "\tmovl %s,%s\n" (string_of_operand op1) (string_of_operand op2)
@@ -130,7 +130,8 @@ let call_stack = Stack.create ()
 let add_instruction i =
   instructions := i :: !instructions
 
-(* TODO Document what this function takes, what gives *)
+(* input: Takes entry l of parameter *)
+(* output: returns  ins_86_64 list *)
 let get_AR l =
   let base = I_movq (Reg (Rsi, B64), Mem (Some 4, Rbp, None)) in
   let ncur = l.entry_scope.sco_nesting in
@@ -143,7 +144,8 @@ let get_AR l =
   in
     base::(loopins [] (ncur-na-1))
 
-(* TODO Document what this function takes, what gives *)
+(* input: Takes callee and called function entries *)
+(* output: returns ins_86_64 list *)
 let update_AR callee called =
   let np = callee.entry_scope.sco_nesting in
   let nx = called.entry_scope.sco_nesting in
@@ -163,41 +165,129 @@ let update_AR callee called =
     fst::(loopins [] (np-nx-1)) @ lst
 
 (* input: This function takes a destination register, and a source argument *)
-(* outpt: a list of the necessery assembly instructions *)
+(* output: a list of the necessery assembly instructions *)
 let rec load reg a =
   match a with
   | Int n ->
-    [I_movw(Const (Imm16 n),reg)]
+      [I_movw(Const (Imm16 n),reg)]
   | Bool b ->
-    [I_movb(Const (Imm8 (Bool.to_int b)),reg)]
+      [I_movb(Const (Imm8 (Bool.to_int b)),reg)] (* TODO: is there such a function ? *)
   | Char chr ->
-    [I_movb(Const (Imm8 (Char.to_int chr)),reg)]
+      [I_movb(Const (Imm8 (Char.to_int chr)),reg)]
   | Var ent ->
-    (* TODO: implement is_local, which takes an entry, and decides if it is local *)
-    (* TODO: Create local ent function to use *)
+    let par_info = 
+      match ent.entry_info with
+      | ENTRY_parameter par -> par
+      | _ -> raise (Terminate "Bad entry to load")
+    in
     if is_local ent then
-     []
+      match par_info.parameter_mode with (* TODO: maybe abstract this check with a function *)
+      | PASS_BY_VALUE -> 
+          [I_movq (Mem (Some par_info.parameter_offset, Rbp, None),reg)]
+      | PASS_BY_REFERENCE ->
+          [I_movq (Mem (Some par_info.parameter_offset, Rbp, None),Reg (Rsi, B64));
+           I_movq (Mem (None, Rsi, None), reg)]
     else
-     []
+      match par_info.parameter_mode with 
+      | PASS_BY_VALUE ->
+          get_AR(ent) @ 
+          [I_movq (Mem (Some par_info.parameter_offset, Rsi, None),reg)]
+      | PASS_BY_REFERENCE ->
+          get_AR(ent) @
+          [I_movq (Mem (Some par_info.parameter_offset, Rsi, None),Reg (Rsi, B64));
+          I_movq (Mem (None, Rsi, None), reg)]
   | Address i -> load_addr reg i
   (* TODO use proper `mov` later later. *)
   | Deref i -> load (Reg (Rdi,B64)) i @ [I_movq (Mem (None,Rdi,None),reg) ]
   | _ -> raise (Terminate "bad quad entry")
 
-(* TODO Document what this function takes, what gives *)
-and load_addr dst src = []
+(* input: This function takes a destination register, and a source argument *)
+(* output: a list of the necessery assembly instructions *)
+(* Pretty much the same as load but with lea *)
+and load_addr reg a = 
+  let reg_of_op = 
+    match reg with
+    | Reg x -> fst x
+    | _ -> Rax (* just a filler, i need reg of operand for leaq, maybe TODO: change this *)
+  in
+  match a with
+  | String str ->
+      []
+      (* [I_leaq(reg, )], String to memory location function or sth needed? *)
+  | Var ent ->
+    let par_info = 
+      match ent.entry_info with
+      | ENTRY_parameter par -> par
+      | _ -> raise (Terminate "Bad entry to load")
+    in
+    if is_local ent then
+      match par_info.parameter_mode with (* TODO: maybe abstract this check with a function *)
+      | PASS_BY_VALUE -> 
+          [I_leaq ((Some par_info.parameter_offset, Rbp, None),reg_of_op)]
+      | PASS_BY_REFERENCE ->
+          [I_movq (Mem (Some par_info.parameter_offset, Rbp, None),reg)]
+    else
+      match par_info.parameter_mode with 
+      | PASS_BY_VALUE ->
+          get_AR(ent) @ 
+          [I_leaq ((Some par_info.parameter_offset, Rsi, None),reg_of_op)]
+      | PASS_BY_REFERENCE ->
+          get_AR(ent) @
+          [I_movq (Mem (Some par_info.parameter_offset, Rsi, None), reg)]
+  (* TODO use proper `mov` later later. *)
+  | Deref i -> load reg i 
+  | _ -> raise (Terminate "bad quad entry")
+
 
 (* Generates assembly instructions to store a register to a memory location *)
-and store src dst = []
+and store reg a = 
+  match a with
+  | Var ent ->
+    let par_info = 
+      match ent.entry_info with
+      | ENTRY_parameter par -> par
+      | _ -> raise (Terminate "Bad entry to load")
+    in
+    if is_local ent then
+      match par_info.parameter_mode with (* TODO: maybe abstract this check with a function *)
+      | PASS_BY_VALUE -> 
+          [I_movq (reg, Mem (Some par_info.parameter_offset, Rbp, None))]
+      | PASS_BY_REFERENCE ->
+          [I_movq (Reg (Rsi, B64),Mem (Some par_info.parameter_offset, Rbp, None));
+          I_movq (reg,Mem (None, Rsi, None))]
+
+    else
+      match par_info.parameter_mode with 
+      | PASS_BY_VALUE ->
+          get_AR(ent) @ 
+          [I_movq (reg,Mem (Some par_info.parameter_offset, Rsi, None))]
+      | PASS_BY_REFERENCE ->
+          get_AR(ent) @
+          [I_movq (Mem (Some par_info.parameter_offset, Rsi, None),Reg (Rsi, B64));
+          I_movq (reg,Mem (None, Rsi, None))]
+  | Deref i -> load (Reg (Rdi, B64)) i @ [I_movq (reg,Mem (None, Rdi, None))]
+  | _ -> raise (Terminate "bad quad entry")
+
 
 (* generate a label for the beginning of a unit *)
-and label_name p = []
+and label_name p = 
+    (* TODO: WE NEED A QUEUE *)
+    let id = id_name p.entry_id in
+    let n = 1 in
+    sprintf "_%s_%d" id n
 
 (* generate a label for the end of a unit *)
-and label_end_of p = []
+and label_end_of p = 
+    (* TODO: WE NEED A QUEUE *)
+    let id = id_name p.entry_id in
+    let n = 1 in
+    sprintf "@%s_%d" id n
 
 (* genearte a label for a quad with label `label_name` *)
-and label_general p = []
+and label_general p = 
+    (* TODO: need a counter of sorts or hashtbl *)
+    let n = 1 in
+    sprintf "@%d" n
 
 (* TODO Document what this function takes, what gives *)
 and asm_of_quad qd =

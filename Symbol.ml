@@ -138,6 +138,11 @@ let newEntry id inf err =
 let string_of_entry e =
   id_name e.entry_id
 
+let is_local e =
+    let scc = !currentScope in
+    e.entry_scope.sco_nesting = scc.sco_nesting 
+    (* TODO: is there a chance e will not be in current scope? *)
+
 let lookupEntry id how err =
   let scc = !currentScope in
   let lookup () =
