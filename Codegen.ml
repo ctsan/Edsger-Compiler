@@ -124,6 +124,11 @@ let string_of_ins_86_64 = function
   | I_jle label          -> sprintf "\tjle %s\n" (string_of_label label)
   | _ -> sprintf "this is not implemented\n"
 
+let bool_to_int b = 
+  match b with
+  | true -> 1
+  | false -> 0
+
 let instructions = ref []
 let call_stack = Stack.create ()
 
@@ -171,7 +176,7 @@ let rec load reg a =
   | Int n ->
       [I_movw(Const (Imm16 n),reg)]
   | Bool b ->
-      [I_movb(Const (Imm8 (Bool.to_int b)),reg)] (* TODO: is there such a function ? *)
+      [I_movb(Const (Imm8 (bool_to_int b)),reg)] (* NOTE: implemented mine coz of incompatibility *)
   | Char chr ->
       [I_movb(Const (Imm8 (Char.to_int chr)),reg)]
   | Var ent ->
@@ -181,21 +186,21 @@ let rec load reg a =
       | _ -> raise (Terminate "Bad entry to load")
     in
     if is_local ent then
-      match par_info.parameter_mode with (* TODO: maybe abstract this check with a function *)
+      (match par_info.parameter_mode with (* TODO: maybe abstract this check with a function *)
       | PASS_BY_VALUE -> 
           [I_movq (Mem (Some par_info.parameter_offset, Rbp, None),reg)]
       | PASS_BY_REFERENCE ->
           [I_movq (Mem (Some par_info.parameter_offset, Rbp, None),Reg (Rsi, B64));
-           I_movq (Mem (None, Rsi, None), reg)]
+           I_movq (Mem (None, Rsi, None), reg)])
     else
-      match par_info.parameter_mode with 
+      (match par_info.parameter_mode with 
       | PASS_BY_VALUE ->
           get_AR(ent) @ 
           [I_movq (Mem (Some par_info.parameter_offset, Rsi, None),reg)]
       | PASS_BY_REFERENCE ->
           get_AR(ent) @
           [I_movq (Mem (Some par_info.parameter_offset, Rsi, None),Reg (Rsi, B64));
-          I_movq (Mem (None, Rsi, None), reg)]
+          I_movq (Mem (None, Rsi, None), reg)])
   | Address i -> load_addr reg i
   (* TODO use proper `mov` later later. *)
   | Deref i -> load (Reg (Rdi,B64)) i @ [I_movq (Mem (None,Rdi,None),reg) ]
@@ -221,19 +226,19 @@ and load_addr reg a =
       | _ -> raise (Terminate "Bad entry to load")
     in
     if is_local ent then
-      match par_info.parameter_mode with (* TODO: maybe abstract this check with a function *)
+      (match par_info.parameter_mode with (* TODO: maybe abstract this check with a function *)
       | PASS_BY_VALUE -> 
           [I_leaq ((Some par_info.parameter_offset, Rbp, None),reg_of_op)]
       | PASS_BY_REFERENCE ->
-          [I_movq (Mem (Some par_info.parameter_offset, Rbp, None),reg)]
+          [I_movq (Mem (Some par_info.parameter_offset, Rbp, None),reg)])
     else
-      match par_info.parameter_mode with 
+      (match par_info.parameter_mode with 
       | PASS_BY_VALUE ->
           get_AR(ent) @ 
           [I_leaq ((Some par_info.parameter_offset, Rsi, None),reg_of_op)]
       | PASS_BY_REFERENCE ->
           get_AR(ent) @
-          [I_movq (Mem (Some par_info.parameter_offset, Rsi, None), reg)]
+          [I_movq (Mem (Some par_info.parameter_offset, Rsi, None), reg)])
   (* TODO use proper `mov` later later. *)
   | Deref i -> load reg i 
   | _ -> raise (Terminate "bad quad entry")
@@ -249,22 +254,21 @@ and store reg a =
       | _ -> raise (Terminate "Bad entry to load")
     in
     if is_local ent then
-      match par_info.parameter_mode with (* TODO: maybe abstract this check with a function *)
+      (match par_info.parameter_mode with (* TODO: maybe abstract this check with a function *)
       | PASS_BY_VALUE -> 
           [I_movq (reg, Mem (Some par_info.parameter_offset, Rbp, None))]
       | PASS_BY_REFERENCE ->
           [I_movq (Reg (Rsi, B64),Mem (Some par_info.parameter_offset, Rbp, None));
-          I_movq (reg,Mem (None, Rsi, None))]
-
+          I_movq (reg,Mem (None, Rsi, None))])
     else
-      match par_info.parameter_mode with 
+      (match par_info.parameter_mode with 
       | PASS_BY_VALUE ->
           get_AR(ent) @ 
           [I_movq (reg,Mem (Some par_info.parameter_offset, Rsi, None))]
       | PASS_BY_REFERENCE ->
           get_AR(ent) @
           [I_movq (Mem (Some par_info.parameter_offset, Rsi, None),Reg (Rsi, B64));
-          I_movq (reg,Mem (None, Rsi, None))]
+          I_movq (reg,Mem (None, Rsi, None))])
   | Deref i -> load (Reg (Rdi, B64)) i @ [I_movq (reg,Mem (None, Rdi, None))]
   | _ -> raise (Terminate "bad quad entry")
 
