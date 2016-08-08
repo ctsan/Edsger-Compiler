@@ -53,6 +53,13 @@ and semantic_properties = {
   mutable falses : int list;
 }
 
+let is_int_op op =
+  match op with
+  | Int _ -> true
+  | Double _ -> false
+  | _ -> raise (Terminate "Unexpected call.")
+
+
 let string_of_operator = function
   | Op_unit       -> "unit"
   | Op_endu       -> "endu"
@@ -128,6 +135,7 @@ let quads = ref []       (* All our Quads *)
 let quadNext = ref 0     (* Next Quad Number *)
 let tmp = ref 0          (* Temporaries Numbering *)
 
+
 (* Return Next Quad number *)
 let nextQuad () =
   !quadNext
@@ -145,6 +153,9 @@ let genQuad op argX argY argZ =
 (* Add a quad on our quads *)
 let addQuad q =
   quads := q :: !quads
+
+(* TODO Refactor to make it pure *)
+let list_of_quads () = !quads
 
 (* Increment Temporaries and return the new one *)
 let newTemp () =
@@ -556,3 +567,6 @@ let rec genquads_stmt ast =
     addQuad ( genQuad Op_ret Empty Empty Empty );
     prop
   | _ -> printf "(else)\n"; prop
+
+let print_quads () =
+  Printf.printf "%a" pprint_quads (List.rev !quads);

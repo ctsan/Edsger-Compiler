@@ -80,7 +80,7 @@ let string_of_imm = function
   | Imm64 i ->
      sprintf "$%d\n" i (* NOTE: Added \n *)
 
-let string_of_reg r = 
+let string_of_reg r =
   match r with
   | Rax -> "%rax"
   | Rbx -> "%rbx"
@@ -95,14 +95,14 @@ let string_of_reg r =
 let string_of_reg_form rf =
   let (^$) c s = s ^ (String.make 1 c) in
   match rf with
-  | (r, B64) -> 
+  | (r, B64) ->
       string_of_reg r
   | (r, B32) ->
       let str = string_of_reg r in
       (match r with
       | Rth _ -> (^$) 'd' str
       | _ -> String.tr 'r' 'e' str)
-  | (r, B16) -> 
+  | (r, B16) ->
       let str = string_of_reg r in
       (match r with
       | Rth _ -> (^$) 'w' str
@@ -115,8 +115,8 @@ let string_of_reg_form rf =
      | _ -> (^$) 'l' (String.filter str filt))
   | (r, B8H) ->
       raise (Terminate "Better not use B8H")
-     
-let string_of_memory_location mloc =  
+
+let string_of_memory_location mloc =
   match mloc with
   | (None, r, None) | (Some 0, r, None) ->
      sprintf "(%s)" (string_of_reg r)
@@ -126,7 +126,7 @@ let string_of_memory_location mloc =
       Int.to_string x ^ (sprintf "(%s)" (string_of_reg r))
   | _ ->
       "No clue what's this or if it's needed"
-  (* TODO: ^ ???? *)           
+  (* TODO: ^ ???? *)
 
 let string_of_operand = function
   | Reg r     -> string_of_reg_form r
@@ -167,14 +167,21 @@ let string_of_ins_86_64 = function
   | I_jge label          -> sprintf "\tjge %s\n" (string_of_label label)
   | I_jl label           -> sprintf "\tjl %s\n" (string_of_label label)
   | I_jle label          -> sprintf "\tjle %s\n" (string_of_label label)
-  | _ -> sprintf "this is not implemented\n"
 
-let bool_to_int b = 
+let bool_to_int b =
   match b with
   | true -> 1
   | false -> 0
 
-let instructions = ref []
+
+(* is operator of intermediary, ultimately transformed to int*)
+(* Only Doubles will not be encoded as Integers. *)
+let is_encoded_as_int op =
+  match op with
+  | Double _ -> false
+  | _ -> true (* consider some assertions here *)
+
+let instructions:ins_86_64 list ref = ref []
 let call_stack = Stack.create ()
 
 let add_instruction i =
@@ -225,22 +232,22 @@ let rec load reg a =
   | Char chr ->
       [I_movb(Const (Imm8 (Char.to_int chr)),reg)]
   | Var ent ->
-    let par_info = 
+    let par_info =
       match ent.entry_info with
       | ENTRY_parameter par -> par
       | _ -> raise (Terminate "Bad entry to load")
     in
     if is_local ent then
       (match par_info.parameter_mode with (* TODO: maybe abstract this check with a function *)
-      | PASS_BY_VALUE -> 
+      | PASS_BY_VALUE ->
           [I_movq (Mem (Some par_info.parameter_offset, Rbp, None),reg)]
       | PASS_BY_REFERENCE ->
           [I_movq (Mem (Some par_info.parameter_offset, Rbp, None),Reg (Rsi, B64));
            I_movq (Mem (None, Rsi, None), reg)])
     else
-      (match par_info.parameter_mode with 
+      (match par_info.parameter_mode with
       | PASS_BY_VALUE ->
-          get_AR(ent) @ 
+          get_AR(ent) @
           [I_movq (Mem (Some par_info.parameter_offset, Rsi, None),reg)]
       | PASS_BY_REFERENCE ->
           get_AR(ent) @
@@ -254,8 +261,8 @@ let rec load reg a =
 (* input: This function takes a destination register, and a source argument *)
 (* output: a list of the necessery assembly instructions *)
 (* Pretty much the same as load but with lea *)
-and load_addr reg a = 
-  let reg_of_op = 
+and load_addr reg a =
+  let reg_of_op =
     match reg with
     | Reg x -> fst x
     | _ -> Rax (* just a filler, i need reg of operand for leaq, maybe TODO: change this *)
@@ -265,50 +272,50 @@ and load_addr reg a =
       []
       (* [I_leaq(reg, )], String to memory location function or sth needed? *)
   | Var ent ->
-    let par_info = 
+    let par_info =
       match ent.entry_info with
       | ENTRY_parameter par -> par
       | _ -> raise (Terminate "Bad entry to load")
     in
     if is_local ent then
       (match par_info.parameter_mode with (* TODO: maybe abstract this check with a function *)
-      | PASS_BY_VALUE -> 
+      | PASS_BY_VALUE ->
           [I_leaq ((Some par_info.parameter_offset, Rbp, None),reg_of_op)]
       | PASS_BY_REFERENCE ->
           [I_movq (Mem (Some par_info.parameter_offset, Rbp, None),reg)])
     else
-      (match par_info.parameter_mode with 
+      (match par_info.parameter_mode with
       | PASS_BY_VALUE ->
-          get_AR(ent) @ 
+          get_AR(ent) @
           [I_leaq ((Some par_info.parameter_offset, Rsi, None),reg_of_op)]
       | PASS_BY_REFERENCE ->
           get_AR(ent) @
           [I_movq (Mem (Some par_info.parameter_offset, Rsi, None), reg)])
   (* TODO use proper `mov` later later. *)
-  | Deref i -> load reg i 
+  | Deref i -> load reg i
   | _ -> raise (Terminate "bad quad entry")
 
 
 (* Generates assembly instructions to store a register to a memory location *)
-and store reg a = 
+and store reg a =
   match a with
   | Var ent ->
-    let par_info = 
+    let par_info =
       match ent.entry_info with
       | ENTRY_parameter par -> par
       | _ -> raise (Terminate "Bad entry to load")
     in
     if is_local ent then
       (match par_info.parameter_mode with (* TODO: maybe abstract this check with a function *)
-      | PASS_BY_VALUE -> 
+      | PASS_BY_VALUE ->
           [I_movq (reg, Mem (Some par_info.parameter_offset, Rbp, None))]
       | PASS_BY_REFERENCE ->
           [I_movq (Reg (Rsi, B64),Mem (Some par_info.parameter_offset, Rbp, None));
           I_movq (reg,Mem (None, Rsi, None))])
     else
-      (match par_info.parameter_mode with 
+      (match par_info.parameter_mode with
       | PASS_BY_VALUE ->
-          get_AR(ent) @ 
+          get_AR(ent) @
           [I_movq (reg,Mem (Some par_info.parameter_offset, Rsi, None))]
       | PASS_BY_REFERENCE ->
           get_AR(ent) @
@@ -319,32 +326,46 @@ and store reg a =
 
 
 (* generate a label for the beginning of a unit *)
-and label_name p = 
+and label_name p =
     (* TODO: WE NEED A QUEUE *)
     let id = id_name p.entry_id in
     let n = 1 in
     sprintf "_%s_%d" id n
 
 (* generate a label for the end of a unit *)
-and label_end_of p = 
+and label_end_of p =
     (* TODO: WE NEED A QUEUE *)
     let id = id_name p.entry_id in
     let n = 1 in
     sprintf "@%s_%d" id n
 
 (* genearte a label for a quad with label `label_name` *)
-and label_general p = 
+and label_general p =
     (* TODO: need a counter of sorts or hashtbl *)
     let n = 1 in
     sprintf "@%d" n
 
-(* TODO Document what this function takes, what gives *)
-and asm_of_quad qd =
-  (* match qd.quad_op with *)
-  (* | Op_assign -> *)
-  (*   if is_int_op qd.quad_argX then *)
-  (*     let _ = load Rsi qd.quad_argX in *)
-  (*     store Rsi qd.quad_argZ *)
+
+(* This function takes a quad, and returns an instruction *)
+and ins_of_quad qd =
+  match qd.quad_op with
+  | Op_assign ->
+    if is_encoded_as_int qd.quad_argX then
+      let _ = load (Reg (Rsi,B64)) qd.quad_argX in
+      store (Reg (Rsi,B64)) qd.quad_argZ
+    else []
   (* | Op_array  -> *)
   (* | Op_call   -> *)
-  (* | _ -> () *)
+  | _ -> []
+
+(* This function takes a list of quads, and returns a list of lists of istructions *)
+let quads_to_ins qlist =
+  List.fold qlist ~init:[] ~f:(fun acc quad -> ins_of_quad quad :: acc)
+  |> List.rev
+
+(* This Function Takes a List of Lists of instructions of x86_64, and prints them *)
+let print_instructions lst =
+  lst
+  |> ListLabels.flatten
+  |> List.iter ~f:(fun ins -> printf "%s" (string_of_ins_86_64 ins))
+

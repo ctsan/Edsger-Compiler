@@ -146,9 +146,7 @@ and check_binary_logical_operator x y =
   check_eval_of_type x y ~wanted_type:(TYPE_bool 0)
 
 and check ast =
-  match ast with
-  | None      -> raise (Terminate "AST is empty")
-  | Some tree -> (
+  ignore(ast >>| fun tree -> (
       initSymbolTable 256;
       openScope();
       check_all_decls tree;
@@ -157,10 +155,12 @@ and check ast =
       then raise (Terminate "main should return void");
       if (not (fun_is_defined (id_make "main_0")))
       then raise (Terminate "main is not implemented");
-      printSymbolTable();
-      Printf.printf "%a" pprint_quads (List.rev !quads);
+      printSymbolTable ();
+      print_quads ();
+      let ins_list = list_of_quads () |> Codegen.quads_to_ins  in
+      Codegen.print_instructions ins_list;
       print_newline()
-    )
+  ))
 
 and check_all_decls decls =
   List.iter decls check_a_declaration;
