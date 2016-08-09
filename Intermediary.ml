@@ -5,6 +5,7 @@ open Ast
 open Types
 open Identifier
 
+(* TODO IMPORANT! FIX TYPES of `Temp`*)
 let (>>|) = Option.(>>|)
 
 type operator =
@@ -27,7 +28,7 @@ and operand =
   | Bool of bool
   | Double of float
   | Label of int
-  | Temp of int
+  | Temp of entry
   | Address of operand (* Invariant: No Nested Address *)
   | Deref   of operand
   | PassType of pass_type
@@ -53,11 +54,6 @@ and semantic_properties = {
   mutable falses : int list;
 }
 
-let is_int_op op =
-  match op with
-  | Int _ -> true
-  | Double _ -> false
-  | _ -> raise (Terminate "Unexpected call.")
 
 
 let string_of_operator = function
@@ -100,10 +96,10 @@ let rec pprint_operand ppf op =
   | UnitName s       -> f ppf "%s" s
   | Int i            -> f ppf "%d" i
   | String s         -> f ppf "\"%s\"" s
-  | Char i           ->f ppf "%C" i
+  | Char i           -> f ppf "%C" i
   | Bool i           -> f ppf "%B" i
   | Double i         -> f ppf "%F" i (* NOTE change this to %f or %.f possibly *)
-  | Temp i           -> f ppf "$%d" i
+  | Temp i           -> f ppf "%s" (id_name i.entry_id)
   | Address op       -> f ppf "{"; pprint_operand ppf op; f ppf "}"
   | Deref   op       -> f ppf "["; pprint_operand ppf op; f ppf "]"
   | Label i          -> f ppf "%d" i
@@ -158,9 +154,10 @@ let addQuad q =
 let list_of_quads () = !quads
 
 (* Increment Temporaries and return the new one *)
-let newTemp () =
-  incr tmp;
-  !tmp
+let newTemp typ= newTemporary typ
+(* let newTemp () = *)
+(*   incr tmp; *)
+(*   !tmp *)
 
 (* condition or expression?  *)
 let is_condition prop =
@@ -210,7 +207,7 @@ let rec output_expression pr =
   else
     begin
       let npr = newProp () in
-      let w = Temp(newTemp()) in
+      let w = Temp(newTemp (TYPE_int 0)) in (* TODO IMPORTANT Fix TYPE!!*)
       backpatch pr.next (nextQuad());
       backpatch pr.trues (nextQuad());
       addQuad(genQuad Op_assign (Bool true) Empty w);
@@ -239,7 +236,7 @@ and genquads_expr ast =
   let bin_op_helper x y op =
     let e1prop = genquads_expr x
     and e2prop = genquads_expr y
-    and w = Temp (newTemp ()) in
+    and w = Temp(newTemp (TYPE_int 0)) in
     let q = genQuad op e1prop.place e2prop.place w in
     addQuad q;
     prop.place <- w;
@@ -269,7 +266,7 @@ and genquads_expr ast =
     in (* TODO Pass return value *)
     (match lookup_result_type fun_id with
      | TYPE_void -> ()
-     | _ -> let w = Temp (newTemp()) in
+     | _ -> let w = Temp(newTemp (TYPE_int 0)) in
        addQuad(genQuad Op_par w (PassType RET) Empty);
        prop.place <- w);
     addQuad(genQuad Op_call Empty Empty (UnitName x));
@@ -290,7 +287,7 @@ and genquads_expr ast =
   | E_plus (x,y)  ->
     let e1prop = genquads_expr x
     and e2prop = genquads_expr y
-    and w = Temp (newTemp ()) in
+    and w = Temp(newTemp (TYPE_int 0)) in
     let q = match_ar_or_ptr ~expr:x
         ~if_int:(lazy (genQuad Op_plus e1prop.place e2prop.place w))
         ~if_pointer:(lazy (genQuad Op_array e1prop.place e2prop.place w))
@@ -302,7 +299,7 @@ and genquads_expr ast =
   | E_minus (x,y) ->
     let e1prop = genquads_expr x
     and e2prop = genquads_expr y
-    and w = Temp (newTemp ()) in
+    and w = Temp(newTemp (TYPE_int 0)) in
     let q = match_ar_or_ptr ~expr:x
             ~if_int:(lazy (genQuad Op_minus e1prop.place e2prop.place w))
         ~if_pointer:(lazy (genQuad Op_array e1prop.place e2prop.place w)) (* TODO MINUS! FIX!*)
@@ -396,13 +393,13 @@ and genquads_expr ast =
     in genquads_expr (E_minus (rs,x))
   | E_addr x ->
     let tprop = genquads_expr x in
-    let w = Temp (newTemp ()) in
+    let w = Temp(newTemp (TYPE_int 0)) in
     addQuad(genQuad Op_assign tprop.place Empty w);
     prop.place <- Address (w);
     prop
   | E_deref x -> (* TODO: Optionally avoid using one temporary in the first step *)
     let tprop = genquads_expr x in
-    let w = Temp (newTemp ()) in
+    let w = Temp(newTemp (TYPE_int 0)) in
     addQuad(genQuad Op_assign tprop.place Empty w);
     prop.place <- Deref (w);
     prop
@@ -415,7 +412,7 @@ and genquads_expr ast =
            ~if_double:(lazy (E_double "1.0"))
     in genquads_expr (expand_as_sum rs)
   | E_incr_aft x ->
-    let ww    = Temp(newTemp ()) in
+    let ww    = Temp(newTemp (TYPE_int 0)) in
     let rprop = genquads_expr x in
     addQuad (genQuad Op_assign rprop.place Empty ww);
     let rs = match_ar_or_ptr ~expr:x
@@ -423,7 +420,7 @@ and genquads_expr ast =
         ~if_pointer:(lazy (E_int "1"))
         ~if_double:(lazy (E_double "1.0"))
     in
-    let w = Temp(newTemp ()) in
+    let w = Temp(newTemp (TYPE_int 0)) in
     let _ = match_ar_or_ptr ~expr:x
         ~if_int:(lazy (addQuad(genQuad Op_plus  rprop.place (genquads_expr rs).place w)))
         ~if_pointer:(lazy (addQuad(genQuad Op_array rprop.place (genquads_expr rs).place w)))
@@ -437,25 +434,25 @@ and genquads_expr ast =
   | E_array_access (x,y) ->  (* TODO FIX *)
     let aprop = genquads_expr x in
     let iprop = genquads_expr y in
-    let w = Temp (newTemp ()) in  (* Generate Temporary just before use for better ordering*)
+    let w = Temp(newTemp (TYPE_int 0)) in  (* Generate Temporary just before use for better ordering*)
     addQuad(genQuad Op_array aprop.place iprop.place w);
     prop.place <- Deref (w); (* The result should be the deref of this *)
     prop
   | E_delete x ->
     let rprop = genquads_expr x in
-    let w = Temp (newTemp ()) in
+    let w = Temp(newTemp (TYPE_int 0)) in
     addQuad(genQuad Op_free rprop.place Empty w);
     prop.place <- w; (* The result should be the deref of this *)
     prop
   | E_new (x, None) ->
     let bytes = sizeOfType (map_to_symbol_table_type x) in
-    let w = Temp (newTemp()) in
+    let w = Temp(newTemp (TYPE_int 0)) in
     addQuad(genQuad Op_malloc (Int bytes) Empty w);
     prop.place <- w;
     prop
   | E_new (x, Some y) ->
     let bytes = sizeOfType (map_to_symbol_table_type x) in
-    let w = Temp (newTemp()) in
+    let w = Temp(newTemp (TYPE_int 0)) in
     let total_bytes_prop    = genquads_expr (E_mult (E_int (string_of_int bytes),y)) in
     addQuad(genQuad Op_malloc total_bytes_prop.place Empty w);
     prop.place <- w;
@@ -464,7 +461,7 @@ and genquads_expr ast =
   | E_ternary_op (con, tr_expr, fal_expr) ->
     let cprop = genquads_expr con |> output_condition in
     backpatch cprop.trues (nextQuad ());
-    let w = Temp (newTemp ()) in
+    let w = Temp(newTemp (TYPE_int 0)) in
     let tprop = genquads_expr tr_expr in
     addQuad (genQuad Op_assign tprop.place Empty w);
     let l1    = [nextQuad ()] in

@@ -256,6 +256,8 @@ let rec load reg a =
   | Address i -> load_addr reg i
   (* TODO use proper `mov` later later. *)
   | Deref i -> load (Reg (Rdi,B64)) i @ [I_movq (Mem (None,Rdi,None),reg) ]
+  (* TODO adjust `mov` size,link temporary variables to Symbol Table *)
+  | Temp  n -> [I_movq (Mem (Some 130,Rdi,None),Reg (Rdi,B64))] 
   | _ -> raise (Terminate "bad quad entry")
 
 (* input: This function takes a destination register, and a source argument *)
@@ -368,4 +370,3 @@ let print_instructions lst =
   lst
   |> ListLabels.flatten
   |> List.iter ~f:(fun ins -> printf "%s" (string_of_ins_86_64 ins))
-
