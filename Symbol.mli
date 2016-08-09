@@ -86,6 +86,7 @@ val lookupEntry        : Identifier.id -> lookup_type -> bool -> entry
 (* NOTE: Result type of `int a[N];` is transformed to `int *` *)
 val lookup_result_type : Identifier.id -> Types.typ
 
+val lookup_bp_offset   : entry -> int
 
 (* NOTE: The following functions take as input an identifier of a function. *)
 val lookup_pass_styles : Identifier.id -> pass_mode list

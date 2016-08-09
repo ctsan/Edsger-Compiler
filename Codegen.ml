@@ -257,7 +257,7 @@ let rec load reg a =
   (* TODO use proper `mov` later later. *)
   | Deref i -> load (Reg (Rdi,B64)) i @ [I_movq (Mem (None,Rdi,None),reg) ]
   (* TODO adjust `mov` size,link temporary variables to Symbol Table *)
-  | Temp  n -> [I_movq (Mem (Some 130,Rdi,None),Reg (Rdi,B64))] 
+  | Temp  n -> [I_movq (Mem (Some 130,Rdi,None),Reg (Rdi,B64))]
   | _ -> raise (Terminate "bad quad entry")
 
 (* input: This function takes a destination register, and a source argument *)
@@ -302,6 +302,7 @@ and load_addr reg a =
 and store reg a =
   match a with
   | Var ent ->
+    (* TODO Fix, `Var` doesn't need to be a parameter*)
     let par_info =
       match ent.entry_info with
       | ENTRY_parameter par -> par

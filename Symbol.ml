@@ -206,6 +206,15 @@ let lookup_pass_styles f =
 	let open Core.Std in
   List.map (lookup_parameters f) ~f:(fun param -> param.parameter_mode)
 
+
+let lookup_bp_offset e =
+  match e with
+  | ENTRY_parameter p -> p.parameter_offset
+  | ENTRY_variable  v -> v.variable_offset
+  | ENTRY_temporary t -> t.temporary_offset
+  | _ -> raise (Failure "Don't call lookup_bp_offset like this.")
+
+
 let newVariable id typ err =
   !currentScope.sco_negofs <- !currentScope.sco_negofs - sizeOfType typ;
   let inf = {
