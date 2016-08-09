@@ -256,8 +256,8 @@ let rec load reg a =
   | Address i -> load_addr reg i
   (* TODO use proper `mov` later later. *)
   | Deref i -> load (Reg (Rdi,B64)) i @ [I_movq (Mem (None,Rdi,None),reg) ]
-  (* TODO adjust `mov` size,link temporary variables to Symbol Table *)
-  | Temp  n -> [I_movq (Mem (Some 130,Rdi,None),Reg (Rdi,B64))]
+  (* TODO adjust `mov` size*)
+  | Temp n -> [I_movq (Mem (Some (lookup_bp_offset n),Rbp,None),reg)]
   | _ -> raise (Terminate "bad quad entry")
 
 (* input: This function takes a destination register, and a source argument *)
@@ -325,6 +325,7 @@ and store reg a =
           [I_movq (Mem (Some par_info.parameter_offset, Rsi, None),Reg (Rsi, B64));
           I_movq (reg,Mem (None, Rsi, None))])
   | Deref i -> load (Reg (Rdi, B64)) i @ [I_movq (reg,Mem (None, Rdi, None))]
+  (* TODO Add Temp like the `load` case *)
   | _ -> raise (Terminate "bad quad entry")
 
 
@@ -349,16 +350,34 @@ and label_general p =
     sprintf "@%d" n
 
 
-(* This function takes a quad, and returns an instruction *)
+(* This function takes a quad, and returns a list of instructions*)
 and ins_of_quad qd =
   match qd.quad_op with
   | Op_assign ->
     if is_encoded_as_int qd.quad_argX then
-      let _ = load (Reg (Rsi,B64)) qd.quad_argX in
-      store (Reg (Rsi,B64)) qd.quad_argZ
+      let ld_ins = load (Reg (Rsi,B64)) qd.quad_argX in
+      ld_ins @ store (Reg (Rsi,B64)) qd.quad_argZ
     else []
-  (* | Op_array  -> *)
-  (* | Op_call   -> *)
+  | Op_array  ->
+    let ld_ins  = load (Reg (Rax,B64)) qd.quad_argY in
+    let ld_addr = load_addr (Reg (Rcx,B64)) qd.quad_argX in
+    let st_ins  = store (Reg (Rax,B64)) qd.quad_argZ in
+    let type_size = sizeOfType (TYPE_int 0) in (* TODO Fix, to lookup for the size of the array *)
+    ld_ins @
+    [I_movq (Reg (Rcx,B64),Const(Imm8 type_size))] @
+    [I_imul (Reg (Rcx,B64),Rax) ] @ (* TODO Check size is correct*)
+    ld_addr @
+    [I_addq (Reg (Rcx,B64),Reg (Rax,B64))] @
+    st_ins
+  | Op_plus ->
+    let ld1_ins = load (Reg (Rax,B64)) qd.quad_argX in
+    let ld2_ins = load (Reg (Rdx,B64)) qd.quad_argY in
+    let st_ins  = store(Reg (Rax,B64)) qd.quad_argZ in
+    ld1_ins @
+    ld2_ins @
+    [I_addq (Reg (Rax,B64),Reg (Rdx,B64)) ] @ (* TODO Chcek Size (q,w,..)*)
+    st_ins
+  (* TODO  | Op_minus  almost same *)
   | _ -> []
 
 (* This function takes a list of quads, and returns a list of lists of istructions *)
