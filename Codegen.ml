@@ -343,9 +343,10 @@ and label_end_of p =
     let n = 1 in
     sprintf "@%s_%d" id n
 
-(* genearte a label for a quad with label `label_name` *)
+(* generate a label for a quad with label `label_name` *)
 and label_general p =
-    (* TODO: need a counter of sorts or hashtbl *)
+    (* TODO: need a hashtbl *)
+    (* assign value n in hashtbl for p *)
     let n = 1 in
     sprintf "@%d" n
 
@@ -377,7 +378,56 @@ and ins_of_quad qd =
     ld2_ins @
     [I_addq (Reg (Rax,B64),Reg (Rdx,B64)) ] @ (* TODO Chcek Size (q,w,..)*)
     st_ins
-  (* TODO  | Op_minus  almost same *)
+  | Op_minus ->
+    let ld1_ins = load (Reg (Rax,B64)) qd.quad_argX in
+    let ld2_ins = load (Reg (Rdx,B64)) qd.quad_argY in
+    let st_ins  = store(Reg (Rax,B64)) qd.quad_argZ in
+    ld1_ins @
+    ld2_ins @
+    [I_subq (Reg (Rax,B64),Reg (Rdx,B64)) ] @ (* TODO Chcek Size (q,w,..)*)
+    st_ins
+  | Op_mult ->
+    let ld1_ins = load (Reg (Rax,B64)) qd.quad_argX in
+    let ld2_ins = load (Reg (Rcx,B64)) qd.quad_argY in
+    let st_ins  = store(Reg (Rax,B64)) qd.quad_argZ in
+    ld1_ins @
+    ld2_ins @
+    [I_imul (Reg (Rax,B64),Reg (Rcx,B64)) ] @ (* TODO Chcek Size (q,w,..)*)
+    st_ins
+  | Op_div ->
+    let ld1_ins = load (Reg (Rax,B64)) qd.quad_argX in
+    (* cwd needed ? i guess depends on size *)
+    let ld2_ins = load (Reg (Rcx,B64)) qd.quad_argY in
+    let st_ins  = store(Reg (Rax,B64)) qd.quad_argZ in
+    ld1_ins @
+    ld2_ins @
+    [I_idiv (Reg (Rax,B64),Reg (Rcx,B64)) ] @ (* TODO Chcek Size (q,w,..)*)
+    st_ins
+  | Op_mod ->
+    let ld1_ins = load (Reg (Rax,B64)) qd.quad_argX in
+    (* cwd needed ? i guess depends on size *)
+    let ld2_ins = load (Reg (Rcx,B64)) qd.quad_argY in
+    let st_ins  = store(Reg (Rdx,B64)) qd.quad_argZ in
+    ld1_ins @
+    ld2_ins @
+    [I_idiv (Reg (Rax,B64),Reg (Rcx,B64)) ] @ (* TODO Chcek Size (q,w,..)*)
+    st_ins
+  | Op_eq ->
+    let ld1_ins = load (Reg (Rax,B64)) qd.quad_argX in
+    let ld2_ins = load (Reg (Rdx,B64)) qd.quad_argY in
+    let jmp_ins  = I_je label_of(qd.quad_argZ) in (* TODO need to fix this *)
+    ld1_ins @
+    ld2_ins @
+    [I_cmp (Reg (Rax,B64),Reg (Rdx,B64)) ] @ 
+    jmp_ins
+  | Op_neq ->
+    []
+  | Op_lt ->
+    []
+  | Op_gt ->
+    []
+  (* TODO Same as Op_eq *)
+  (* TODO Figure out label stuff *)
   | _ -> []
 
 (* This function takes a list of quads, and returns a list of lists of istructions *)
