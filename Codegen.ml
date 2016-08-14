@@ -61,7 +61,7 @@ type ins_86_64 =
   | I_subq  of operand * operand
 
   | I_imul  of operand * reg (* first operand:reg or mem, result is always a register 64bit *)
-  | I_idiv  of operand (* mem,reg: divides 128-bit integer (rdx:rax), remained in rdx, quotient in rax.*)
+  | I_idiv  of operand  (* mem,reg: divides 128-bit integer (rdx:rax), remained in rdx, quotient in rax.*)
   | I_idivw of memory_location (* mem,reg: divides 128-bit integer (rdx:rax), remained in rdx, quotient in rax.*)
   | I_jmp   of label_id
   | I_cmp   of operand * operand
@@ -260,6 +260,9 @@ let rec load reg a =
   | Temp n -> [I_movq (Mem (Some (lookup_bp_offset n),Rbp,None),reg)]
   | _ -> raise (Terminate "bad quad entry")
 
+and label_of n =
+  "dummy_label"
+
 (* input: This function takes a destination register, and a source argument *)
 (* output: a list of the necessery assembly instructions *)
 (* Pretty much the same as load but with lea *)
@@ -337,9 +340,15 @@ and label_name p =
     sprintf "_%s_%d" id n
 
 (* generate a label for the end of a unit *)
-and label_end_of p =
+(* and label_end_of p = *)
+(*     (\* TODO: WE NEED A QUEUE *\) *)
+(*     let id = id_name p.entry_id in *)
+(*     let n = 1 in *)
+(*     sprintf "@%s_%d" id n *)
+
+and label_end_of str =
     (* TODO: WE NEED A QUEUE *)
-    let id = id_name p.entry_id in
+    let id = str in
     let n = 1 in
     sprintf "@%s_%d" id n
 
@@ -349,6 +358,7 @@ and label_general p =
     (* assign value n in hashtbl for p *)
     let n = 1 in
     sprintf "@%d" n
+
 
 
 (* This function takes a quad, and returns a list of instructions*)
@@ -392,7 +402,7 @@ and ins_of_quad qd =
     let st_ins = store(Reg (Rax,B64)) qd.quad_argZ in
     ld1_ins @
     ld2_ins @
-    [I_imul (Reg (Rax,B64),Reg (Rcx,B64)) ] @ (* TODO Chcek Size (q,w,..)*)
+    [I_imul (Reg (Rax,B64),Rcx) ] @ (* TODO Chcek Size (q,w,..)*)
     st_ins
   | Op_div ->
     let ld1_ins = load (Reg (Rax,B64)) qd.quad_argX in
@@ -401,7 +411,7 @@ and ins_of_quad qd =
     let st_ins = store(Reg (Rax,B64)) qd.quad_argZ in
     ld1_ins @
     ld2_ins @
-    [I_idiv (Reg (Rax,B64),Reg (Rcx,B64)) ] @ (* TODO Chcek Size (q,w,..)*)
+    [I_idiv (Reg (Rcx,B64)) ] @ (* TODO Chcek Size (q,w,..)*)
     st_ins
   | Op_mod ->
     let ld1_ins = load (Reg (Rax,B64)) qd.quad_argX in
@@ -410,51 +420,51 @@ and ins_of_quad qd =
     let st_ins = store(Reg (Rdx,B64)) qd.quad_argZ in
     ld1_ins @
     ld2_ins @
-    [I_idiv (Reg (Rax,B64),Reg (Rcx,B64)) ] @ (* TODO Chcek Size (q,w,..)*)
+    [I_idiv (Reg (Rcx,B64)) ] @ (* TODO Chcek Size (q,w,..)*)
     st_ins
   | Op_eq ->
     let ld1_ins = load (Reg (Rax,B64)) qd.quad_argX in
     let ld2_ins = load (Reg (Rdx,B64)) qd.quad_argY in
     ld1_ins @
     ld2_ins @
-    [I_cmp (Reg (Rax,B64),Reg (Rdx,B64)); 
-     I_je label_of(qd.quad_argZ)]
-  | Op_neq ->
-    let ld1_ins = load (Reg (Rax,B64)) qd.quad_argX in
-    let ld2_ins = load (Reg (Rdx,B64)) qd.quad_argY in
-    ld1_ins @
-    ld2_ins @
     [I_cmp (Reg (Rax,B64),Reg (Rdx,B64));
-     I_jne label_of(qd.quad_argZ)]
+     I_je (label_of(qd.quad_argZ))]
+  (* | Op_neq -> *)
+  (*   let ld1_ins = load (Reg (Rax,B64)) qd.quad_argX in *)
+  (*   let ld2_ins = load (Reg (Rdx,B64)) qd.quad_argY in *)
+  (*   ld1_ins @ *)
+  (*   ld2_ins @ *)
+  (*   [I_cmp (Reg (Rax,B64),Reg (Rdx,B64)); *)
+  (*    I_jne (label_of(qd.quad_argZ))] *)
   | Op_lt ->
     let ld1_ins = load (Reg (Rax,B64)) qd.quad_argX in
     let ld2_ins = load (Reg (Rdx,B64)) qd.quad_argY in
     ld1_ins @
     ld2_ins @
     [I_cmp (Reg (Rax,B64),Reg (Rdx,B64)); 
-     I_jl label_of(qd.quad_argZ)]
+     I_jl (label_of(qd.quad_argZ))]
   | Op_gt ->
     let ld1_ins = load (Reg (Rax,B64)) qd.quad_argX in
     let ld2_ins = load (Reg (Rdx,B64)) qd.quad_argY in
     ld1_ins @
     ld2_ins @
     [I_cmp (Reg (Rax,B64),Reg (Rdx,B64));
-     I_jg label_of(qd.quad_argZ)]
+     I_jg (label_of(qd.quad_argZ))]
   | Op_ifb ->
     let ld1_ins = load (Reg (Rax,B64)) qd.quad_argX in
     ld1_ins @
-    [I_cmp (Reg (Rax,B64),Imm (Const (Imm64 0))); (* TODO no or so immediate cmp *)
-     I_jne label_of (qd.quad_argZ)]
+    [I_cmp (Reg (Rax,B64),Const (Imm64 0)); (* TODO no or so immediate cmp *)
+     I_jne (label_of(qd.quad_argZ))]
   | Op_jump ->
-    [I_jmp label_of (qd.quad_argZ)]
+    [I_jmp (label_of (qd.quad_argZ))]
   | Op_unit ->
     (* TODO SOMEHOW GET sco_negofs for size and save to size *) 
     (* TODO PRINT LABEL N SHIT *)
     [I_pushq (Reg (Rbp, B64));
      I_movq (Reg (Rsp, B64), Reg (Rbp, B64));
-     I_subq (Reg (Rsp, B64), Const(Imm8 size))]
+     I_subq (Reg (Rsp, B64), Const(Imm8 3000))] (*TODO Imm8 size *)
   | Op_endu ->
-    let ent = match qd.quad_argx with 
+    let ent = match qd.quad_argX with 
               | UnitName x -> x
               | _ -> raise (Terminate "Bad operator of endu")
     in
@@ -467,9 +477,9 @@ and ins_of_quad qd =
      M_Label endp]
   | Op_ret ->
     []
-  | OP_call ->
+  | Op_call ->
     []
-  | OP_par ->
+  | Op_par ->
     []
   (* TODO Figure out label stuff *)
   | _ -> []
