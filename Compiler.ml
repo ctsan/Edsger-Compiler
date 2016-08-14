@@ -17,10 +17,10 @@ let compile_channel channel =
                        was found at offset %d. Aborting..\n"
       chr (Char.to_int chr) (pos); eclear();
     exit 1
-  | Semantic.Terminate str | Types.Terminate str ->
-    eprintf_color Red "[3] "; eprintf "%s\n" str; eclear ();
-    exit 3
-  | Symbol.Exit -> exit 3
+  (* | Semantic.Terminate str | Types.Terminate str -> *)
+  (*   eprintf_color Red "[3] "; eprintf "%s\n" str; eclear (); *)
+  (*   exit 3 *)
+  (* | Symbol.Exit -> exit 3 *)
 
 (* Parse Flags and Provide Documentation for -help *)
 let arguments =

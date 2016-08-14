@@ -1,5 +1,0 @@
-#include "other.eds"
-void main () {
-    int i;
-    i = i+1;
-}

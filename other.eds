@@ -1,4 +1,0 @@
-void other () {
-    int i;
-    i = i+1;
-}

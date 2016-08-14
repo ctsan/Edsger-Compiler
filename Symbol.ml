@@ -140,7 +140,9 @@ let string_of_entry e =
 
 let is_local e =
     let scc = !currentScope in
-    e.entry_scope.sco_nesting = scc.sco_nesting 
+    let res = e.entry_scope.sco_nesting = scc.sco_nesting in
+    (* Printf.printf "\ncurrent scope %d, item scope %d\n" scc.sco_nesting e.entry_scope.sco_nesting; *)
+    res
     (* TODO: is there a chance e will not be in current scope? *)
 
 let lookupEntry id how err =

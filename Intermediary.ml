@@ -127,9 +127,10 @@ let newProp () = {
   falses = [];
 }
 
-let quads = ref []       (* All our Quads *)
-let quadNext = ref 0     (* Next Quad Number *)
-let tmp = ref 0          (* Temporaries Numbering *)
+let quads = ref []          (* All our Quads *)
+let last_fun_quads = ref [] (* All The quads of the last function *)
+let quadNext = ref 0        (* Next Quad Number *)
+let tmp = ref 0             (* Temporaries Numbering *)
 
 
 (* Return Next Quad number *)
@@ -147,11 +148,14 @@ let genQuad op argX argY argZ =
     quad_argZ = argZ }
 
 (* Add a quad on our quads *)
+(* Affects quads, last_fun_quads *)
 let addQuad q =
-  quads := q :: !quads
+  quads          := q :: !quads;
+  last_fun_quads := q :: !last_fun_quads
 
 (* TODO Refactor to make it pure *)
 let list_of_quads () = !quads
+let list_of_last_fun_quads () = !last_fun_quads
 
 (* Increment Temporaries and return the new one *)
 let newTemp typ= newTemporary typ
@@ -225,11 +229,15 @@ and closequad prop =
   backpatch prop.falses (nextQuad ());
 
 
+(* Affects last_fun_quads *)
 and closeFinalQuad prop name =
   backpatch prop.next (nextQuad ());
   backpatch prop.trues (nextQuad ());
   backpatch prop.falses (nextQuad ());
   addQuad (genQuad Op_endu Empty Empty (UnitName name))
+
+and clearFunQuads () =
+  last_fun_quads := [];
 
 and genquads_expr ast =
   let prop = newProp () in

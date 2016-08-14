@@ -157,10 +157,10 @@ and check tree =
       then raise (Terminate "main is not implemented");
       printSymbolTable ();
       print_quads ();
-      let ins_list = list_of_quads () |> Codegen.quads_to_ins  in
+      (* let ins_list = list_of_quads () |> Codegen.quads_to_ins  in *)
       print_newline();
       print_newline();
-      Codegen.print_instructions ins_list;
+      Codegen.get_all_instructions () |> Codegen.print_instructions;
       print_newline()
   (* )) *)
 
@@ -244,6 +244,9 @@ and check_a_declaration  =
         in
         printSymbolTable ();
         closeFinalQuad lst_prop id;
+        let ins_list = list_of_last_fun_quads () |> Codegen.quads_to_ins  in
+        Codegen.add_list_of_ins ins_list;
+        clearFunQuads ();
         closeScope ()
       end);
 

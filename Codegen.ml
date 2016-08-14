@@ -73,13 +73,20 @@ type ins_86_64 =
   | I_jl    of label_id
   | I_jle   of label_id
   | I_ret
+  | I_empty (* for debugging *)
+
+let func_id = ref 0
+
+let get_func_id () = incr func_id; !func_id
+
+let cur_func_id () = !func_id
 
 let string_of_imm = function
   | Imm8  i
   | Imm16 i
   | Imm32 i
   | Imm64 i ->
-     sprintf "$%d\n" i (* NOTE: Added \n *)
+     sprintf "$%d" i (* NOTE: Added \n *)
 
 let string_of_reg r =
   match r with
@@ -140,7 +147,7 @@ let string_of_ins_86_64 = function
   | D_short  (label,num)   -> (string_of_label label) ^ sprintf "\t.short " ^ string_of_imm num
   | D_long  (label,num)   -> (string_of_label label) ^ sprintf "\t.long " ^ string_of_imm num
   | D_zero (label,total) -> (string_of_label label) ^ sprintf "\t.zero %d\n" total
-  | M_Label label        -> sprintf "%S:\n" (string_of_label label)
+  | M_Label label        -> sprintf "%s" (string_of_label label)
   | I_movb (op1,op2)     -> sprintf "\tmovb %s,%s\n" (string_of_operand op1) (string_of_operand op2)
   | I_movw (op1,op2)     -> sprintf "\tmovw %s,%s\n" (string_of_operand op1) (string_of_operand op2)
   | I_movl (op1,op2)     -> sprintf "\tmovl %s,%s\n" (string_of_operand op1) (string_of_operand op2)
@@ -169,6 +176,7 @@ let string_of_ins_86_64 = function
   | I_jl label           -> sprintf "\tjl %s\n" (string_of_label label)
   | I_jle label          -> sprintf "\tjle %s\n" (string_of_label label)
   | I_ret                -> sprintf "\tret\n"
+  | I_empty              -> sprintf "\n"
 
 let bool_to_int b =
   match b with
@@ -263,11 +271,12 @@ let rec load reg a =
 
 (* Takes operand of quad that is String str (Label int????) *)
 (* Returns M_Label (ins) str *)
-and label_of e = match e with
-| String str -> str
-| Label int -> Int.to_string int
-| _ -> printf e; raise (Terminate "Label can only be string")
-  
+and label_of e =
+  "dummy"
+(*   match e with *)
+(* | String str -> str *)
+(* | Label int -> Int.to_string int *)
+(* | _ -> raise (Terminate "Label can only be string") *)
 
 (* input: This function takes a destination register, and a source argument *)
 (* output: a list of the necessery assembly instructions *)
@@ -307,7 +316,7 @@ and store reg a =
     if is_local ent then
      (if (not (is_par ent) || lookup_passmode ent = PASS_BY_VALUE) then
         [I_movq (reg, Mem (Some (lookup_bp_offset ent), Rbp, None))]
-      else          
+      else
         [I_movq (Reg (Rsi, B64),Mem (Some (lookup_bp_offset ent), Rbp, None));
         I_movq (reg,Mem (None, Rsi, None))])
     else
@@ -320,15 +329,22 @@ and store reg a =
           I_movq (reg,Mem (None, Rsi, None))])
   | Deref i -> load (Reg (Rdi, B64)) i @ [I_movq (reg,Mem (None, Rdi, None))]
   (* TODO Add Temp like the `load` case *)
+  | Temp n -> [I_movq (reg,Mem (Some (lookup_bp_offset n),Rbp,None))]
   | _ -> raise (Terminate "bad quad entry")
 
 
 (* generate a label for the beginning of a unit *)
 and label_name p =
     (* TODO: WE NEED A QUEUE *)
-    let id = id_name p.entry_id in
-    let n = 1 in
-    sprintf "_%s_%d" id n
+    match p with
+    | UnitName str -> sprintf "_%s_%d" str (get_func_id ())
+    | _ -> raise (Failure "This should be called with procedure name\n")
+
+(* genearte label for the end of a unit*)
+and label_end_of p =
+    match p with
+    | UnitName str -> sprintf "@%s_%d" str (cur_func_id ())
+    | _ -> raise (Failure "This should be called with procedure name\n")
 
 (* generate a label for the end of a unit *)
 (* and label_end_of p = *)
@@ -337,11 +353,12 @@ and label_name p =
 (*     let n = 1 in *)
 (*     sprintf "@%s_%d" id n *)
 
-and label_end_of str =
-    (* TODO: WE NEED A QUEUE *)
-    let id = str in
-    let n = 1 in
-    sprintf "@%s_%d" id n
+(* and label_name str = *)
+(*     (\* TODO: WE NEED A QUEUE *\) *)
+(*     let id = str in *)
+(*     let n = 1 in *)
+(*     sprintf "_%s_%d" id n *)
+
 
 (* generate a label for a quad with label `label_name` *)
 and label_general p =
@@ -354,7 +371,7 @@ and label_general p =
 
 (* This function takes a quad, and returns a list of instructions*)
 and ins_of_quad qd =
-  match qd.quad_op with
+  (match qd.quad_op with
   | Op_assign ->
     if is_encoded_as_int qd.quad_argX then
       let ld_ins = load (Reg (Rsi,B64)) qd.quad_argX in
@@ -451,21 +468,20 @@ and ins_of_quad qd =
   | Op_unit ->
     (* TODO SOMEHOW GET sco_negofs for size and save to size *) 
     (* TODO PRINT LABEL N SHIT *)
-    [I_pushq (Reg (Rbp, B64));
+    [
+     M_Label (label_name qd.quad_argX);
+     I_pushq (Reg (Rbp, B64));
      I_movq (Reg (Rsp, B64), Reg (Rbp, B64));
      I_subq (Reg (Rsp, B64), Const(Imm8 3000))] (*TODO Imm8 size *)
   | Op_endu ->
-    let ent = match qd.quad_argZ with 
-              | UnitName x -> x
-              | _ -> raise (Terminate "Bad operator of endu")
-    in
-    let endof = label_end_of(ent) ^ ":" in
-    let endp = label_of(qd.quad_argX) ^ "\t endp\n" in
-    [M_Label endof;
+    let endof = label_end_of(qd.quad_argZ)  in
+    (* let endp =  label_name(qd.quad_argZ) ^ " endp\n" in *)
+    [
+     M_Label endof;
      I_movq (Reg (Rbp, B64), Reg (Rsp, B64));
      I_pushq (Reg (Rbp, B64));
      (* TODO I_ret ??? *)
-     M_Label endp]
+     (* M_Label endp  TODO use endp if at&t will be used *)]
   | Op_ret ->
     []
   | Op_call ->
@@ -473,7 +489,7 @@ and ins_of_quad qd =
   | Op_par ->
     []
   (* TODO Figure out label stuff *)
-  | _ -> []
+  | _ -> []) @ [I_empty]
 
 (* This function takes a list of quads, and returns a list of lists of istructions *)
 let quads_to_ins qlist =
@@ -485,3 +501,11 @@ let print_instructions lst =
   lst
   |> ListLabels.flatten
   |> List.iter ~f:(fun ins -> printf "%s" (string_of_ins_86_64 ins))
+
+let instrss: ins_86_64 list list list ref = ref []
+
+let add_list_of_ins lst =
+  instrss := lst::!instrss
+
+let get_all_instructions () =
+  ListLabels.flatten (!instrss) |> List.rev
