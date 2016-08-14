@@ -72,6 +72,7 @@ type ins_86_64 =
   | I_jge   of label_id
   | I_jl    of label_id
   | I_jle   of label_id
+  | I_ret
 
 let string_of_imm = function
   | Imm8  i
@@ -167,6 +168,7 @@ let string_of_ins_86_64 = function
   | I_jge label          -> sprintf "\tjge %s\n" (string_of_label label)
   | I_jl label           -> sprintf "\tjl %s\n" (string_of_label label)
   | I_jle label          -> sprintf "\tjle %s\n" (string_of_label label)
+  | I_ret                -> sprintf "\tret\n"
 
 let bool_to_int b =
   match b with
@@ -221,6 +223,12 @@ let update_AR callee called =
   in
     fst::(loopins [] (np-nx-1)) @ lst
 
+let is_par e = match e.entry_info with
+| ENTRY_parameter _ -> true
+| ENTRY_variable _ | ENTRY_temporary _ -> false
+| _ -> raise (Terminate "Bad entry to load")
+
+
 (* input: This function takes a destination register, and a source argument *)
 (* output: a list of the necessery assembly instructions *)
 let rec load reg a =
@@ -232,27 +240,20 @@ let rec load reg a =
   | Char chr ->
       [I_movb(Const (Imm8 (Char.to_int chr)),reg)]
   | Var ent ->
-    let par_info =
-      match ent.entry_info with
-      | ENTRY_parameter par -> par
-      | _ -> raise (Terminate "Bad entry to load")
-    in
     if is_local ent then
-      (match par_info.parameter_mode with (* TODO: maybe abstract this check with a function *)
-      | PASS_BY_VALUE ->
-          [I_movq (Mem (Some par_info.parameter_offset, Rbp, None),reg)]
-      | PASS_BY_REFERENCE ->
-          [I_movq (Mem (Some par_info.parameter_offset, Rbp, None),Reg (Rsi, B64));
-           I_movq (Mem (None, Rsi, None), reg)])
+     (if (not (is_par ent) || lookup_passmode ent = PASS_BY_VALUE) then 
+        [I_movq (Mem (Some (lookup_bp_offset ent), Rbp, None),reg)]
+      else
+        [I_movq (Mem (Some (lookup_bp_offset ent), Rbp, None),Reg (Rsi, B64));
+         I_movq (Mem (None, Rsi, None), reg)])
     else
-      (match par_info.parameter_mode with
-      | PASS_BY_VALUE ->
-          get_AR(ent) @
-          [I_movq (Mem (Some par_info.parameter_offset, Rsi, None),reg)]
-      | PASS_BY_REFERENCE ->
-          get_AR(ent) @
-          [I_movq (Mem (Some par_info.parameter_offset, Rsi, None),Reg (Rsi, B64));
-          I_movq (Mem (None, Rsi, None), reg)])
+     (if (not (is_par ent) || lookup_passmode ent = PASS_BY_VALUE) then 
+        get_AR(ent) @
+        [I_movq (Mem (Some (lookup_bp_offset ent), Rsi, None),reg)]
+     else
+        get_AR(ent) @
+        [I_movq (Mem (Some (lookup_bp_offset ent), Rsi, None),Reg (Rsi, B64));
+        I_movq (Mem (None, Rsi, None), reg)])
   | Address i -> load_addr reg i
   (* TODO use proper `mov` later later. *)
   | Deref i -> load (Reg (Rdi,B64)) i @ [I_movq (Mem (None,Rdi,None),reg) ]
@@ -260,8 +261,13 @@ let rec load reg a =
   | Temp n -> [I_movq (Mem (Some (lookup_bp_offset n),Rbp,None),reg)]
   | _ -> raise (Terminate "bad quad entry")
 
-and label_of n =
-  "dummy_label"
+(* Takes operand of quad that is String str (Label int????) *)
+(* Returns M_Label (ins) str *)
+and label_of e = match e with
+| String str -> str
+| Label int -> Int.to_string int
+| _ -> printf e; raise (Terminate "Label can only be string")
+  
 
 (* input: This function takes a destination register, and a source argument *)
 (* output: a list of the necessery assembly instructions *)
@@ -277,25 +283,18 @@ and load_addr reg a =
       []
       (* [I_leaq(reg, )], String to memory location function or sth needed? *)
   | Var ent ->
-    let par_info =
-      match ent.entry_info with
-      | ENTRY_parameter par -> par
-      | _ -> raise (Terminate "Bad entry to load")
-    in
     if is_local ent then
-      (match par_info.parameter_mode with (* TODO: maybe abstract this check with a function *)
-      | PASS_BY_VALUE ->
-          [I_leaq ((Some par_info.parameter_offset, Rbp, None),reg_of_op)]
-      | PASS_BY_REFERENCE ->
-          [I_movq (Mem (Some par_info.parameter_offset, Rbp, None),reg)])
+     (if (not (is_par ent) || lookup_passmode ent = PASS_BY_VALUE) then
+        [I_leaq ((Some (lookup_bp_offset ent), Rbp, None),reg_of_op)]
+      else
+        [I_movq (Mem (Some (lookup_bp_offset ent), Rbp, None),reg)])
     else
-      (match par_info.parameter_mode with
-      | PASS_BY_VALUE ->
-          get_AR(ent) @
-          [I_leaq ((Some par_info.parameter_offset, Rsi, None),reg_of_op)]
-      | PASS_BY_REFERENCE ->
-          get_AR(ent) @
-          [I_movq (Mem (Some par_info.parameter_offset, Rsi, None), reg)])
+     (if (not (is_par ent) || lookup_passmode ent = PASS_BY_VALUE) then
+        get_AR(ent) @
+        [I_leaq ((Some (lookup_bp_offset ent), Rsi, None),reg_of_op)]
+      else        
+        get_AR(ent) @
+        [I_movq (Mem (Some (lookup_bp_offset ent), Rsi, None), reg)])
   (* TODO use proper `mov` later later. *)
   | Deref i -> load reg i
   | _ -> raise (Terminate "bad quad entry")
@@ -305,27 +304,19 @@ and load_addr reg a =
 and store reg a =
   match a with
   | Var ent ->
-    (* TODO Fix, `Var` doesn't need to be a parameter*)
-    let par_info =
-      match ent.entry_info with
-      | ENTRY_parameter par -> par
-      | _ -> raise (Terminate "Bad entry to load")
-    in
     if is_local ent then
-      (match par_info.parameter_mode with (* TODO: maybe abstract this check with a function *)
-      | PASS_BY_VALUE ->
-          [I_movq (reg, Mem (Some par_info.parameter_offset, Rbp, None))]
-      | PASS_BY_REFERENCE ->
-          [I_movq (Reg (Rsi, B64),Mem (Some par_info.parameter_offset, Rbp, None));
-          I_movq (reg,Mem (None, Rsi, None))])
+     (if (not (is_par ent) || lookup_passmode ent = PASS_BY_VALUE) then
+        [I_movq (reg, Mem (Some (lookup_bp_offset ent), Rbp, None))]
+      else          
+        [I_movq (Reg (Rsi, B64),Mem (Some (lookup_bp_offset ent), Rbp, None));
+        I_movq (reg,Mem (None, Rsi, None))])
     else
-      (match par_info.parameter_mode with
-      | PASS_BY_VALUE ->
+     (if (not (is_par ent) || lookup_passmode ent = PASS_BY_VALUE) then
           get_AR(ent) @
-          [I_movq (reg,Mem (Some par_info.parameter_offset, Rsi, None))]
-      | PASS_BY_REFERENCE ->
+          [I_movq (reg,Mem (Some (lookup_bp_offset ent), Rsi, None))]
+      else
           get_AR(ent) @
-          [I_movq (Mem (Some par_info.parameter_offset, Rsi, None),Reg (Rsi, B64));
+          [I_movq (Mem (Some (lookup_bp_offset ent), Rsi, None),Reg (Rsi, B64));
           I_movq (reg,Mem (None, Rsi, None))])
   | Deref i -> load (Reg (Rdi, B64)) i @ [I_movq (reg,Mem (None, Rdi, None))]
   (* TODO Add Temp like the `load` case *)
