@@ -373,7 +373,7 @@ and ins_of_quad qd =
   | Op_plus ->
     let ld1_ins = load (Reg (Rax,B64)) qd.quad_argX in
     let ld2_ins = load (Reg (Rdx,B64)) qd.quad_argY in
-    let st_ins  = store(Reg (Rax,B64)) qd.quad_argZ in
+    let st_ins = store(Reg (Rax,B64)) qd.quad_argZ in
     ld1_ins @
     ld2_ins @
     [I_addq (Reg (Rax,B64),Reg (Rdx,B64)) ] @ (* TODO Chcek Size (q,w,..)*)
@@ -381,7 +381,7 @@ and ins_of_quad qd =
   | Op_minus ->
     let ld1_ins = load (Reg (Rax,B64)) qd.quad_argX in
     let ld2_ins = load (Reg (Rdx,B64)) qd.quad_argY in
-    let st_ins  = store(Reg (Rax,B64)) qd.quad_argZ in
+    let st_ins = store(Reg (Rax,B64)) qd.quad_argZ in
     ld1_ins @
     ld2_ins @
     [I_subq (Reg (Rax,B64),Reg (Rdx,B64)) ] @ (* TODO Chcek Size (q,w,..)*)
@@ -389,7 +389,7 @@ and ins_of_quad qd =
   | Op_mult ->
     let ld1_ins = load (Reg (Rax,B64)) qd.quad_argX in
     let ld2_ins = load (Reg (Rcx,B64)) qd.quad_argY in
-    let st_ins  = store(Reg (Rax,B64)) qd.quad_argZ in
+    let st_ins = store(Reg (Rax,B64)) qd.quad_argZ in
     ld1_ins @
     ld2_ins @
     [I_imul (Reg (Rax,B64),Reg (Rcx,B64)) ] @ (* TODO Chcek Size (q,w,..)*)
@@ -398,7 +398,7 @@ and ins_of_quad qd =
     let ld1_ins = load (Reg (Rax,B64)) qd.quad_argX in
     (* cwd needed ? i guess depends on size *)
     let ld2_ins = load (Reg (Rcx,B64)) qd.quad_argY in
-    let st_ins  = store(Reg (Rax,B64)) qd.quad_argZ in
+    let st_ins = store(Reg (Rax,B64)) qd.quad_argZ in
     ld1_ins @
     ld2_ins @
     [I_idiv (Reg (Rax,B64),Reg (Rcx,B64)) ] @ (* TODO Chcek Size (q,w,..)*)
@@ -407,7 +407,7 @@ and ins_of_quad qd =
     let ld1_ins = load (Reg (Rax,B64)) qd.quad_argX in
     (* cwd needed ? i guess depends on size *)
     let ld2_ins = load (Reg (Rcx,B64)) qd.quad_argY in
-    let st_ins  = store(Reg (Rdx,B64)) qd.quad_argZ in
+    let st_ins = store(Reg (Rdx,B64)) qd.quad_argZ in
     ld1_ins @
     ld2_ins @
     [I_idiv (Reg (Rax,B64),Reg (Rcx,B64)) ] @ (* TODO Chcek Size (q,w,..)*)
@@ -415,18 +415,62 @@ and ins_of_quad qd =
   | Op_eq ->
     let ld1_ins = load (Reg (Rax,B64)) qd.quad_argX in
     let ld2_ins = load (Reg (Rdx,B64)) qd.quad_argY in
-    let jmp_ins  = I_je label_of(qd.quad_argZ) in (* TODO need to fix this *)
     ld1_ins @
     ld2_ins @
-    [I_cmp (Reg (Rax,B64),Reg (Rdx,B64)) ] @ 
-    jmp_ins
+    [I_cmp (Reg (Rax,B64),Reg (Rdx,B64)); 
+     I_je label_of(qd.quad_argZ)]
   | Op_neq ->
-    []
+    let ld1_ins = load (Reg (Rax,B64)) qd.quad_argX in
+    let ld2_ins = load (Reg (Rdx,B64)) qd.quad_argY in
+    ld1_ins @
+    ld2_ins @
+    [I_cmp (Reg (Rax,B64),Reg (Rdx,B64));
+     I_jne label_of(qd.quad_argZ)]
   | Op_lt ->
-    []
+    let ld1_ins = load (Reg (Rax,B64)) qd.quad_argX in
+    let ld2_ins = load (Reg (Rdx,B64)) qd.quad_argY in
+    ld1_ins @
+    ld2_ins @
+    [I_cmp (Reg (Rax,B64),Reg (Rdx,B64)); 
+     I_jl label_of(qd.quad_argZ)]
   | Op_gt ->
+    let ld1_ins = load (Reg (Rax,B64)) qd.quad_argX in
+    let ld2_ins = load (Reg (Rdx,B64)) qd.quad_argY in
+    ld1_ins @
+    ld2_ins @
+    [I_cmp (Reg (Rax,B64),Reg (Rdx,B64));
+     I_jg label_of(qd.quad_argZ)]
+  | Op_ifb ->
+    let ld1_ins = load (Reg (Rax,B64)) qd.quad_argX in
+    ld1_ins @
+    [I_cmp (Reg (Rax,B64),Imm (Const (Imm64 0))); (* TODO no or so immediate cmp *)
+     I_jne label_of (qd.quad_argZ)]
+  | Op_jump ->
+    [I_jmp label_of (qd.quad_argZ)]
+  | Op_unit ->
+    (* TODO SOMEHOW GET sco_negofs for size and save to size *) 
+    (* TODO PRINT LABEL N SHIT *)
+    [I_pushq (Reg (Rbp, B64));
+     I_movq (Reg (Rsp, B64), Reg (Rbp, B64));
+     I_subq (Reg (Rsp, B64), Const(Imm8 size))]
+  | Op_endu ->
+    let ent = match qd.quad_argx with 
+              | UnitName x -> x
+              | _ -> raise (Terminate "Bad operator of endu")
+    in
+    let endof = label_end_of(ent) ^ ":" in
+    let endp = label_of(qd.quad_argX) ^ "\t endp\n" in
+    [M_Label endof;
+     I_movq (Reg (Rbp, B64), Reg (Rsp, B64));
+     I_pushq (Reg (Rbp, B64));
+     (* TODO I_ret ??? *)
+     M_Label endp]
+  | Op_ret ->
     []
-  (* TODO Same as Op_eq *)
+  | OP_call ->
+    []
+  | OP_par ->
+    []
   (* TODO Figure out label stuff *)
   | _ -> []
 
