@@ -464,7 +464,7 @@ and ins_of_quad qd =
      I_movq (Reg (Rsp, B64), Reg (Rbp, B64));
      I_subq (Reg (Rsp, B64), Const(Imm8 3000))] (*TODO Imm8 size *)
   | Op_endu ->
-    let ent = match qd.quad_argX with 
+    let ent = match qd.quad_argZ with 
               | UnitName x -> x
               | _ -> raise (Terminate "Bad operator of endu")
     in
