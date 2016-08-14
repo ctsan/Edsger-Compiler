@@ -1,5 +1,4 @@
 open Core.Std
-open Printf
 open Symbol
 open Ast
 open Types
@@ -468,11 +467,12 @@ and ins_of_quad qd =
   | Op_unit ->
     (* TODO SOMEHOW GET sco_negofs for size and save to size *) 
     (* TODO PRINT LABEL N SHIT *)
+    let size = lookup_fr_size () in
     [
      M_Label (label_name qd.quad_argX);
      I_pushq (Reg (Rbp, B64));
      I_movq (Reg (Rsp, B64), Reg (Rbp, B64));
-     I_subq (Reg (Rsp, B64), Const(Imm8 3000))] (*TODO Imm8 size *)
+     I_subq (Reg (Rsp, B64), Const(Imm8 size))] (*TODO Imm8 size *)
   | Op_endu ->
     let endof = label_end_of(qd.quad_argZ)  in
     (* let endp =  label_name(qd.quad_argZ) ^ " endp\n" in *)
@@ -480,8 +480,10 @@ and ins_of_quad qd =
      M_Label endof;
      I_movq (Reg (Rbp, B64), Reg (Rsp, B64));
      I_pushq (Reg (Rbp, B64));
+     I_ret
+    ]
      (* TODO I_ret ??? *)
-     (* M_Label endp  TODO use endp if at&t will be used *)]
+     (* M_Label endp  TODO use endp if at&t will be used *)
   | Op_ret ->
     []
   | Op_call ->
@@ -493,8 +495,9 @@ and ins_of_quad qd =
 
 (* This function takes a list of quads, and returns a list of lists of istructions *)
 let quads_to_ins qlist =
-  List.fold qlist ~init:[] ~f:(fun acc quad -> ins_of_quad quad :: acc)
+  qlist
   |> List.rev
+  |> List.fold ~init:[] ~f:(fun acc quad -> ins_of_quad quad :: acc)
 
 (* This Function Takes a List of Lists of instructions of x86_64, and prints them *)
 let print_instructions lst =

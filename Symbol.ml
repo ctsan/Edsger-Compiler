@@ -26,6 +26,7 @@ type scope = {
   mutable sco_negofs : int
 }
 
+
 and variable_info = {
   variable_type   : Types.typ;
   variable_offset : int
@@ -215,7 +216,7 @@ let lookup_bp_offset e =
   | ENTRY_temporary t -> t.temporary_offset
   | _ -> raise (Failure "Don't call lookup_bp_offset with non-temp/var/par.")
 
-let lookup_passmode e = 
+let lookup_passmode e =
   match e.entry_info with
   | ENTRY_parameter p -> p.parameter_mode
   | _ -> raise (Failure "Don't call lookup_passmode with non-par.")
@@ -367,3 +368,8 @@ let endFunctionHeader e typ =
       inf.function_pstatus <- PARDEF_COMPLETE
   | _ ->
       Printf.printf "Cannot end parameters in a non-function"
+
+
+(* TODO make sure an offset isn't necessery *)
+let lookup_fr_size () =
+  -(!currentScope).sco_negofs

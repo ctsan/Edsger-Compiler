@@ -93,6 +93,9 @@ val lookup_passmode    : entry -> pass_mode
 val lookup_pass_styles : Identifier.id -> pass_mode list
 val lookup_pass_types  : Identifier.id -> Types.typ list
 (* return true if a function has been defined *)
+
+val lookup_fr_size  : unit -> int
+
 val fun_is_defined : Identifier.id -> bool
 
 val is_mutable: Identifier.id -> bool
