@@ -158,6 +158,8 @@ and check ast =
       printSymbolTable ();
       print_quads ();
       let ins_list = list_of_quads () |> Codegen.quads_to_ins  in
+      print_newline();
+      print_newline();
       Codegen.print_instructions ins_list;
       print_newline()
   ))
