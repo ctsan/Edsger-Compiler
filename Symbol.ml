@@ -211,7 +211,12 @@ let lookup_bp_offset e =
   | ENTRY_parameter p -> p.parameter_offset
   | ENTRY_variable  v -> v.variable_offset
   | ENTRY_temporary t -> t.temporary_offset
-  | _ -> raise (Failure "Don't call lookup_bp_offset like this.")
+  | _ -> raise (Failure "Don't call lookup_bp_offset with non-temp/var/par.")
+
+let lookup_passmode e = 
+  match e.entry_info with
+  | ENTRY_parameter p -> p.parameter_mode
+  | _ -> raise (Failure "Don't call lookup_passmode with non-par.")
 
 
 let newVariable id typ err =
