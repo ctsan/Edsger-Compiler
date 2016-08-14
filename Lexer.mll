@@ -5,22 +5,22 @@ exception Bad_character_format of string
 
 (* Assuming there is a starting "'" character as well as an ending "'" *)
 
-let unwrap_str str = 
-    let open String in 
+let unwrap_str str =
+    let open String in
     let old_size = length str in
     sub str 1 (old_size-2)
 ;;
 
-let getEdsgerCharacter str = 
-    let open String in 
+let getEdsgerCharacter str =
+    let open String in
     let old_size = length str in
     let ears_free_str = sub str 1 (old_size-2) in
     match get ears_free_str 0 with
     | '\\' ->
-          ( match get ears_free_str 1 with 
-            | 'x' -> 
-                let hex_friendly_str = "0x" ^ 
-                                      (sub ears_free_str 2 2)   
+          ( match get ears_free_str 1 with
+            | 'x' ->
+                let hex_friendly_str = "0x" ^
+                                      (sub ears_free_str 2 2)
                 in  Char.chr @@ int_of_string hex_friendly_str
             | '\\'-> '\\'
             | '\'' -> '\''
@@ -32,7 +32,7 @@ let getEdsgerCharacter str =
             | _ -> raise (Bad_character_format str))
     | plain_char -> plain_char
 
-} 
+}
 
 let digit             = ['0'-'9']
 let hex_digit         = digit | ['a'-'f' 'A'-'F']
@@ -49,6 +49,13 @@ let const_char_inners = [^'\\' '\'' '"']
 rule lexer = parse
   | "//" notnewline* { lexer lexbuf }
   | "/*"             { consume_comment lexbuf }
+  | "#include \""   ( [^'"' '\n']* as filename) '"'
+      {
+        let c = open_in filename in
+        let lb = Lexing.from_channel c in
+        let p = Parser.program lexer lb in
+        T_include p
+      }
   | "for"            { T_for      }
   | "if"             { T_if       }
   | "else"           { T_else     }
@@ -66,12 +73,12 @@ rule lexer = parse
   | "double"         { T_double   }
   | "bool"           { T_bool     }
   | "char"           { T_char     }
-  | '"' ([^'"']|'\\' '"')* '"'  
+  | '"' ([^'"']|'\\' '"')* '"'
       {
-        T_string (unwrap_str @@ Lexing.lexeme lexbuf) 
+        T_string (unwrap_str @@ Lexing.lexeme lexbuf)
       }
 
-  | '\'' const_char_inners '\'' 
+  | '\'' const_char_inners '\''
       {
         let str = Lexing.lexeme lexbuf in
         T_char_const ( getEdsgerCharacter str )
@@ -116,7 +123,7 @@ rule lexer = parse
   |  eof          { T_eof }
   |  _ as chr     { raise (Unexpected_character (chr,(Lexing.lexeme_start lexbuf)))}
 
-and consume_comment = 
+and consume_comment =
     parse
     | "*/" { lexer lexbuf }
     | _ { consume_comment lexbuf}

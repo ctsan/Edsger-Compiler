@@ -76,6 +76,3 @@ and ast_expr =
   | E_cast of ast_type * ast_expr
   | E_ternary_op of ast_expr * ast_expr * ast_expr
 ;;
-
-let ast_tree:ast_decl list option ref = ref None
-

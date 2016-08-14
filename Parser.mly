@@ -66,6 +66,7 @@ let construct_binary_operation typ arg1 arg2 =
      | None -> "0";;
 %}
 
+%token <Ast.ast_decl list> T_include
 %token <string>T_id
 (*---------------Types---------------*)
 %token T_double T_bool T_char T_int
@@ -116,7 +117,7 @@ let construct_binary_operation typ arg1 arg2 =
 %nonassoc T_lbrack
 
 %start program
-%type <unit> program
+%type <Ast.ast_decl list> program
 %type <ast_decl> declaration
 %type <ast_type> ctype
 %type <int> pointer_asterisk_e
@@ -127,12 +128,17 @@ let construct_binary_operation typ arg1 arg2 =
 %%
 
 program:
-      declaration+ T_eof
-        {
-            eprintf_color Green "Syntax Checking Completed Succesfully \n";
-            eclear();
-            ast_tree := Some $1
-        };
+     includes declaration+ T_eof
+       {
+           eprintf_color Green "Syntax Checking Completed Succesfully \n";
+           eclear();
+           List.rev_append (List.rev $1) $2
+       };
+
+includes:
+     | { [] }
+     | T_include includes { List.rev_append (List.rev $1) $2 }
+
 
 declaration_list:
      | declaration declaration_list { $1::$2 }

@@ -5,9 +5,8 @@ open Ast
 let compile_channel channel =
   let lexbuf = Lexing.from_channel channel in
   try
-    Parser.program Lexer.lexer lexbuf;
-    (* Semantic.count_top_level_decls !ast_tree;*)
-    Semantic.check !ast_tree;
+    let ast_tree = Parser.program Lexer.lexer lexbuf in
+    Semantic.check ast_tree;
     exit 0
   with
   | Parser.Error ->
@@ -18,10 +17,10 @@ let compile_channel channel =
                        was found at offset %d. Aborting..\n"
       chr (Char.to_int chr) (pos); eclear();
     exit 1
-  (* | Semantic.Terminate str | Types.Terminate str -> *)
-  (*   eprintf_color Red "[3] "; eprintf "%s\n" str; eclear (); *)
-  (*   exit 3 *)
-  (* | Symbol.Exit -> exit 3 *)
+  | Semantic.Terminate str | Types.Terminate str ->
+    eprintf_color Red "[3] "; eprintf "%s\n" str; eclear ();
+    exit 3
+  | Symbol.Exit -> exit 3
 
 (* Parse Flags and Provide Documentation for -help *)
 let arguments =

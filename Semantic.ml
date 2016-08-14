@@ -145,8 +145,8 @@ and check_eval_of_type x y ~wanted_type =
 and check_binary_logical_operator x y =
   check_eval_of_type x y ~wanted_type:(TYPE_bool 0)
 
-and check ast =
-  ignore(ast >>| fun tree -> (
+and check tree =
+  (* ignore(ast >>| fun tree -> ( *)
       initSymbolTable 256;
       openScope();
       check_all_decls tree;
@@ -162,7 +162,7 @@ and check ast =
       print_newline();
       Codegen.print_instructions ins_list;
       print_newline()
-  ))
+  (* )) *)
 
 and check_all_decls decls =
   List.iter decls check_a_declaration;
