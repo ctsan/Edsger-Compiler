@@ -1,4 +1,7 @@
 void other () {
     bool i;
+    return;
     i = true && i;
+    return;
+
 }

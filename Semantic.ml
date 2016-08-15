@@ -181,7 +181,8 @@ and check_a_declaration  =
           ))
      | None -> ());
     if forward then forwardFunction brand_new_fun;
-    endFunctionHeader brand_new_fun symtbl_ret_type
+    endFunctionHeader brand_new_fun symtbl_ret_type;
+    brand_new_fun
   in
   (function
     (***********************************************)
@@ -215,7 +216,7 @@ and check_a_declaration  =
     | D_func_decl (typ,id,params) ->
       begin
         printf "- fun decl %s\n" id;
-        def_func_head typ id params ~forward:true;
+        ignore (def_func_head typ id params ~forward:true);
         closeScope ();
       end
 
@@ -226,13 +227,13 @@ and check_a_declaration  =
     | D_func_def (typ,id,params,fun_decls,fun_stmts) ->
       begin
         printf "- fun def %s\n" id;
-        def_func_head typ id params ~forward:false;
+        let fun_entry = def_func_head typ id params ~forward:false in
         (match fun_decls with
          | Some declerations -> check_all_decls declerations
          | None -> ()
         );
         (* This Folding Returns whether return statement is guaranteed or not *)
-        addQuad (genQuad Op_unit (UnitName id) Empty Empty); (* IR add Function Quad *)
+        addQuad (genQuad Op_unit (UnitName (fun_entry)) Empty Empty); (* IR add Function Quad *)
         let guaranteed_return =
           List.fold fun_stmts ~init:false ~f:(check_a_statement (id_make id))
         in
@@ -243,7 +244,7 @@ and check_a_declaration  =
             closequad prop; prop)
         in
         printSymbolTable ();
-        closeFinalQuad lst_prop id;
+        closeFinalQuad lst_prop fun_entry;
         let ins_list = list_of_last_fun_quads () |> Codegen.quads_to_ins  in
         Codegen.add_list_of_ins ins_list;
         clearFunQuads ();

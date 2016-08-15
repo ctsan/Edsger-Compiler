@@ -21,7 +21,7 @@ and pass_type =
 and operand =
   | Unit
   | Var of entry          (* TODO: MAYBE Change it to be Symbol Table Entry *)
-  | UnitName of string
+  | UnitName of entry
   | Char of char
   | String of string
   | Int of int
@@ -93,7 +93,7 @@ let rec pprint_operand ppf op =
   match op with
   | Unit             -> f ppf "()"
   | Var v            -> f ppf "%s" (string_of_entry v)
-  | UnitName s       -> f ppf "%s" s
+  | UnitName s       -> f ppf "%s" (string_of_entry s)
   | Int i            -> f ppf "%d" i
   | String s         -> f ppf "\"%s\"" s
   | Char i           -> f ppf "%C" i
@@ -277,7 +277,8 @@ and genquads_expr ast =
      | _ -> let w = Temp(newTemp (TYPE_int 0)) in
        addQuad(genQuad Op_par w (PassType RET) Empty);
        prop.place <- w);
-    addQuad(genQuad Op_call Empty Empty (UnitName x));
+    let fid_entry = lookupEntry (id_make x) LOOKUP_ALL_SCOPES true in
+    addQuad(genQuad Op_call Empty Empty (UnitName fid_entry));
     prop;
   | E_id str ->
       let st_entry = lookupEntry (id_make str) LOOKUP_ALL_SCOPES true in
@@ -572,6 +573,7 @@ let rec genquads_stmt ast =
     addQuad ( genQuad Op_ret Empty Empty Empty );
     prop
   | _ -> printf "(else)\n"; prop
+
 
 let print_quads () =
   Printf.printf "%a" pprint_quads (List.rev !quads);

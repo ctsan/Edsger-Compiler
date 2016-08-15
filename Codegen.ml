@@ -336,13 +336,13 @@ and store reg a =
 and label_name p =
     (* TODO: WE NEED A QUEUE *)
     match p with
-    | UnitName str -> sprintf "_%s_%d" str (get_func_id ())
+    | UnitName ent -> sprintf "_%s_%d" (string_of_entry ent) (get_func_id ())
     | _ -> raise (Failure "This should be called with procedure name\n")
 
 (* genearte label for the end of a unit*)
 and label_end_of p =
     match p with
-    | UnitName str -> sprintf "@%s_%d" str (cur_func_id ())
+    | UnitName ent -> sprintf "@%s_%d" (string_of_entry ent) (cur_func_id ())
     | _ -> raise (Failure "This should be called with procedure name\n")
 
 (* generate a label for the end of a unit *)
@@ -370,7 +370,7 @@ and label_general p =
 
 (* This function takes a quad, and returns a list of instructions*)
 and ins_of_quad qd =
-  (match qd.quad_op with
+  M_Label (label_of (Label qd.quad_tag)) :: (match qd.quad_op with
   | Op_assign ->
     if is_encoded_as_int qd.quad_argX then
       let ld_ins = load (Reg (Rsi,B64)) qd.quad_argX in
@@ -467,6 +467,9 @@ and ins_of_quad qd =
   | Op_unit ->
     (* TODO SOMEHOW GET sco_negofs for size and save to size *) 
     (* TODO PRINT LABEL N SHIT *)
+    (match qd.quad_argX with
+    | UnitName ent -> Stack.push call_stack (ent)
+    | _ -> raise (Failure "incorrect argument"));
     let size = lookup_fr_size () in
     [
      M_Label (label_name qd.quad_argX);
@@ -476,6 +479,7 @@ and ins_of_quad qd =
   | Op_endu ->
     let endof = label_end_of(qd.quad_argZ)  in
     (* let endp =  label_name(qd.quad_argZ) ^ " endp\n" in *)
+    ignore (Stack.pop_exn call_stack);
     [
      M_Label endof;
      I_movq (Reg (Rbp, B64), Reg (Rsp, B64));
@@ -485,7 +489,8 @@ and ins_of_quad qd =
      (* TODO I_ret ??? *)
      (* M_Label endp  TODO use endp if at&t will be used *)
   | Op_ret ->
-    []
+    let current = Stack.top_exn call_stack in
+    [I_jmp (label_end_of (UnitName current))]
   | Op_call ->
     []
   | Op_par ->
