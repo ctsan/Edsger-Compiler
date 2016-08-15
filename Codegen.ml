@@ -7,6 +7,7 @@ open Intermediary
 
 type label_id = string
 let string_of_label l = sprintf "%s:\n" l
+let string_of_targ_label l = sprintf "%s" l
 
 type reg =
   | Rax | Rbx | Rcx | Rdx
@@ -165,15 +166,15 @@ let string_of_ins_86_64 = function
   | I_imul (op1,reg1)    -> sprintf "\timul %s,%s\n" (string_of_operand op1) (string_of_reg reg1)
   | I_idiv reg1          -> sprintf "\tidiv %s\n" (string_of_operand reg1)
   | I_idivw mem          -> sprintf "\tidivw %s\n" (string_of_memory_location mem)
-  | I_jmp label          -> sprintf "\tjmp %s\n" (string_of_label label)
+  | I_jmp label          -> sprintf "\tjmp %s\n" (string_of_targ_label label)
   | I_cmp (op1,op2)      -> sprintf "\tcmp %s,%s\n" (string_of_operand op1) (string_of_operand op2)
-  | I_je label           -> sprintf "\tje %s\n" (string_of_label label)
-  | I_jne label          -> sprintf "\tjne %s\n" (string_of_label label)
-  | I_jz label           -> sprintf "\tjz %s\n" (string_of_label label)
-  | I_jg label           -> sprintf "\tjg %s\n" (string_of_label label)
-  | I_jge label          -> sprintf "\tjge %s\n" (string_of_label label)
-  | I_jl label           -> sprintf "\tjl %s\n" (string_of_label label)
-  | I_jle label          -> sprintf "\tjle %s\n" (string_of_label label)
+  | I_je label           -> sprintf "\tje %s\n" (string_of_targ_label label)
+  | I_jne label          -> sprintf "\tjne %s\n" (string_of_targ_label label)
+  | I_jz label           -> sprintf "\tjz %s\n" (string_of_targ_label label)
+  | I_jg label           -> sprintf "\tjg %s\n" (string_of_targ_label label)
+  | I_jge label          -> sprintf "\tjge %s\n" (string_of_targ_label label)
+  | I_jl label           -> sprintf "\tjl %s\n" (string_of_targ_label label)
+  | I_jle label          -> sprintf "\tjle %s\n" (string_of_targ_label label)
   | I_ret                -> sprintf "\tret\n"
   | I_empty              -> sprintf "\n"
 
@@ -271,11 +272,10 @@ let rec load reg a =
 (* Takes operand of quad that is String str (Label int????) *)
 (* Returns M_Label (ins) str *)
 and label_of e =
-  "dummy"
-(*   match e with *)
-(* | String str -> str *)
-(* | Label int -> Int.to_string int *)
-(* | _ -> raise (Terminate "Label can only be string") *)
+  match e with
+  (* | String str -> "@p" ^ str *)
+  | Label int -> "@" ^ Int.to_string int
+  | _ -> raise (Terminate "Label can only be string")
 
 (* input: This function takes a destination register, and a source argument *)
 (* output: a list of the necessery assembly instructions *)

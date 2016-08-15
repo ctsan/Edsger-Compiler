@@ -1,0 +1,4 @@
+void other () {
+    bool i;
+    i = true && i;
+}

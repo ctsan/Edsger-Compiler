@@ -130,8 +130,6 @@ let construct_binary_operation typ arg1 arg2 =
 program:
      includes declaration+ T_eof
        {
-           eprintf_color Green "Syntax Checking Completed Succesfully \n";
-           eclear();
            List.rev_append (List.rev $1) $2
        };
 
