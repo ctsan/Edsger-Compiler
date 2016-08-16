@@ -493,43 +493,50 @@ and ins_of_quad qd =
   | Op_ret ->
     let current = Stack.top_exn call_stack in
     [I_jmp (label_end_of (UnitName current))]
-  | Op_call -> 
+  | Op_call ->
     let ent = match qd.quad_argZ with
-    | Unitname e -> e
-    | _ -> raise (Terminate "call with non-function")
+            | UnitName e -> e
+            | _ -> raise (Terminate "call with non-function")
     in
     let par_size = match ent.entry_info with
-    | ENTRY_function f -> size_of_params f.function_paramlist (* TODO implement *)
-    | _ -> raise (Terminate "call with non-function")
-    [I_subq (Reg (Rsp, Const (Imm8 2)))] @
-    update_AL @
+                    | ENTRY_function f -> size_of_params f.function_paramlist (* TODO implement *)
+                    | _ -> raise (Terminate "call with non-function")
+    in
+    let called_ent = (match qd.quad_argX with
+      | UnitName e -> e
+      | _ -> raise (Failure "Bad arg"))
+    in
+    [I_subq (Reg (Rsp,B64), Const (Imm8 2))] @
+    update_AL (Stack.top_exn call_stack) called_ent @
     [
-     I_call string_of_entry(ent);
-     I_addq (Reg (Rsp, Const (Imm8 (par_size + 4)))) (* TODO size ?? *)
+     I_call (string_of_entry(ent));
+     I_addq (Reg (Rsp,B64), Const (Imm8 (par_size + 4))) (* TODO size ?? *)
     ]
   | Op_par ->
-    let xsize = size_of_operand qd.quad_argX (* TODO implement *)
-    let ptype = match qd.quad_argY with
-    | PassType p -> p
-    | _ -> raise (Terminate "par quad with no passtype")
-    in match (ptype, xsize) with
-    | (V, sizeOfType (TYPE_int 0)) ->
-      load Reg (Rax, B16) qd.quad_argX @ (* TODO fix register based on size *)
-      [I_pushq (Reg (Rax, B16))]         (* maybe correct here *)
-    | (V, sizeOfType (TYPE_char 0)) ->
-      load Reg (Rax, B8L) qd.quad_argX @
-      [I_subq (Reg (Rsp, B64), Const (Imm8 1));
-       I_movq (Reg (Rsp, B64), Reg (Rsi, B64));
-       I_movb (Reg (Rax, B8L), Mem (0, Rsi ,None))
-      ] 
-    | (V, sizeOfType (TYPE_double 0)) ->
-      [] (* TODO doubles *)
-    | (R, _) | (RET, _) ->
-      load_addr Reg (Rsi, B64) qd.quad_argX @
-      [I_pushq (Reg (Rsi, B64))]
-    | (_, _) -> raise (Terminate "Bad size of par")          
+    let xsize = size_of_operand qd.quad_argX in (* TODO implement *)
+    let ptype =
+      match qd.quad_argY with
+      | PassType p -> p
+      | _ -> raise (Terminate "par quad with no passtype")
+    in (match (ptype, xsize) with
+        (* TODO !IMPORTANT You probably can't do the following *)
+        | (V, sizeOfType (TYPE_int 0)) ->
+          load Reg (Rax, B16) qd.quad_argX @ (* TODO fix register based on size *)
+          [I_pushq (Reg (Rax, B16))]         (* maybe correct here *)
+        | (V, sizeOfType (TYPE_char 0)) ->
+          load Reg (Rax, B8L) qd.quad_argX @
+          [I_subq (Reg (Rsp, B64), Const (Imm8 1));
+          I_movq (Reg (Rsp, B64), Reg (Rsi, B64));
+          I_movb (Reg (Rax, B8L), Mem (0, Rsi ,None))
+          ]
+        | (V, sizeOfType (TYPE_double 0)) ->
+          [] (* TODO doubles *)
+        | (R, _) | (RET, _) ->
+          load_addr Reg (Rsi, B64) qd.quad_argX @
+          [I_pushq (Reg (Rsi, B64))]
+        | _ -> raise (Terminate "Bad size of par"))
   (* TODO Figure out label stuff *)
-  | _ -> []) @ [I_empty]
+  | _ -> []) @ [I_empty] (* NOTE Inneficient, reconsider *)
 
 (* This function takes a list of quads, and returns a list of lists of istructions *)
 let quads_to_ins qlist =
