@@ -73,6 +73,7 @@ type ins_86_64 =
   | I_jl    of label_id
   | I_jle   of label_id
   | I_ret
+  | I_call  of label_id
   | I_empty (* for debugging *)
 
 let func_id = ref 0
@@ -177,6 +178,7 @@ let string_of_ins_86_64 = function
   | I_jle label          -> sprintf "\tjle %s\n" (string_of_targ_label label)
   | I_ret                -> sprintf "\tret\n"
   | I_empty              -> sprintf "\n"
+  | I_call label         -> sprintf "\tcall %s\n" (string_of_targ_label label)
 
 let bool_to_int b =
   match b with
@@ -213,7 +215,7 @@ let get_AR l =
 
 (* input: Takes callee and called function entries *)
 (* output: returns ins_86_64 list *)
-let update_AR callee called =
+let update_AL callee called =
   let np = callee.entry_scope.sco_nesting in
   let nx = called.entry_scope.sco_nesting in
   if (np > nx) then
@@ -491,10 +493,41 @@ and ins_of_quad qd =
   | Op_ret ->
     let current = Stack.top_exn call_stack in
     [I_jmp (label_end_of (UnitName current))]
-  | Op_call ->
-    []
+  | Op_call -> 
+    let ent = match qd.quad_argZ with
+    | Unitname e -> e
+    | _ -> raise (Terminate "call with non-function")
+    in
+    let par_size = match ent.entry_info with
+    | ENTRY_function f -> size_of_params f.function_paramlist (* TODO implement *)
+    | _ -> raise (Terminate "call with non-function")
+    [I_subq (Reg (Rsp, Const (Imm8 2)))] @
+    update_AL @
+    [
+     I_call string_of_entry(ent);
+     I_addq (Reg (Rsp, Const (Imm8 (par_size + 4)))) (* TODO size ?? *)
+    ]
   | Op_par ->
-    []
+    let xsize = size_of_operand qd.quad_argX (* TODO implement *)
+    let ptype = match qd.quad_argY with
+    | PassType p -> p
+    | _ -> raise (Terminate "par quad with no passtype")
+    in match (ptype, xsize) with
+    | (V, sizeOfType (TYPE_int 0)) ->
+      load Reg (Rax, B16) qd.quad_argX @ (* TODO fix register based on size *)
+      [I_pushq (Reg (Rax, B16))]         (* maybe correct here *)
+    | (V, sizeOfType (TYPE_char 0)) ->
+      load Reg (Rax, B8L) qd.quad_argX @
+      [I_subq (Reg (Rsp, B64), Const (Imm8 1));
+       I_movq (Reg (Rsp, B64), Reg (Rsi, B64));
+       I_movb (Reg (Rax, B8L), Mem (0, Rsi ,None))
+      ] 
+    | (V, sizeOfType (TYPE_double 0)) ->
+      [] (* TODO doubles *)
+    | (R, _) | (RET, _) ->
+      load_addr Reg (Rsi, B64) qd.quad_argX @
+      [I_pushq (Reg (Rsi, B64))]
+    | (_, _) -> raise (Terminate "Bad size of par")          
   (* TODO Figure out label stuff *)
   | _ -> []) @ [I_empty]
 
