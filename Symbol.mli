@@ -102,3 +102,6 @@ val is_mutable: Identifier.id -> bool
 
 val start_positive_offset : int   (* Αρχικό θετικό offset στο Ε.Δ.   *)
 val start_negative_offset : int   (* Αρχικό αρνητικό offset στο Ε.Δ. *)
+
+val size_of_entry : entry -> int
+val size_of_params : entry list -> int
