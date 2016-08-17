@@ -25,7 +25,7 @@ type imm =
   | Imm32 of int
   | Imm64 of int
 
-type memory_location = int option * reg * reg option
+type memory_location = int option * reg * reg option * int option
 
 type operand =
   | Reg   of reg_form
@@ -98,7 +98,7 @@ let string_of_reg r =
   | Rsi -> "%rsi"
   | Rdi -> "%rdi"
   | Rbp -> "%rbp"
-  | Rsp -> "%rsx"
+  | Rsp -> "%rsp"
   | Rth i -> "%r" ^ Int.to_string i
 
 let string_of_reg_form rf =
@@ -127,11 +127,11 @@ let string_of_reg_form rf =
 
 let string_of_memory_location mloc =
   match mloc with
-  | (None, r, None) | (Some 0, r, None) ->
+  | (None, r, None,None) | (Some 0, r, None,None) ->
      sprintf "(%s)" (string_of_reg r)
-  | (Some x, r, None) when x > 0 ->
+  | (Some x, r, None,None) when x > 0 ->
       "+" ^ Int.to_string x ^ (sprintf "(%s)" (string_of_reg r))
-  | (Some x, r, None) ->
+  | (Some x, r, None,None) ->
       Int.to_string x ^ (sprintf "(%s)" (string_of_reg r))
   | _ ->
       "No clue what's this or if it's needed"
@@ -202,14 +202,14 @@ let add_instruction i =
 (* input: Takes entry l of parameter *)
 (* output: returns  ins_86_64 list *)
 let get_AR l =
-  let base = I_movq (Reg (Rsi, B64), Mem (Some 4, Rbp, None)) in
+  let base = I_movq (Reg (Rsi, B64), Mem (Some 4, Rbp, None,None)) in
   let ncur = l.entry_scope.sco_nesting in
   let na = (Stack.top_exn call_stack).entry_scope.sco_nesting in
   let rec loopins acc = function
     | 0 ->
         acc
     | n ->
-        loopins ((I_movq (Mem (Some 4, Rsi, None), Reg (Rsi, B64)))::acc) (n-1)
+        loopins ((I_movq (Mem (Some 4, Rsi, None,None), Reg (Rsi, B64)))::acc) (n-1)
   in
     base::(loopins [] (ncur-na-1))
 
@@ -221,15 +221,15 @@ let update_AL callee called =
   if (np > nx) then
     [I_pushq (Reg (Rbp, B64))]
   else if (np = nx) then
-    [I_pushq (Mem (Some 4, Rbp, None))]
+    [I_pushq (Mem (Some 4, Rbp, None,None))]
   else
-    let fst = I_movq (Mem (Some 4, Rbp, None),Reg (Rsi, B64)) in
-    let lst = [I_pushq (Mem (Some 4, Rsi, None))] in
+    let fst = I_movq (Mem (Some 4, Rbp, None,None),Reg (Rsi, B64)) in
+    let lst = [I_pushq (Mem (Some 4, Rsi, None,None))] in
     let rec loopins acc = function
     | 0 ->
         acc
     | n ->
-        loopins ((I_movq (Mem (Some 4, Rsi, None), Reg (Rsi, B64)))::acc) (n-1)
+        loopins ((I_movq (Mem (Some 4, Rsi, None,None), Reg (Rsi, B64)))::acc) (n-1)
   in
     fst::(loopins [] (np-nx-1)) @ lst
 
@@ -238,6 +238,11 @@ let is_par e = match e.entry_info with
 | ENTRY_variable _ | ENTRY_temporary _ -> false
 | _ -> raise (Terminate "Bad entry to load")
 
+
+(* input: the register to which, we will move address of the result *)
+(* output: needed ins_86_64 list *)
+let rec load_result_address reg =
+  [ I_movq (Mem (Some (3*ptrBytes), Rbp,None,None),reg) ]
 
 (* input: This function takes a destination register, and a source argument *)
 (* output: a list of the necessery assembly instructions *)
@@ -252,23 +257,23 @@ let rec load reg a =
   | Var ent ->
     if is_local ent then
      (if (not (is_par ent) || lookup_passmode ent = PASS_BY_VALUE) then 
-        [I_movq (Mem (Some (lookup_bp_offset ent), Rbp, None),reg)]
+        [I_movq (Mem (Some (lookup_bp_offset ent), Rbp, None,None),reg)]
       else
-        [I_movq (Mem (Some (lookup_bp_offset ent), Rbp, None),Reg (Rsi, B64));
-         I_movq (Mem (None, Rsi, None), reg)])
+        [I_movq (Mem (Some (lookup_bp_offset ent), Rbp, None,None),Reg (Rsi, B64));
+         I_movq (Mem (None, Rsi, None,None), reg)])
     else
      (if (not (is_par ent) || lookup_passmode ent = PASS_BY_VALUE) then 
         get_AR(ent) @
-        [I_movq (Mem (Some (lookup_bp_offset ent), Rsi, None),reg)]
+        [I_movq (Mem (Some (lookup_bp_offset ent), Rsi, None,None),reg)]
      else
         get_AR(ent) @
-        [I_movq (Mem (Some (lookup_bp_offset ent), Rsi, None),Reg (Rsi, B64));
-        I_movq (Mem (None, Rsi, None), reg)])
+        [I_movq (Mem (Some (lookup_bp_offset ent), Rsi, None,None),Reg (Rsi, B64));
+        I_movq (Mem (None, Rsi, None,None), reg)])
   | Address i -> load_addr reg i
   (* TODO use proper `mov` later later. *)
-  | Deref i -> load (Reg (Rdi,B64)) i @ [I_movq (Mem (None,Rdi,None),reg) ]
+  | Deref i -> load (Reg (Rdi,B64)) i @ [I_movq (Mem (None,Rdi,None,None),reg) ]
   (* TODO adjust `mov` size*)
-  | Temp n -> [I_movq (Mem (Some (lookup_bp_offset n),Rbp,None),reg)]
+  | Temp n -> [I_movq (Mem (Some (lookup_bp_offset n),Rbp,None,None),reg)]
   | _ -> raise (Terminate "bad quad entry")
 
 (* Takes operand of quad that is String str (Label int????) *)
@@ -295,16 +300,16 @@ and load_addr reg a =
   | Var ent ->
     if is_local ent then
      (if (not (is_par ent) || lookup_passmode ent = PASS_BY_VALUE) then
-        [I_leaq ((Some (lookup_bp_offset ent), Rbp, None),reg_of_op)]
+        [I_leaq ( (Some (lookup_bp_offset ent), Rbp, None,None) ,reg_of_op)]
       else
-        [I_movq (Mem (Some (lookup_bp_offset ent), Rbp, None),reg)])
+        [I_movq (Mem (Some (lookup_bp_offset ent), Rbp, None,None),reg)])
     else
      (if (not (is_par ent) || lookup_passmode ent = PASS_BY_VALUE) then
         get_AR(ent) @
-        [I_leaq ((Some (lookup_bp_offset ent), Rsi, None),reg_of_op)]
+        [I_leaq ((Some (lookup_bp_offset ent), Rsi, None,None),reg_of_op)]
       else        
         get_AR(ent) @
-        [I_movq (Mem (Some (lookup_bp_offset ent), Rsi, None), reg)])
+        [I_movq (Mem (Some (lookup_bp_offset ent), Rsi, None,None), reg)])
   (* TODO use proper `mov` later later. *)
   | Deref i -> load reg i
   | _ -> raise (Terminate "bad quad entry")
@@ -316,21 +321,21 @@ and store reg a =
   | Var ent ->
     if is_local ent then
      (if (not (is_par ent) || lookup_passmode ent = PASS_BY_VALUE) then
-        [I_movq (reg, Mem (Some (lookup_bp_offset ent), Rbp, None))]
+        [I_movq (reg, Mem (Some (lookup_bp_offset ent), Rbp, None,None))]
       else
-        [I_movq (Reg (Rsi, B64),Mem (Some (lookup_bp_offset ent), Rbp, None));
-        I_movq (reg,Mem (None, Rsi, None))])
+        [I_movq (Reg (Rsi, B64),Mem (Some (lookup_bp_offset ent), Rbp, None,None));
+        I_movq (reg,Mem (None, Rsi, None,None))])
     else
      (if (not (is_par ent) || lookup_passmode ent = PASS_BY_VALUE) then
           get_AR(ent) @
-          [I_movq (reg,Mem (Some (lookup_bp_offset ent), Rsi, None))]
+          [I_movq (reg,Mem (Some (lookup_bp_offset ent), Rsi, None,None))]
       else
           get_AR(ent) @
-          [I_movq (Mem (Some (lookup_bp_offset ent), Rsi, None),Reg (Rsi, B64));
-          I_movq (reg,Mem (None, Rsi, None))])
-  | Deref i -> load (Reg (Rdi, B64)) i @ [I_movq (reg,Mem (None, Rdi, None))]
+          [I_movq (Mem (Some (lookup_bp_offset ent), Rsi, None,None),Reg (Rsi, B64));
+          I_movq (reg,Mem (None, Rsi, None,None))])
+  | Deref i -> load (Reg (Rdi, B64)) i @ [I_movq (reg,Mem (None, Rdi, None,None))]
   (* TODO Add Temp like the `load` case *)
-  | Temp n -> [I_movq (reg,Mem (Some (lookup_bp_offset n),Rbp,None))]
+  | Temp n -> [I_movq (reg,Mem (Some (lookup_bp_offset n),Rbp,None,None))]
   | _ -> raise (Terminate "bad quad entry")
 
 
@@ -490,51 +495,56 @@ and ins_of_quad qd =
     ]
      (* TODO I_ret ??? *)
      (* M_Label endp  TODO use endp if at&t will be used *)
+  | Op_retv ->
+    let current = Stack.top_exn call_stack in
+    load (Reg (Rax,B64)) qd.quad_argX @
+    load_result_address (Reg (Rdx,B64)) @
+    [ I_movq (Reg (Rax,B64), Mem (None,Rdx,None,None)) ] (* TODO fix size (Size of Result Type) *)
   | Op_ret ->
     let current = Stack.top_exn call_stack in
     [I_jmp (label_end_of (UnitName current))]
-  | Op_call ->
-    let ent = match qd.quad_argZ with
-            | UnitName e -> e
-            | _ -> raise (Terminate "call with non-function")
-    in
-    let par_size = match ent.entry_info with
-                    | ENTRY_function f -> size_of_params f.function_paramlist (* TODO implement *)
-                    | _ -> raise (Terminate "call with non-function")
-    in
-    let called_ent = (match qd.quad_argX with
-      | UnitName e -> e
-      | _ -> raise (Failure "Bad arg"))
-    in
-    [I_subq (Reg (Rsp,B64), Const (Imm8 2))] @
-    update_AL (Stack.top_exn call_stack) called_ent @
-    [
-     I_call (string_of_entry(ent));
-     I_addq (Reg (Rsp,B64), Const (Imm8 (par_size + 4))) (* TODO size ?? *)
-    ]
-  | Op_par ->
-    let xsize = size_of_operand qd.quad_argX in 
-    let ptype =
-      match qd.quad_argY with
-      | PassType p -> p
-      | _ -> raise (Terminate "par quad with no passtype")
-    in (match ptype with
-        (* TODO !IMPORTANT You probably can't do the following *)
-        | V when xsize = sizeOfType (TYPE_int 0)  ->
-          load (Reg (Rax, B16)) qd.quad_argX @ (* TODO fix register based on size *)
-          [I_pushq (Reg (Rax, B16))]         (* maybe correct here *)
-        | V when xsize = sizeOfType (TYPE_char 0) ->
-          load (Reg (Rax, B8L)) qd.quad_argX @
-          [I_subq (Reg (Rsp, B64), Const (Imm8 1));
-          I_movq (Reg (Rsp, B64), Reg (Rsi, B64));
-          I_movb (Reg (Rax, B8L), Mem (Some 0, Rsi ,None))
-          ]
-        | V when xsize = sizeOfType (TYPE_double 0) ->
-          [] (* TODO doubles *)
-        | R | RET ->
-          load_addr (Reg (Rsi, B64)) qd.quad_argX @
-          [I_pushq (Reg (Rsi, B64))]
-        | _ -> raise (Terminate "Bad size of par"))
+  (* | Op_call -> *)
+  (*   let ent = match qd.quad_argZ with *)
+  (*           | UnitName e -> e *)
+  (*           | _ -> raise (Terminate "call with non-function") *)
+  (*   in *)
+  (*   let par_size = match ent.entry_info with *)
+  (*                   | ENTRY_function f -> size_of_params f.function_paramlist (\* TODO implement *\) *)
+  (*                   | _ -> raise (Terminate "call with non-function") *)
+  (*   in *)
+  (*   let called_ent = (match qd.quad_argX with *)
+  (*     | UnitName e -> e *)
+  (*     | _ -> raise (Failure "Bad arg")) *)
+  (*   in *)
+  (*   [I_subq (Reg (Rsp,B64), Const (Imm8 2))] @ *)
+  (*   update_AL (Stack.top_exn call_stack) called_ent @ *)
+  (*   [ *)
+  (*    I_call (string_of_entry(ent)); *)
+  (*    I_addq (Reg (Rsp,B64), Const (Imm8 (par_size + 4))) (\* TODO size ?? *\) *)
+  (*   ] *)
+  (* | Op_par -> *)
+  (*   let xsize = size_of_operand qd.quad_argX in  *)
+  (*   let ptype = *)
+  (*     match qd.quad_argY with *)
+  (*     | PassType p -> p *)
+  (*     | _ -> raise (Terminate "par quad with no passtype") *)
+  (*   in (match ptype with *)
+  (*       (\* TODO !IMPORTANT You probably can't do the following *\) *)
+  (*       | V when xsize = sizeOfType (TYPE_int 0)  -> *)
+  (*         load (Reg (Rax, B16)) qd.quad_argX @ (\* TODO fix register based on size *\) *)
+  (*         [I_pushq (Reg (Rax, B16))]         (\* maybe correct here *\) *)
+  (*       | V when xsize = sizeOfType (TYPE_char 0) -> *)
+  (*         load (Reg (Rax, B8L)) qd.quad_argX @ *)
+  (*         [I_subq (Reg (Rsp, B64), Const (Imm8 1)); *)
+  (*         I_movq (Reg (Rsp, B64), Reg (Rsi, B64)); *)
+  (*         I_movb (Reg (Rax, B8L), Mem (Some 0, Rsi ,None)) *)
+  (*         ] *)
+  (*       | V when xsize = sizeOfType (TYPE_double 0) -> *)
+  (*         [] (\* TODO doubles *\) *)
+  (*       | R | RET -> *)
+  (*         load_addr (Reg (Rsi, B64)) qd.quad_argX @ *)
+  (*         [I_pushq (Reg (Rsi, B64))] *)
+  (*       | _ -> raise (Terminate "Bad size of par")) *)
   (* TODO Figure out label stuff *)
   | _ -> []) @ [I_empty] (* NOTE Inneficient, reconsider *)
 

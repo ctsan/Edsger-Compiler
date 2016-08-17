@@ -12,6 +12,12 @@ type typ = TYPE_none
          | TYPE_null
 
 
+val ptrBytes      : int
+val intBytes      : int
+val boolBytes     : int
+val charBytes     : int
+val doubleBytes   : int
+
 val sizeOfType : typ -> int
 val equalType : typ -> typ -> bool
 val map_to_symbol_table_type :  ast_type ->typ

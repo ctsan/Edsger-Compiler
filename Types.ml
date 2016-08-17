@@ -11,15 +11,26 @@ type typ =
 	| TYPE_void
 	| TYPE_null
 
+
+let ptrBytes    = 8
+
+let intBytes    = 2
+
+let boolBytes   = 1
+
+let charBytes   = 1
+
+let doubleBytes = 10
+
 let rec sizeOfType t =
    match t with
 	(*-- Primitive Type Sizes  --*)
-   | TYPE_int n when n=0	 -> 2
-   | TYPE_char n when n=0    -> 1
-   | TYPE_bool n when n=0    -> 1
-   | TYPE_double n when n=0  -> 10
-	(*-- Pointers Cost 2 Bytes --*)
-   | TYPE_int _ | TYPE_char _ | TYPE_bool _ | TYPE_double _ -> 2
+   | TYPE_int n when n=0	   -> intBytes
+   | TYPE_char n when n=0    -> charBytes
+   | TYPE_bool n when n=0    -> boolBytes
+   | TYPE_double n when n=0  -> doubleBytes
+	(*-- Pointers Cost 8 Bytes --*)
+   | TYPE_int _ | TYPE_char _ | TYPE_bool _ | TYPE_double _ -> ptrBytes
 	(*-- Arrays Cost According to their size --*)
    | TYPE_array (et, sz) 	-> sz * sizeOfType et
    | _						 -> 0

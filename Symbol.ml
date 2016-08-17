@@ -67,8 +67,8 @@ and entry = {
 
 type lookup_type = LOOKUP_CURRENT_SCOPE | LOOKUP_ALL_SCOPES
 
-let start_positive_offset = 8
-let start_negative_offset = 0
+let start_positive_offset = 4 * ptrBytes
+let start_negative_offset = 0 (* NOTE  *)
 
 let the_outer_scope = {
   sco_parent = None;
@@ -364,7 +364,7 @@ let endFunctionHeader e typ =
                   let size =
                     match inf.parameter_mode with
                     | PASS_BY_VALUE     -> sizeOfType inf.parameter_type (* !IMPORANT *)
-                    | PASS_BY_REFERENCE -> 2 in (* !IMPORANT *)
+                    | PASS_BY_REFERENCE -> ptrBytes in (* !IMPORANT *)
                   offset := !offset + size
               | _ ->
                   Printf.printf "Cannot fix offset to a non parameter" in

@@ -5,3 +5,20 @@ void main () {
     i = i+1;
     return;
 }
+
+int called () {
+    return 3;
+}
+
+//int called (int a, char b, bool c, bool * d) {
+//    return 9;
+//}
+//
+//void calling () {
+//    int assign;
+//    bool d;
+//
+//    d = true;
+//    
+//    assign = called(9,'a',false, &d);
+//}
