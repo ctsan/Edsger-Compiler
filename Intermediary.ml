@@ -5,7 +5,6 @@ open Ast
 open Types
 open Identifier
 
-(* TODO IMPORANT! FIX TYPES of `Temp`*)
 let (>>|) = Option.(>>|)
 
 type operator =
