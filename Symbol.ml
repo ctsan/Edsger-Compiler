@@ -146,6 +146,19 @@ let is_local e =
     res
     (* TODO: is there a chance e will not be in current scope? *)
 
+let size_of_entry e = match e.entry_info with
+  | ENTRY_variable var -> sizeOfType var.variable_type
+  | ENTRY_parameter par -> sizeOfType par.parameter_type
+  | ENTRY_temporary tem -> sizeOfType tem.temporary_type
+  | _ -> raise (Terminate "size_of_entry only works with var/par/tem")
+
+let size_of_params parlist = 
+  let rec sizeAux acc = function
+    | [] -> acc
+    | (x::xs) -> sizeAux (acc + size_of_entry x) xs
+  in
+  sizeAux 0 parlist
+
 let lookupEntry id how err =
   let scc = !currentScope in
   let lookup () =
