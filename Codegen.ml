@@ -238,6 +238,13 @@ let is_par e = match e.entry_info with
 | ENTRY_variable _ | ENTRY_temporary _ -> false
 | _ -> raise (Terminate "Bad entry to load")
 
+let regSizeOfEntry e = 
+  let rsize = size_of_entry e in
+  if rsize = intBytes then B16
+  else if rsize = charBytes then B8L
+  else if rsize = doubleBytes then raise (Terminate "Doubles in regSizeOfEntry")
+  else if risize = ptrBytes then B64
+  else raise (Terminate "Strange size of entry")
 
 (* input: the register to which, we will move address of the result *)
 (* output: needed ins_86_64 list *)
@@ -249,15 +256,16 @@ let rec load_result_address reg =
 let rec load reg a =
   match a with
   | Int n ->
-      [I_movw(Const (Imm16 n),reg)]
+      [I_movw(Const (Imm16 n), Reg (reg, B16))]
   | Bool b ->
-      [I_movb(Const (Imm8 (bool_to_int b)),reg)] (* NOTE: implemented mine coz of incompatibility *)
+      [I_movb(Const (Imm8 (bool_to_int b)), Reg (reg, B8L))] (* NOTE: implemented mine coz of incompatibility *)
   | Char chr ->
-      [I_movb(Const (Imm8 (Char.to_int chr)),reg)]
+      [I_movb(Const (Imm8 (Char.to_int chr)), Reg (reg, B8L))]
   | Var ent ->
+    let rsize = regSizeOfEntry ent in
     if is_local ent then
      (if (not (is_par ent) || lookup_passmode ent = PASS_BY_VALUE) then 
-        [I_movq (Mem (Some (lookup_bp_offset ent), Rbp, None,None),reg)]
+        [I_movq (Mem (Some (lookup_bp_offset ent), Rbp, None,None), (reg, rsize))]
       else
         [I_movq (Mem (Some (lookup_bp_offset ent), Rbp, None,None),Reg (Rsi, B64));
          I_movq (Mem (None, Rsi, None,None), reg)])
