@@ -243,8 +243,15 @@ let regSizeOfEntry e =
   if rsize = intBytes then B16
   else if rsize = charBytes then B8L
   else if rsize = doubleBytes then raise (Terminate "Doubles in regSizeOfEntry")
-  else if risize = ptrBytes then B64
+  else if rsize = ptrBytes then B64
   else raise (Terminate "Strange size of entry")
+
+let transMov rsize = function
+  | I_movq (x,y) when rsize = B8L -> I_movb (x,y)
+  | I_movq (x,y) when rsize = B16 -> I_movw (x,y)
+  | I_movq (x,y) when rsize = B32 -> I_movl (x,y)
+  | I_movq (x,y) when rsize = B64 -> I_movq (x,y)
+  | _ -> raise (Terminate "strange transform of mov")
 
 (* input: the register to which, we will move address of the result *)
 (* output: needed ins_86_64 list *)
@@ -265,21 +272,21 @@ let rec load reg a =
     let rsize = regSizeOfEntry ent in
     if is_local ent then
      (if (not (is_par ent) || lookup_passmode ent = PASS_BY_VALUE) then 
-        [I_movq (Mem (Some (lookup_bp_offset ent), Rbp, None,None), (reg, rsize))]
+        [I_movq (Mem (Some (lookup_bp_offset ent), Rbp, None,None), (reg, rsize)) |> transMov rsize]
       else
         [I_movq (Mem (Some (lookup_bp_offset ent), Rbp, None,None),Reg (Rsi, B64));
-         I_movq (Mem (None, Rsi, None,None), reg)])
+         I_movq (Mem (None, Rsi, None,None), (reg, rsize) |> transMov rsize)]) (* TODO fix size (now it gets that of pointer) *)
     else
      (if (not (is_par ent) || lookup_passmode ent = PASS_BY_VALUE) then 
         get_AR(ent) @
-        [I_movq (Mem (Some (lookup_bp_offset ent), Rsi, None,None),reg)]
+        [I_movq (Mem (Some (lookup_bp_offset ent), Rsi, None,None), (reg, rsize)) |> transMov rsize]
      else
         get_AR(ent) @
         [I_movq (Mem (Some (lookup_bp_offset ent), Rsi, None,None),Reg (Rsi, B64));
-        I_movq (Mem (None, Rsi, None,None), reg)])
+        I_movq (Mem (None, Rsi, None,None), (reg, rsize)) |> transMov rsize]) (* TODO fix size (now it gets that of pointer) *)
   | Address i -> load_addr reg i
   (* TODO use proper `mov` later later. *)
-  | Deref i -> load (Reg (Rdi,B64)) i @ [I_movq (Mem (None,Rdi,None,None),reg) ]
+  | Deref i -> load (Reg (Rdi,B64)) i @ [I_movq (Mem (None,Rdi,None,None),(reg, B64)) ]  (* TODO Same prob as above *)
   (* TODO adjust `mov` size*)
   | Temp n -> [I_movq (Mem (Some (lookup_bp_offset n),Rbp,None,None),reg)]
   | _ -> raise (Terminate "bad quad entry")
