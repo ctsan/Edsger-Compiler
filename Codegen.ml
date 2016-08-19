@@ -418,8 +418,8 @@ and ins_of_quad qd =
   M_Label (label_of (Label qd.quad_tag)) :: (match qd.quad_op with
   | Op_assign ->
     if is_encoded_as_int qd.quad_argX then
-      let ld_ins = load Rsi qd.quad_argX in
-      ld_ins @ store Rsi qd.quad_argZ
+      let ld_ins = load Rax qd.quad_argX in
+      ld_ins @ store Rax qd.quad_argZ
     else []
   | Op_array  ->
     let ld_ins  = load Rax qd.quad_argY in
