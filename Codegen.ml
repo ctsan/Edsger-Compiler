@@ -458,10 +458,10 @@ and ins_of_quad qd =
       else if rsize = B16 then [I_subw (r1,r2)]
       (*else if rsize = ?? then raise (Terminate "double in ins_of_quad op_plus")*)
       else if rsize = B64 then [I_subq (r1,r2)]
-      else raise (Terminate "Strange rsize of operand")
+      else raise (Terminate "Strange rsize of operand") in
     ld1_ins @
     ld2_ins @
-    sub_ins (Reg (Rax,rsize),Reg (Rdx,rsize))  @ 
+    sub_ins (Reg (Rax,rsize),Reg (Rdx,rsize))  @
     st_ins
   | Op_mult ->
     let ld1_ins = load Rax qd.quad_argX in
