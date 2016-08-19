@@ -246,6 +246,14 @@ let regSizeOfEntry (e, from_ptr) =
   else if rsize = ptrBytes then B64
   else raise (Terminate "Strange size of entry")
 
+let regSizeOfOperand = function
+  | Var e -> regSizeOfEntry (e,false)
+  | Temp e -> regSizeOfEntry (e,false)
+  | Char _ | Bool _ -> B8L
+  | Int _ -> B16
+  | String _ | Address _ -> B64
+  | _ -> raise (Terminate "regSizeOfOperand strange operand")
+
 let transMov rsize = function
   | I_movq (x,y) when rsize = B8L -> I_movb (x,y)
   | I_movq (x,y) when rsize = B16 -> I_movw (x,y)
@@ -294,7 +302,10 @@ let rec load reg a =
       load Rdi i @ 
       [I_movq (Mem (None,Rdi,None,None),Reg (reg,B64))] (* TODO fix movq *)
   (* TODO adjust `mov` size*)
-  | Temp n -> [I_movq (Mem (Some (lookup_bp_offset n),Rbp,None,None), Reg (reg, B64))]
+  | Temp n ->
+      let rsize = regSizeOfEntry (n, false) in
+      [I_movq (Mem (Some (lookup_bp_offset n),Rbp,None,None), Reg (reg, rsize))
+       |> transMov rsize]
   | _ -> raise (Terminate "bad quad entry")
 
 (* Takes operand of quad that is String str (Label int????) *)
@@ -348,17 +359,21 @@ and store reg a =
      (if (not (is_par ent) || lookup_passmode ent = PASS_BY_VALUE) then
         let rsize = regSizeOfEntry (ent, false) in
         get_AR(ent) @
-        [I_movq (Reg (reg,rsize),Mem (Some (lookup_bp_offset ent), Rsi, None,None))]
+        [I_movq (Reg (reg,rsize),Mem (Some (lookup_bp_offset ent), Rsi, None,None))
+         |> transMov rsize]
       else
         let rsize = regSizeOfEntry (ent, true) in
         get_AR(ent) @
         [I_movq (Mem (Some (lookup_bp_offset ent), Rsi, None,None),Reg (Rsi, B64));
-         I_movq (Reg (reg,rsize),Mem (None, Rsi, None,None))])
+         I_movq (Reg (reg,rsize),Mem (None, Rsi, None,None)) |> transMov rsize])
   | Deref i -> 
       load Rdi i @ 
       [I_movq (Reg (reg,B64),Mem (None, Rdi, None,None))] (* TODO fix movq *)
   (* TODO Add Temp like the `load` case *)
-  | Temp n -> [I_movq (Reg (reg, B64),Mem (Some (lookup_bp_offset n),Rbp,None,None))]
+  | Temp n -> 
+      let rsize = regSizeOfEntry (n, false) in
+      [I_movq (Reg (reg, rsize),Mem (Some (lookup_bp_offset n),Rbp,None,None))
+       |> transMov rsize]
   | _ -> raise (Terminate "bad quad entry")
 
 
@@ -421,9 +436,17 @@ and ins_of_quad qd =
     let ld1_ins = load Rax qd.quad_argX in
     let ld2_ins = load Rdx qd.quad_argY in
     let st_ins = store Rax qd.quad_argZ in
+    let rsize = regSizeOfOperand qd.quad_argX in
+    let add_ins (r1,r2) = 
+      if rsize = B8L then [I_addb (r1,r2)]
+      else if rsize = B16 then [I_addw (r1,r2)]
+      (*else if rsize = ?? then raise (Terminate "double in ins_of_quad op_plus")*)
+      else if rsize = B64 then [I_addq (r1,r2)]
+      else raise (Terminate "Strange rsize of operand")
+    in
     ld1_ins @
     ld2_ins @
-    [I_addq (Reg (Rax,B64),Reg (Rdx,B64)) ] @ (* TODO Chcek Size (q,w,..)*)
+    add_ins (Reg (Rax,rsize),Reg (Rdx,rsize)) @ (* TODO Chcek Size (q,w,..)*)
     st_ins
   | Op_minus ->
     let ld1_ins = load Rax qd.quad_argX in
