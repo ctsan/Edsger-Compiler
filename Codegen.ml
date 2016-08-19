@@ -339,6 +339,9 @@ and load_addr reg a =
         [I_movq (Mem (Some (lookup_bp_offset ent), Rsi, None,None), Reg (reg, B64))])
   (* TODO use proper `mov` later later. *)
   | Deref i -> load reg i
+  | Temp n ->
+      let rsize = regSizeOfEntry (n, false) in
+      [I_leaq ((Some (lookup_bp_offset n),Rbp,None,None), reg)] (* fix type *)
   | _ -> raise (Terminate "bad quad entry")
 
 
@@ -546,7 +549,7 @@ and ins_of_quad qd =
     [
      M_Label endof;
      I_movq (Reg (Rbp, B64), Reg (Rsp, B64));
-     I_pushq (Reg (Rbp, B64));
+     I_popq (Reg (Rbp, B64));
      I_ret
     ]
      (* TODO I_ret ??? *)
@@ -559,48 +562,51 @@ and ins_of_quad qd =
   | Op_ret ->
     let current = Stack.top_exn call_stack in
     [I_jmp (label_end_of (UnitName current))]
-  (* | Op_call -> *)
-  (*   let ent = match qd.quad_argZ with *)
-  (*           | UnitName e -> e *)
-  (*           | _ -> raise (Terminate "call with non-function") *)
-  (*   in *)
-  (*   let par_size = match ent.entry_info with *)
-  (*                   | ENTRY_function f -> size_of_params f.function_paramlist (\* TODO implement *\) *)
-  (*                   | _ -> raise (Terminate "call with non-function") *)
-  (*   in *)
-  (*   let called_ent = (match qd.quad_argX with *)
-  (*     | UnitName e -> e *)
-  (*     | _ -> raise (Failure "Bad arg")) *)
-  (*   in *)
-  (*   [I_subq (Reg (Rsp,B64), Const (Imm8 2))] @ *)
-  (*   update_AL (Stack.top_exn call_stack) called_ent @ *)
-  (*   [ *)
-  (*    I_call (string_of_entry(ent)); *)
-  (*    I_addq (Reg (Rsp,B64), Const (Imm8 (par_size + 4))) (\* TODO size ?? *\) *)
-  (*   ] *)
-  (* | Op_par -> *)
-  (*   let xsize = size_of_operand qd.quad_argX in  *)
-  (*   let ptype = *)
-  (*     match qd.quad_argY with *)
-  (*     | PassType p -> p *)
-  (*     | _ -> raise (Terminate "par quad with no passtype") *)
-  (*   in (match ptype with *)
-  (*       (\* TODO !IMPORTANT You probably can't do the following *\) *)
-  (*       | V when xsize = sizeOfType (TYPE_int 0)  -> *)
-  (*         load (Reg (Rax, B16)) qd.quad_argX @ (\* TODO fix register based on size *\) *)
-  (*         [I_pushq (Reg (Rax, B16))]         (\* maybe correct here *\) *)
-  (*       | V when xsize = sizeOfType (TYPE_char 0) -> *)
-  (*         load (Reg (Rax, B8L)) qd.quad_argX @ *)
-  (*         [I_subq (Reg (Rsp, B64), Const (Imm8 1)); *)
-  (*         I_movq (Reg (Rsp, B64), Reg (Rsi, B64)); *)
-  (*         I_movb (Reg (Rax, B8L), Mem (Some 0, Rsi ,None)) *)
-  (*         ] *)
-  (*       | V when xsize = sizeOfType (TYPE_double 0) -> *)
-  (*         [] (\* TODO doubles *\) *)
-  (*       | R | RET -> *)
-  (*         load_addr (Reg (Rsi, B64)) qd.quad_argX @ *)
-  (*         [I_pushq (Reg (Rsi, B64))] *)
-  (*       | _ -> raise (Terminate "Bad size of par")) *)
+  | Op_call ->
+    let ent = match qd.quad_argZ with
+            | UnitName e -> e
+            | _ -> raise (Terminate "call with non-function")
+    in
+    let par_size = match ent.entry_info with
+                    | ENTRY_function f -> size_of_params f.function_paramlist (* TODO implement *)
+                    | _ -> raise (Terminate "call with non-function")
+    in
+    let called_ent = (match qd.quad_argZ with
+      | UnitName e -> e
+      | _ -> raise (Failure "Bad arg"))
+    in
+    [I_subq ( Const (Imm8 8),Reg (Rsp,B64))] (* NOTE FIX if procedure *)@
+    update_AL (Stack.top_exn call_stack) called_ent @
+    [
+     I_call (string_of_entry(ent));
+     I_addq (Reg (Rsp,B64), Const (Imm8 (par_size + 4))) (* TODO size ?? *)
+    ]
+  | Op_par ->
+    let xsize = size_of_operand qd.quad_argX in
+    let ptype =
+      match qd.quad_argY with
+      | PassType p -> p
+      | _ -> raise (Terminate "par quad with no passtype")
+    in (match ptype with
+        (* TODO !IMPORTANT You probably can't do the following *)
+        | V when xsize = intBytes  ->
+          load (Rax) qd.quad_argX @ (* TODO fix register based on size *)
+          [I_pushq (Reg (Rax, B16))]         (* maybe correct here *)
+        | V when xsize = ptrBytes  ->
+          load (Rax) qd.quad_argX @ (* TODO fix register based on size *)
+          [I_pushq (Reg (Rax, B16))]         (* maybe correct here *)
+        | V when xsize = charBytes ->
+          load (Rax) qd.quad_argX @
+          [I_subq (Reg (Rsp, B64), Const (Imm8 1));
+          I_movq (Reg (Rsp, B64), Reg (Rsi, B64));
+          I_movb (Reg (Rax, B8L), Mem (Some 0, Rsi ,None,None))
+          ]
+        | V when xsize = doubleBytes ->
+          [] (* TODO doubles *)
+        | R | RET ->
+          load_addr Rsi qd.quad_argX @
+          [I_pushq (Reg (Rsi, B64))]
+        | _ -> raise (Terminate "Bad size of par"))
   (* TODO Figure out label stuff *)
   | _ -> []) @ [I_empty] (* NOTE Inneficient, reconsider *)
 
