@@ -56,11 +56,11 @@ and semantic_properties = {
 let size_of_operand = function
   | Var e -> size_of_entry e
   | Temp e -> size_of_entry e
-  | Char _ | Bool _ -> sizeOfType (TYPE_char 0)
-  | Int _ -> sizeOfType (TYPE_int 0)
-  | Double _ -> sizeOfType (TYPE_double 0)
-  | Address _ -> sizeOfType (TYPE_int 1)
-  | String _ -> sizeOfType (TYPE_int 1)
+  | Char _ | Bool _ -> charBytes
+  | Int _ -> intBytes
+  | Double _ -> doubleBytes
+  | Address _ -> ptrBytes
+  | String _ -> ptrBytes
   | Deref _ -> raise (Terminate "deref in size of operand")
   | Unit | UnitName _ -> raise (Terminate "unit{name} in size of operand")
   | Label _ -> raise (Terminate "Label in size_of_operand")

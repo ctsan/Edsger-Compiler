@@ -238,8 +238,8 @@ let is_par e = match e.entry_info with
 | ENTRY_variable _ | ENTRY_temporary _ -> false
 | _ -> raise (Terminate "Bad entry to load")
 
-let regSizeOfEntry e = 
-  let rsize = size_of_entry e in
+let regSizeOfEntry (e, from_ptr) = 
+  let rsize = if from_ptr then size_of_entry_deref e else size_of_entry e in
   if rsize = intBytes then B16
   else if rsize = charBytes then B8L
   else if rsize = doubleBytes then raise (Terminate "Doubles in regSizeOfEntry")
@@ -269,26 +269,32 @@ let rec load reg a =
   | Char chr ->
       [I_movb(Const (Imm8 (Char.to_int chr)), Reg (reg, B8L))]
   | Var ent ->
-    let rsize = regSizeOfEntry ent in
     if is_local ent then
-     (if (not (is_par ent) || lookup_passmode ent = PASS_BY_VALUE) then 
-        [I_movq (Mem (Some (lookup_bp_offset ent), Rbp, None,None), (reg, rsize)) |> transMov rsize]
+     (if (not (is_par ent) || lookup_passmode ent = PASS_BY_VALUE) then
+        let rsize = regSizeOfEntry (ent, false) in
+        [I_movq (Mem (Some (lookup_bp_offset ent), Rbp, None,None), Reg (reg,rsize)) 
+         |> transMov rsize]
       else
+        let rsize = regSizeOfEntry (ent, true) in
         [I_movq (Mem (Some (lookup_bp_offset ent), Rbp, None,None),Reg (Rsi, B64));
-         I_movq (Mem (None, Rsi, None,None), (reg, rsize) |> transMov rsize)]) (* TODO fix size (now it gets that of pointer) *)
+         I_movq (Mem (None, Rsi, None,None), Reg (reg,rsize)) |> transMov rsize]) 
     else
-     (if (not (is_par ent) || lookup_passmode ent = PASS_BY_VALUE) then 
+     (if (not (is_par ent) || lookup_passmode ent = PASS_BY_VALUE) then
+        let rsize = regSizeOfEntry (ent, false) in 
         get_AR(ent) @
-        [I_movq (Mem (Some (lookup_bp_offset ent), Rsi, None,None), (reg, rsize)) |> transMov rsize]
-     else
+        [I_movq (Mem (Some (lookup_bp_offset ent), Rsi, None,None), Reg (reg,rsize)) |> transMov rsize]
+      else
+        let rsize = regSizeOfEntry (ent, true) in
         get_AR(ent) @
         [I_movq (Mem (Some (lookup_bp_offset ent), Rsi, None,None),Reg (Rsi, B64));
-        I_movq (Mem (None, Rsi, None,None), (reg, rsize)) |> transMov rsize]) (* TODO fix size (now it gets that of pointer) *)
+        I_movq (Mem (None, Rsi, None,None), Reg (reg,rsize)) |> transMov rsize]) 
   | Address i -> load_addr reg i
   (* TODO use proper `mov` later later. *)
-  | Deref i -> load (Reg (Rdi,B64)) i @ [I_movq (Mem (None,Rdi,None,None),(reg, B64)) ]  (* TODO Same prob as above *)
+  | Deref i -> 
+      load Rdi i @ 
+      [I_movq (Mem (None,Rdi,None,None),Reg (reg,B64))] (* TODO fix movq *)
   (* TODO adjust `mov` size*)
-  | Temp n -> [I_movq (Mem (Some (lookup_bp_offset n),Rbp,None,None),reg)]
+  | Temp n -> [I_movq (Mem (Some (lookup_bp_offset n),Rbp,None,None), Reg (reg, B64))]
   | _ -> raise (Terminate "bad quad entry")
 
 (* Takes operand of quad that is String str (Label int????) *)
@@ -303,28 +309,23 @@ and label_of e =
 (* output: a list of the necessery assembly instructions *)
 (* Pretty much the same as load but with lea *)
 and load_addr reg a =
-  let reg_of_op =
-    match reg with
-    | Reg x -> fst x
-    | _ -> Rax (* just a filler, i need reg of operand for leaq, maybe TODO: change this *)
-  in
   match a with
   | String str ->
       []
       (* [I_leaq(reg, )], String to memory location function or sth needed? *)
   | Var ent ->
     if is_local ent then
-     (if (not (is_par ent) || lookup_passmode ent = PASS_BY_VALUE) then
-        [I_leaq ( (Some (lookup_bp_offset ent), Rbp, None,None) ,reg_of_op)]
+     (if (not (is_par ent) || lookup_passmode ent = PASS_BY_VALUE) then        
+        [I_leaq ( (Some (lookup_bp_offset ent), Rbp, None,None) ,reg)]
       else
-        [I_movq (Mem (Some (lookup_bp_offset ent), Rbp, None,None),reg)])
+        [I_movq (Mem (Some (lookup_bp_offset ent), Rbp, None,None), Reg (reg, B64))])
     else
      (if (not (is_par ent) || lookup_passmode ent = PASS_BY_VALUE) then
         get_AR(ent) @
-        [I_leaq ((Some (lookup_bp_offset ent), Rsi, None,None),reg_of_op)]
+        [I_leaq ((Some (lookup_bp_offset ent), Rsi, None,None),reg)]
       else        
         get_AR(ent) @
-        [I_movq (Mem (Some (lookup_bp_offset ent), Rsi, None,None), reg)])
+        [I_movq (Mem (Some (lookup_bp_offset ent), Rsi, None,None), Reg (reg, B64))])
   (* TODO use proper `mov` later later. *)
   | Deref i -> load reg i
   | _ -> raise (Terminate "bad quad entry")
@@ -336,21 +337,28 @@ and store reg a =
   | Var ent ->
     if is_local ent then
      (if (not (is_par ent) || lookup_passmode ent = PASS_BY_VALUE) then
-        [I_movq (reg, Mem (Some (lookup_bp_offset ent), Rbp, None,None))]
+        let rsize = regSizeOfEntry (ent, false) in
+        [I_movq (Reg (reg,rsize), Mem (Some (lookup_bp_offset ent), Rbp, None,None))
+         |> transMov rsize]
       else
+        let rsize = regSizeOfEntry (ent, true) in
         [I_movq (Reg (Rsi, B64),Mem (Some (lookup_bp_offset ent), Rbp, None,None));
-        I_movq (reg,Mem (None, Rsi, None,None))])
+        I_movq (Reg (reg,rsize),Mem (None, Rsi, None,None)) |> transMov rsize])
     else
      (if (not (is_par ent) || lookup_passmode ent = PASS_BY_VALUE) then
-          get_AR(ent) @
-          [I_movq (reg,Mem (Some (lookup_bp_offset ent), Rsi, None,None))]
+        let rsize = regSizeOfEntry (ent, false) in
+        get_AR(ent) @
+        [I_movq (Reg (reg,rsize),Mem (Some (lookup_bp_offset ent), Rsi, None,None))]
       else
-          get_AR(ent) @
-          [I_movq (Mem (Some (lookup_bp_offset ent), Rsi, None,None),Reg (Rsi, B64));
-          I_movq (reg,Mem (None, Rsi, None,None))])
-  | Deref i -> load (Reg (Rdi, B64)) i @ [I_movq (reg,Mem (None, Rdi, None,None))]
+        let rsize = regSizeOfEntry (ent, true) in
+        get_AR(ent) @
+        [I_movq (Mem (Some (lookup_bp_offset ent), Rsi, None,None),Reg (Rsi, B64));
+         I_movq (Reg (reg,rsize),Mem (None, Rsi, None,None))])
+  | Deref i -> 
+      load Rdi i @ 
+      [I_movq (Reg (reg,B64),Mem (None, Rdi, None,None))] (* TODO fix movq *)
   (* TODO Add Temp like the `load` case *)
-  | Temp n -> [I_movq (reg,Mem (Some (lookup_bp_offset n),Rbp,None,None))]
+  | Temp n -> [I_movq (Reg (reg, B64),Mem (Some (lookup_bp_offset n),Rbp,None,None))]
   | _ -> raise (Terminate "bad quad entry")
 
 
@@ -395,14 +403,14 @@ and ins_of_quad qd =
   M_Label (label_of (Label qd.quad_tag)) :: (match qd.quad_op with
   | Op_assign ->
     if is_encoded_as_int qd.quad_argX then
-      let ld_ins = load (Reg (Rsi,B64)) qd.quad_argX in
-      ld_ins @ store (Reg (Rsi,B64)) qd.quad_argZ
+      let ld_ins = load Rsi qd.quad_argX in
+      ld_ins @ store Rsi qd.quad_argZ
     else []
   | Op_array  ->
-    let ld_ins  = load (Reg (Rax,B64)) qd.quad_argY in
-    let ld_addr = load_addr (Reg (Rcx,B64)) qd.quad_argX in
-    let st_ins  = store (Reg (Rax,B64)) qd.quad_argZ in
-    let type_size = sizeOfType (TYPE_int 0) in (* TODO Fix, to lookup for the size of the array *)
+    let ld_ins  = load Rax qd.quad_argY in
+    let ld_addr = load_addr Rcx qd.quad_argX in
+    let st_ins  = store Rax qd.quad_argZ in
+    let type_size = intBytes in (* TODO Fix, to lookup for the size of the array *)
     ld_ins @
     [I_movq (Reg (Rcx,B64),Const(Imm8 type_size))] @
     [I_imul (Reg (Rcx,B64),Rax) ] @ (* TODO Check size is correct*)
@@ -410,50 +418,50 @@ and ins_of_quad qd =
     [I_addq (Reg (Rcx,B64),Reg (Rax,B64))] @
     st_ins
   | Op_plus ->
-    let ld1_ins = load (Reg (Rax,B64)) qd.quad_argX in
-    let ld2_ins = load (Reg (Rdx,B64)) qd.quad_argY in
-    let st_ins = store(Reg (Rax,B64)) qd.quad_argZ in
+    let ld1_ins = load Rax qd.quad_argX in
+    let ld2_ins = load Rdx qd.quad_argY in
+    let st_ins = store Rax qd.quad_argZ in
     ld1_ins @
     ld2_ins @
     [I_addq (Reg (Rax,B64),Reg (Rdx,B64)) ] @ (* TODO Chcek Size (q,w,..)*)
     st_ins
   | Op_minus ->
-    let ld1_ins = load (Reg (Rax,B64)) qd.quad_argX in
-    let ld2_ins = load (Reg (Rdx,B64)) qd.quad_argY in
-    let st_ins = store(Reg (Rax,B64)) qd.quad_argZ in
+    let ld1_ins = load Rax qd.quad_argX in
+    let ld2_ins = load Rdx qd.quad_argY in
+    let st_ins = store Rax qd.quad_argZ in
     ld1_ins @
     ld2_ins @
     [I_subq (Reg (Rax,B64),Reg (Rdx,B64)) ] @ (* TODO Chcek Size (q,w,..)*)
     st_ins
   | Op_mult ->
-    let ld1_ins = load (Reg (Rax,B64)) qd.quad_argX in
-    let ld2_ins = load (Reg (Rcx,B64)) qd.quad_argY in
-    let st_ins = store(Reg (Rax,B64)) qd.quad_argZ in
+    let ld1_ins = load Rax qd.quad_argX in
+    let ld2_ins = load Rcx qd.quad_argY in
+    let st_ins = store Rax qd.quad_argZ in
     ld1_ins @
     ld2_ins @
     [I_imul (Reg (Rax,B64),Rcx) ] @ (* TODO Chcek Size (q,w,..)*)
     st_ins
   | Op_div ->
-    let ld1_ins = load (Reg (Rax,B64)) qd.quad_argX in
+    let ld1_ins = load Rax qd.quad_argX in
     (* cwd needed ? i guess depends on size *)
-    let ld2_ins = load (Reg (Rcx,B64)) qd.quad_argY in
-    let st_ins = store(Reg (Rax,B64)) qd.quad_argZ in
+    let ld2_ins = load Rcx qd.quad_argY in
+    let st_ins = store Rax qd.quad_argZ in
     ld1_ins @
     ld2_ins @
     [I_idiv (Reg (Rcx,B64)) ] @ (* TODO Chcek Size (q,w,..)*)
     st_ins
   | Op_mod ->
-    let ld1_ins = load (Reg (Rax,B64)) qd.quad_argX in
+    let ld1_ins = load Rax qd.quad_argX in
     (* cwd needed ? i guess depends on size *)
-    let ld2_ins = load (Reg (Rcx,B64)) qd.quad_argY in
-    let st_ins = store(Reg (Rdx,B64)) qd.quad_argZ in
+    let ld2_ins = load Rcx qd.quad_argY in
+    let st_ins = store Rdx qd.quad_argZ in
     ld1_ins @
     ld2_ins @
     [I_idiv (Reg (Rcx,B64)) ] @ (* TODO Chcek Size (q,w,..)*)
     st_ins
   | Op_eq ->
-    let ld1_ins = load (Reg (Rax,B64)) qd.quad_argX in
-    let ld2_ins = load (Reg (Rdx,B64)) qd.quad_argY in
+    let ld1_ins = load Rax qd.quad_argX in
+    let ld2_ins = load Rdx qd.quad_argY in
     ld1_ins @
     ld2_ins @
     [I_cmp (Reg (Rax,B64),Reg (Rdx,B64));
@@ -466,21 +474,21 @@ and ins_of_quad qd =
   (*   [I_cmp (Reg (Rax,B64),Reg (Rdx,B64)); *)
   (*    I_jne (label_of(qd.quad_argZ))] *)
   | Op_lt ->
-    let ld1_ins = load (Reg (Rax,B64)) qd.quad_argX in
-    let ld2_ins = load (Reg (Rdx,B64)) qd.quad_argY in
+    let ld1_ins = load Rax qd.quad_argX in
+    let ld2_ins = load Rdx qd.quad_argY in
     ld1_ins @
     ld2_ins @
     [I_cmp (Reg (Rax,B64),Reg (Rdx,B64)); 
      I_jl (label_of(qd.quad_argZ))]
   | Op_gt ->
-    let ld1_ins = load (Reg (Rax,B64)) qd.quad_argX in
-    let ld2_ins = load (Reg (Rdx,B64)) qd.quad_argY in
+    let ld1_ins = load Rax qd.quad_argX in
+    let ld2_ins = load Rdx qd.quad_argY in
     ld1_ins @
     ld2_ins @
     [I_cmp (Reg (Rax,B64),Reg (Rdx,B64));
      I_jg (label_of(qd.quad_argZ))]
   | Op_ifb ->
-    let ld1_ins = load (Reg (Rax,B64)) qd.quad_argX in
+    let ld1_ins = load Rax qd.quad_argX in
     ld1_ins @
     [I_cmp (Reg (Rax,B64),Const (Imm64 0)); (* TODO no or so immediate cmp *)
      I_jne (label_of(qd.quad_argZ))]
@@ -512,7 +520,7 @@ and ins_of_quad qd =
      (* M_Label endp  TODO use endp if at&t will be used *)
   | Op_retv ->
     let current = Stack.top_exn call_stack in
-    load (Reg (Rax,B64)) qd.quad_argX @
+    load Rax qd.quad_argX @
     load_result_address (Reg (Rdx,B64)) @
     [ I_movq (Reg (Rax,B64), Mem (None,Rdx,None,None)) ] (* TODO fix size (Size of Result Type) *)
   | Op_ret ->

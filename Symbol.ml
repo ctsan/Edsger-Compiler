@@ -152,6 +152,12 @@ let size_of_entry e = match e.entry_info with
   | ENTRY_temporary tem -> sizeOfType tem.temporary_type
   | _ -> raise (Terminate "size_of_entry only works with var/par/tem")
 
+let size_of_entry_deref e = match e.entry_info with
+  | ENTRY_variable var -> sizeOfType (deref_expr var.variable_type)
+  | ENTRY_parameter par -> sizeOfType (deref_expr par.parameter_type)
+  | ENTRY_temporary tem -> sizeOfType (deref_expr tem.temporary_type)
+  | _ -> raise (Terminate "size_of_entry_deref only works with var/par/tem")
+
 let size_of_params parlist = 
   let rec sizeAux acc = function
     | [] -> acc

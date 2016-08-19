@@ -104,4 +104,5 @@ val start_positive_offset : int   (* Αρχικό θετικό offset στο Ε.
 val start_negative_offset : int   (* Αρχικό αρνητικό offset στο Ε.Δ. *)
 
 val size_of_entry : entry -> int
+val size_of_entry_deref : entry -> int
 val size_of_params : entry list -> int
