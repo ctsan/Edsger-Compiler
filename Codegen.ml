@@ -446,15 +446,22 @@ and ins_of_quad qd =
     in
     ld1_ins @
     ld2_ins @
-    add_ins (Reg (Rax,rsize),Reg (Rdx,rsize)) @ (* TODO Chcek Size (q,w,..)*)
+    add_ins (Reg (Rax,rsize),Reg (Rdx,rsize)) @ 
     st_ins
   | Op_minus ->
     let ld1_ins = load Rax qd.quad_argX in
     let ld2_ins = load Rdx qd.quad_argY in
     let st_ins = store Rax qd.quad_argZ in
+    let rsize = regSizeOfOperand qd.quad_argX in
+    let sub_ins (r1,r2) = 
+      if rsize = B8L then [I_subb (r1,r2)]
+      else if rsize = B16 then [I_subw (r1,r2)]
+      (*else if rsize = ?? then raise (Terminate "double in ins_of_quad op_plus")*)
+      else if rsize = B64 then [I_subq (r1,r2)]
+      else raise (Terminate "Strange rsize of operand")
     ld1_ins @
     ld2_ins @
-    [I_subq (Reg (Rax,B64),Reg (Rdx,B64)) ] @ (* TODO Chcek Size (q,w,..)*)
+    sub_ins (Reg (Rax,rsize),Reg (Rdx,rsize))  @ 
     st_ins
   | Op_mult ->
     let ld1_ins = load Rax qd.quad_argX in
@@ -462,7 +469,7 @@ and ins_of_quad qd =
     let st_ins = store Rax qd.quad_argZ in
     ld1_ins @
     ld2_ins @
-    [I_imul (Reg (Rax,B64),Rcx) ] @ (* TODO Chcek Size (q,w,..)*)
+    [I_imul (Reg (Rax,B64),Rcx) ] @ 
     st_ins
   | Op_div ->
     let ld1_ins = load Rax qd.quad_argX in
@@ -485,9 +492,10 @@ and ins_of_quad qd =
   | Op_eq ->
     let ld1_ins = load Rax qd.quad_argX in
     let ld2_ins = load Rdx qd.quad_argY in
+    let rsize = regSizeOfOperand qd.quad_argX in
     ld1_ins @
     ld2_ins @
-    [I_cmp (Reg (Rax,B64),Reg (Rdx,B64));
+    [I_cmp (Reg (Rax,rsize),Reg (Rdx,rsize));
      I_je (label_of(qd.quad_argZ))]
   (* | Op_neq -> *)
   (*   let ld1_ins = load (Reg (Rax,B64)) qd.quad_argX in *)
@@ -499,21 +507,23 @@ and ins_of_quad qd =
   | Op_lt ->
     let ld1_ins = load Rax qd.quad_argX in
     let ld2_ins = load Rdx qd.quad_argY in
+    let rsize = regSizeOfOperand qd.quad_argX in
     ld1_ins @
     ld2_ins @
-    [I_cmp (Reg (Rax,B64),Reg (Rdx,B64)); 
+    [I_cmp (Reg (Rax,rsize),Reg (Rdx,rsize)); 
      I_jl (label_of(qd.quad_argZ))]
   | Op_gt ->
     let ld1_ins = load Rax qd.quad_argX in
     let ld2_ins = load Rdx qd.quad_argY in
+    let rsize = regSizeOfOperand qd.quad_argX in
     ld1_ins @
     ld2_ins @
-    [I_cmp (Reg (Rax,B64),Reg (Rdx,B64));
+    [I_cmp (Reg (Rax,rsize),Reg (Rdx,rsize));
      I_jg (label_of(qd.quad_argZ))]
   | Op_ifb ->
     let ld1_ins = load Rax qd.quad_argX in
     ld1_ins @
-    [I_cmp (Reg (Rax,B64),Const (Imm64 0)); (* TODO no or so immediate cmp *)
+    [I_cmp (Reg (Rax,B8L),Const (Imm8 0)); (* TODO no or so immediate cmp *)
      I_jne (label_of(qd.quad_argZ))]
   | Op_jump ->
     [I_jmp (label_of (qd.quad_argZ))]
