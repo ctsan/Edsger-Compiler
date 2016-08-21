@@ -60,6 +60,10 @@ type ins_86_64 =
   | I_subl  of operand * operand
   | I_subq  of operand * operand
 
+  | I_cdqe (* RAX <- Extend EAX *)
+  | I_cwde (* EAX <- Extend AX  *)
+  | I_cbw  (*  AX <- Extend AL  *)
+
   | I_imul  of operand * reg (* first operand:reg or mem, result is always a register 64bit *)
   | I_idiv  of operand  (* mem,reg: divides 128-bit integer (rdx:rax), remained in rdx, quotient in rax.*)
   | I_idivw of memory_location (* mem,reg: divides 128-bit integer (rdx:rax), remained in rdx, quotient in rax.*)
@@ -129,8 +133,8 @@ let string_of_memory_location mloc =
   match mloc with
   | (None, r, None,None) | (Some 0, r, None,None) ->
      sprintf "(%s)" (string_of_reg r)
-  | (Some x, r, None,None) when x > 0 ->
-      "+" ^ Int.to_string x ^ (sprintf "(%s)" (string_of_reg r))
+  (* | (Some x, r, None,None) when x > 0 -> *)
+  (*     "+" ^ Int.to_string x ^ (sprintf "(%s)" (string_of_reg r)) *)
   | (Some x, r, None,None) ->
       Int.to_string x ^ (sprintf "(%s)" (string_of_reg r))
   | _ ->
@@ -144,9 +148,9 @@ let string_of_operand = function
 
 let string_of_ins_86_64 = function
   | D_str  (label,str)   -> (string_of_label label) ^ sprintf "\t.string %S\n" str
-  | D_byte  (label,num)   -> (string_of_label label) ^ sprintf "\t.byte " ^ string_of_imm num
-  | D_short  (label,num)   -> (string_of_label label) ^ sprintf "\t.short " ^ string_of_imm num
-  | D_long  (label,num)   -> (string_of_label label) ^ sprintf "\t.long " ^ string_of_imm num
+  | D_byte  (label,num)  -> (string_of_label label) ^ sprintf "\t.byte " ^ string_of_imm num
+  | D_short  (label,num) -> (string_of_label label) ^ sprintf "\t.short " ^ string_of_imm num
+  | D_long  (label,num)  -> (string_of_label label) ^ sprintf "\t.long " ^ string_of_imm num
   | D_zero (label,total) -> (string_of_label label) ^ sprintf "\t.zero %d\n" total
   | M_Label label        -> sprintf "%s" (string_of_label label)
   | I_movb (op1,op2)     -> sprintf "\tmovb %s,%s\n" (string_of_operand op1) (string_of_operand op2)
@@ -179,6 +183,9 @@ let string_of_ins_86_64 = function
   | I_ret                -> sprintf "\tret\n"
   | I_empty              -> sprintf "\n"
   | I_call label         -> sprintf "\tcall %s\n" (string_of_targ_label label)
+  | I_cbw                -> sprintf "\tcbw\n"
+  | I_cdqe               -> sprintf "\tcdqe\n"
+  | I_cwde               -> sprintf "\tcwde\n"
 
 let bool_to_int b =
   match b with
@@ -384,7 +391,10 @@ and store reg a =
 and label_name p =
     (* TODO: WE NEED A QUEUE *)
     match p with
-    | UnitName ent -> sprintf "_%s_%d" (string_of_entry ent) (get_func_id ())
+    | UnitName ent ->
+      let id = get_func_id () in
+      add_uniq_id ent id;
+      sprintf "_%s_%d" (string_of_entry ent) id
     | _ -> raise (Failure "This should be called with procedure name\n")
 
 (* genearte label for the end of a unit*)
@@ -426,13 +436,16 @@ and ins_of_quad qd =
     else []
   | Op_array  ->
     let ld_ins  = load Rax qd.quad_argY in
-    let ld_addr = load_addr Rcx qd.quad_argX in
+    let ld_addr = load_addr Rax qd.quad_argX in (* TODO Test this is correct *)
     let st_ins  = store Rax qd.quad_argZ in
-    let type_size = intBytes in (* TODO Fix, to lookup for the size of the array *)
+    let type_size = qd.quad_argX |> type_of_operand |> deref_expr |> sizeOfType  in 
     ld_ins @
-    [I_movq (Reg (Rcx,B64),Const(Imm8 type_size))] @
-    [I_imul (Reg (Rcx,B64),Rax) ] @ (* TODO Check size is correct*)
+    [I_movq (Const(Imm8 type_size),Reg (Rcx,B64))] @
+    (* Offset goes to RCX *)
+    [I_imul (Reg(Rax,B16), Rcx) ] @ (* TODO double check imul has the correct format *)
+    (* address goes to RAX*)
     ld_addr @
+    (* sum offset (RCX) and address (RAX) *)
     [I_addq (Reg (Rcx,B64),Reg (Rax,B64))] @
     st_ins
   | Op_plus ->
@@ -563,6 +576,10 @@ and ins_of_quad qd =
     let current = Stack.top_exn call_stack in
     [I_jmp (label_end_of (UnitName current))]
   | Op_call ->
+    let fix_procs_offset_ins entry =
+      if is_procedure entry then [I_subq ( Const (Imm8 8),Reg (Rsp,B64))]
+      else []
+    in
     let ent = match qd.quad_argZ with
             | UnitName e -> e
             | _ -> raise (Terminate "call with non-function")
@@ -575,10 +592,10 @@ and ins_of_quad qd =
       | UnitName e -> e
       | _ -> raise (Failure "Bad arg"))
     in
-    [I_subq ( Const (Imm8 8),Reg (Rsp,B64))] (* NOTE FIX if procedure *)@
+    fix_procs_offset_ins called_ent @
     update_AL (Stack.top_exn call_stack) called_ent @
     [
-     I_call (string_of_entry(ent));
+     I_call (uniq_string_of_fentry(ent));
      I_addq (Reg (Rsp,B64), Const (Imm8 (par_size + 4))) (* TODO size ?? *)
     ]
   | Op_par ->

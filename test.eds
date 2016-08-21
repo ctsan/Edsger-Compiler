@@ -1,9 +1,12 @@
-#include "other.eds"
-
 void main () {
     int i;
+    bool j;
+    char k;
+    char* e;
     i = i+1;
-    i = i-1;
+    j = true;
+    k = 'f';
+    e = e+1;
     return;
 }
 
@@ -18,4 +21,13 @@ void calling () {
     d = true;
     
     assign = called(9,'a',false, &d);
+}
+
+void arr() {
+    int test[100];
+    int * i;
+
+    test [ 10 ] = 14;
+    //i = test;
+    *(i+10) = 14;
 }

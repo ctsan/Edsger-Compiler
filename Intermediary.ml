@@ -46,25 +46,37 @@ and quad =  {
 
 and semantic_properties = {
   mutable place  : operand;
-  (* mutable typ    : Types.typ; *)
-  (* mutable cond   : bool;  *)
   mutable next   : int list;
   mutable trues  : int list;
   mutable falses : int list;
 }
 
-let size_of_operand = function
-  | Var e -> size_of_entry e
-  | Temp e -> size_of_entry e
-  | Char _ | Bool _ -> charBytes
-  | Int _ -> intBytes
-  | Double _ -> doubleBytes
-  | Address _ -> ptrBytes
-  | String _ -> ptrBytes
-  | Deref _ -> raise (Terminate "deref in size of operand")
+let rec type_of_operand = function
+  | Var e  | Temp e-> lookup_result_type e.entry_id
+  | Char _ | Bool _ -> TYPE_char 0
+  | Int _ -> TYPE_int 0
+  | Double _ -> TYPE_double 0
+  | Address n -> addr_of_point (type_of_operand n)
+  | String _ -> TYPE_char 1
+  | Deref n -> deref_expr (type_of_operand n)
   | Unit | UnitName _ -> raise (Terminate "unit{name} in size of operand")
   | Label _ -> raise (Terminate "Label in size_of_operand")
   | _ -> raise (Terminate "Size of operand of this type not implemented")
+
+let size_of_operand op =
+  sizeOfType (type_of_operand op)
+  (* = function *)
+  (* | Var e -> size_of_entry e *)
+  (* | Temp e -> size_of_entry e *)
+  (* | Char _ | Bool _ -> charBytes *)
+  (* | Int _ -> intBytes *)
+  (* | Double _ -> doubleBytes *)
+  (* | Address _ -> ptrBytes *)
+  (* | String _ -> ptrBytes *)
+  (* | Deref _ -> raise (Terminate "deref in size of operand") *)
+  (* | Unit | UnitName _ -> raise (Terminate "unit{name} in size of operand") *)
+  (* | Label _ -> raise (Terminate "Label in size_of_operand") *)
+  (* | _ -> raise (Terminate "Size of operand of this type not implemented") *)
 
 let string_of_operator = function
   | Op_unit       -> "unit"
@@ -216,12 +228,12 @@ let rec output_condition pr =
       npr
     end
 
-let rec output_expression pr =
+let rec output_expression typ pr =
   if not (is_condition pr) then pr
   else
     begin
       let npr = newProp () in
-      let w = Temp(newTemp (TYPE_int 0)) in (* TODO IMPORTANT Fix TYPE!!*)
+      let w = Temp(newTemp typ) in (* TODO IMPORTANT Fix TYPE!!*)
       backpatch pr.next (nextQuad());
       backpatch pr.trues (nextQuad());
       addQuad(genQuad Op_assign (Bool true) Empty w);
@@ -254,7 +266,7 @@ and genquads_expr ast =
   let bin_op_helper x y op =
     let e1prop = genquads_expr x
     and e2prop = genquads_expr y
-    and w = Temp(newTemp (TYPE_int 0)) in
+    and w = Temp(newTemp (lookup_type_of_expr x)) in
     let q = genQuad op e1prop.place e2prop.place w in
     addQuad q;
     prop.place <- w;
@@ -284,7 +296,7 @@ and genquads_expr ast =
     in (* TODO Pass return value *)
     (match lookup_result_type fun_id with
      | TYPE_void -> ()
-     | _ -> let w = Temp(newTemp (TYPE_int 0)) in
+     | typ -> let w = Temp(newTemp typ) in
        addQuad(genQuad Op_par w (PassType RET) Empty);
        prop.place <- w);
     let fid_entry = lookupEntry (id_make x) LOOKUP_ALL_SCOPES true in
@@ -306,7 +318,7 @@ and genquads_expr ast =
   | E_plus (x,y)  ->
     let e1prop = genquads_expr x
     and e2prop = genquads_expr y
-    and w = Temp(newTemp (TYPE_int 0)) in
+    and w = Temp(newTemp (lookup_type_of_expr x)) in
     let q = match_ar_or_ptr ~expr:x
         ~if_int:(lazy (genQuad Op_plus e1prop.place e2prop.place w))
         ~if_pointer:(lazy (genQuad Op_array e1prop.place e2prop.place w))
@@ -318,7 +330,7 @@ and genquads_expr ast =
   | E_minus (x,y) ->
     let e1prop = genquads_expr x
     and e2prop = genquads_expr y
-    and w = Temp(newTemp (TYPE_int 0)) in
+    and w = Temp(newTemp (lookup_type_of_expr x)) in
     let q = match_ar_or_ptr ~expr:x
             ~if_int:(lazy (genQuad Op_minus e1prop.place e2prop.place w))
         ~if_pointer:(lazy (genQuad Op_array e1prop.place e2prop.place w)) (* TODO MINUS! FIX!*)
@@ -357,7 +369,7 @@ and genquads_expr ast =
     prop.place <- yprop.place;
     prop
   | E_assign (x,y) ->
-    let yprop = genquads_expr y |> output_expression in
+    let yprop = genquads_expr y |> output_expression (lookup_type_of_expr y) in
     closequad yprop;
     (* backpatch yprop.next (nextQuad ()); *)
     let xprop = genquads_expr x in
@@ -412,13 +424,13 @@ and genquads_expr ast =
     in genquads_expr (E_minus (rs,x))
   | E_addr x ->
     let tprop = genquads_expr x in
-    let w = Temp(newTemp (TYPE_int 0)) in
+    let w = Temp( lookup_type_of_expr x |> newTemp) in
     addQuad(genQuad Op_assign tprop.place Empty w);
     prop.place <- Address (w);
     prop
   | E_deref x -> (* TODO: Optionally avoid using one temporary in the first step *)
     let tprop = genquads_expr x in
-    let w = Temp(newTemp (TYPE_int 0)) in
+    let w = Temp( lookup_type_of_expr x |> newTemp ) in
     addQuad(genQuad Op_assign tprop.place Empty w);
     prop.place <- Deref (w);
     prop
@@ -431,15 +443,16 @@ and genquads_expr ast =
            ~if_double:(lazy (E_double "1.0"))
     in genquads_expr (expand_as_sum rs)
   | E_incr_aft x ->
-    let ww    = Temp(newTemp (TYPE_int 0)) in
     let rprop = genquads_expr x in
+    let result_type = lookup_type_of_expr x in
+    let ww    = Temp(newTemp result_type) in
     addQuad (genQuad Op_assign rprop.place Empty ww);
     let rs = match_ar_or_ptr ~expr:x
         ~if_int:(lazy (E_int "1"))
         ~if_pointer:(lazy (E_int "1"))
         ~if_double:(lazy (E_double "1.0"))
     in
-    let w = Temp(newTemp (TYPE_int 0)) in
+    let w = Temp(newTemp result_type ) in
     let _ = match_ar_or_ptr ~expr:x
         ~if_int:(lazy (addQuad(genQuad Op_plus  rprop.place (genquads_expr rs).place w)))
         ~if_pointer:(lazy (addQuad(genQuad Op_array rprop.place (genquads_expr rs).place w)))

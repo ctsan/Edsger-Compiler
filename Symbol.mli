@@ -27,7 +27,8 @@ and function_info = {                         (******* Συνάρτηση ******
   mutable function_redeflist : entry list;    (* Λίστα παραμέτρων (2η) *)
   mutable function_result    : Types.typ;     (* Function  result      *)
   mutable function_pstatus   : param_status;  (* Κατάσταση παραμέτρων  *)
-  mutable function_initquad  : int            (* Αρχική τετράδα        *)
+  mutable function_initquad  : int;           (* Αρχική τετράδα        *)
+  mutable function_uniq_id   : int option
 }
 
 and parameter_info = {                        (****** Παράμετρος *******)
@@ -62,6 +63,8 @@ val is_local : entry -> bool
 
 val string_of_entry  : entry -> string
 
+val uniq_string_of_fentry  : entry -> string
+
 val no_entry : Identifier.id -> entry
 val currentScope : scope ref              (* Τρέχουσα εμβέλεια         *)
 val quadNext : int ref                    (* Αριθμός επόμενης τετράδας *)
@@ -77,7 +80,9 @@ val newParameter     : Identifier.id -> Types.typ -> pass_mode ->
                                         entry -> bool -> entry
 val newTemporary     : Types.typ -> entry
 
-val endLabelScope	 : entry -> unit
+val add_uniq_id      : entry -> int -> unit
+
+val endLabelScope	   : entry -> unit
 
 val forwardFunction    : entry -> unit
 val endFunctionHeader  : entry -> Types.typ -> unit
@@ -85,6 +90,8 @@ val lookupEntry        : Identifier.id -> lookup_type -> bool -> entry
 
 (* NOTE: Result type of `int a[N];` is transformed to `int *` *)
 val lookup_result_type : Identifier.id -> Types.typ
+
+val is_procedure       : entry -> bool
 
 val lookup_bp_offset   : entry -> int
 val lookup_passmode    : entry -> pass_mode

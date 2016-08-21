@@ -38,7 +38,8 @@ and function_info = {
   mutable function_redeflist : entry list;
   mutable function_result    : Types.typ;
   mutable function_pstatus   : param_status;
-  mutable function_initquad  : int
+  mutable function_initquad  : int;
+  mutable function_uniq_id   : int option;
 }
 
 and parameter_info = {
@@ -136,8 +137,26 @@ let newEntry id inf err =
     error "duplicate identifier %a" pretty_id id;
     e
 
+let add_uniq_id ent id =
+  match ent.entry_info with
+  | ENTRY_function f -> f.function_uniq_id <- Some id
+  | _ -> raise (Invalid_argument "function should be passed")
+
 let string_of_entry e =
   id_name e.entry_id
+
+(** this returns the absolute unique string of a function entry
+    this is used for labeling in assembly  *)
+let uniq_string_of_fentry e =
+  let open Core.Std in
+  let (>>|) = Option.(>>|) in
+  match e.entry_info with
+  | ENTRY_function f ->
+    (match f.function_uniq_id >>| fun i -> "_" ^ (string_of_entry e) ^ "_" ^  (string_of_int i ) with
+    | None   ->  raise (Failure "no unique id has been given to this function yet")
+    | Some n -> n)
+  | _ -> raise (Invalid_argument "should pass function")
+
 
 let is_local e =
     let scc = !currentScope in
@@ -204,6 +223,8 @@ let lookup_result_type id =
   | TYPE_array (t,sz) -> addr_of_point t
   | n -> n
 
+let is_procedure ent = lookup_result_type ent.entry_id = TYPE_void
+
 let is_mutable id =
   match lookup_unfiltered_type id with
   | TYPE_array _ -> false
@@ -239,7 +260,6 @@ let lookup_passmode e =
   match e.entry_info with
   | ENTRY_parameter p -> p.parameter_mode
   | _ -> raise (Failure "Don't call lookup_passmode with non-par.")
-
 
 let newVariable id typ err =
   !currentScope.sco_negofs <- !currentScope.sco_negofs - sizeOfType typ;
@@ -277,7 +297,8 @@ let newFunction id err =
       function_redeflist = [];
       function_result = TYPE_none;
       function_pstatus = PARDEF_DEFINE;
-      function_initquad = 0
+      function_initquad = 0;
+      function_uniq_id  = None;
     } in
     newEntry id (ENTRY_function inf) false
 
