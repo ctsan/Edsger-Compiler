@@ -251,7 +251,7 @@ let regSizeOfEntry (e, from_ptr) =
   else if rsize = charBytes then B8L
   else if rsize = doubleBytes then raise (Terminate "Doubles in regSizeOfEntry")
   else if rsize = ptrBytes then B64
-  else raise (Terminate "Strange size of entry")
+  else raise (Terminate ("Strange size of entry = " ^ string_of_int rsize))
 
 let regSizeOfOperand = function
   | Var e -> regSizeOfEntry (e,false)
@@ -565,7 +565,6 @@ and ins_of_quad qd =
      I_popq (Reg (Rbp, B64));
      I_ret
     ]
-     (* TODO I_ret ??? *)
      (* M_Label endp  TODO use endp if at&t will be used *)
   | Op_retv ->
     let current = Stack.top_exn call_stack in

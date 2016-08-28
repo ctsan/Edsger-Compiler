@@ -165,11 +165,15 @@ let is_local e =
     res
     (* TODO: is there a chance e will not be in current scope? *)
 
-let size_of_entry e = match e.entry_info with
-  | ENTRY_variable var -> sizeOfType var.variable_type
-  | ENTRY_parameter par -> sizeOfType par.parameter_type
-  | ENTRY_temporary tem -> sizeOfType tem.temporary_type
+let size_of_entry e = 
+  let typ = match e.entry_info with
+  | ENTRY_variable var -> var.variable_type
+  | ENTRY_parameter par -> par.parameter_type
+  | ENTRY_temporary tem -> tem.temporary_type
   | _ -> raise (Terminate "size_of_entry only works with var/par/tem")
+  in match typ with
+  | TYPE_array (et, _) -> sizeOfType et
+  | _ -> sizeOfType typ
 
 let size_of_entry_deref e = match e.entry_info with
   | ENTRY_variable var -> sizeOfType (deref_expr var.variable_type)

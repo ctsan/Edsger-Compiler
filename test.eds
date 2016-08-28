@@ -28,6 +28,6 @@ void arr() {
     int * i;
 
     test [ 10 ] = 14;
-    //i = test;
+    i = test;
     *(i+10) = 14;
 }
