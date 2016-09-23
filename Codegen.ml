@@ -60,9 +60,9 @@ type ins_86_64 =
   | I_subl  of operand * operand
   | I_subq  of operand * operand
 
-  | I_cdqe (* RAX <- Extend EAX *)
-  | I_cwde (* EAX <- Extend AX  *)
-  | I_cbw  (*  AX <- Extend AL  *)
+  | I_cbtw (* AX <- Sign Extend AL *)
+  | I_cwtd (* EAX <- Sign Extend AX  *)
+  | I_cltd  (*  RAX <- Sign Extend EAX  *)
 
   | I_imul  of operand * reg (* first operand:reg or mem, result is always a register 64bit *)
   | I_idiv  of operand  (* mem,reg: divides 128-bit integer (rdx:rax), remained in rdx, quotient in rax.*)
@@ -183,9 +183,9 @@ let string_of_ins_86_64 = function
   | I_ret                -> sprintf "\tret\n"
   | I_empty              -> sprintf "\n"
   | I_call label         -> sprintf "\tcall %s\n" (string_of_targ_label label)
-  | I_cbw                -> sprintf "\tcbw\n"
-  | I_cdqe               -> sprintf "\tcdqe\n"
-  | I_cwde               -> sprintf "\tcwde\n"
+  | I_cbtw               -> sprintf "\tcbtw\n"
+  | I_cltd               -> sprintf "\tcltd\n"
+  | I_cwtd               -> sprintf "\tcwtd\n"
 
 let bool_to_int b =
   match b with
@@ -462,7 +462,7 @@ and ins_of_quad qd =
     in
     ld1_ins @
     ld2_ins @
-    add_ins (Reg (Rax,rsize),Reg (Rdx,rsize)) @ 
+    add_ins (Reg (Rdx,rsize),Reg (Rax,rsize)) @ 
     st_ins
   | Op_minus ->
     let ld1_ins = load Rax qd.quad_argX in
@@ -477,33 +477,48 @@ and ins_of_quad qd =
       else raise (Terminate "Strange rsize of operand") in
     ld1_ins @
     ld2_ins @
-    sub_ins (Reg (Rax,rsize),Reg (Rdx,rsize))  @
+    sub_ins (Reg (Rdx,rsize),Reg (Rax,rsize))  @
     st_ins
   | Op_mult ->
     let ld1_ins = load Rax qd.quad_argX in
     let ld2_ins = load Rcx qd.quad_argY in
     let st_ins = store Rax qd.quad_argZ in
+    let rsize = regSizeOfOperand qd.quad_argX in
     ld1_ins @
     ld2_ins @
-    [I_imul (Reg (Rax,B64),Rcx) ] @ 
+    [I_imul (Reg (Rcx,rsize),(Rax,rsize)) ] @ 
     st_ins
   | Op_div ->
     let ld1_ins = load Rax qd.quad_argX in
-    (* cwd needed ? i guess depends on size *)
     let ld2_ins = load Rcx qd.quad_argY in
+    let rsize = regSizeOfOperand qd.quad_argX in
+    let conv_ins = 
+      if rsize = B8L then [I_cbtw]
+      else if rsize = B16 then [I_cwtd]
+      else if rsize = B32 then [I_cltd] 
+      else raise (Terminate "Strange rsize division") in
     let st_ins = store Rax qd.quad_argZ in
     ld1_ins @
     ld2_ins @
-    [I_idiv (Reg (Rcx,B64)) ] @ (* TODO Chcek Size (q,w,..)*)
+    conv_ins @
+    [I_idiv (Reg (Rcx,rsize)) ] @
     st_ins
   | Op_mod ->
     let ld1_ins = load Rax qd.quad_argX in
-    (* cwd needed ? i guess depends on size *)
     let ld2_ins = load Rcx qd.quad_argY in
-    let st_ins = store Rdx qd.quad_argZ in
+    let rsize = regSizeOfOperand qd.quad_argX in
+    let conv_ins = 
+      if rsize = B8L then [I_cbtw]
+      else if rsize = B16 then [I_cwtd]
+      else if rsize = B32 then [I_cltd] 
+      else raise (Terminate "Strange rsize division") in
+    let st_ins = 
+      if rsize = B8L then store Rax qd.quad_argZ 
+      else store Rdx qd.quad_argZ in
     ld1_ins @
     ld2_ins @
-    [I_idiv (Reg (Rcx,B64)) ] @ (* TODO Chcek Size (q,w,..)*)
+    conv_ins @
+    [I_idiv (Reg (Rcx,rsize)) ] @ 
     st_ins
   | Op_eq ->
     let ld1_ins = load Rax qd.quad_argX in
@@ -554,7 +569,7 @@ and ins_of_quad qd =
      M_Label (label_name qd.quad_argX);
      I_pushq (Reg (Rbp, B64));
      I_movq (Reg (Rsp, B64), Reg (Rbp, B64));
-     I_subq (Reg (Rsp, B64), Const(Imm8 size))] (*TODO Imm8 size *)
+     I_subq (Const(Imm8 size), Reg (Rsp, B64))] (*TODO Imm8 size *)
   | Op_endu ->
     let endof = label_end_of(qd.quad_argZ)  in
     (* let endp =  label_name(qd.quad_argZ) ^ " endp\n" in *)
