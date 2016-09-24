@@ -64,7 +64,7 @@ type ins_86_64 =
   | I_cwtd (* EAX <- Sign Extend AX  *)
   | I_cltd  (*  RAX <- Sign Extend EAX  *)
 
-  | I_imul  of operand * reg (* first operand:reg or mem, result is always a register 64bit *)
+  | I_imul  of operand * operand (* first operand:reg or mem, result is always a register 64bit (WHY???) *)
   | I_idiv  of operand  (* mem,reg: divides 128-bit integer (rdx:rax), remained in rdx, quotient in rax.*)
   | I_idivw of memory_location (* mem,reg: divides 128-bit integer (rdx:rax), remained in rdx, quotient in rax.*)
   | I_jmp   of label_id
@@ -168,7 +168,7 @@ let string_of_ins_86_64 = function
   | I_subw (op1,op2)     -> sprintf "\tsubw %s,%s\n" (string_of_operand op1) (string_of_operand op2)
   | I_subl (op1,op2)     -> sprintf "\tsubl %s,%s\n" (string_of_operand op1) (string_of_operand op2)
   | I_subq (op1,op2)     -> sprintf "\tsubq %s,%s\n" (string_of_operand op1) (string_of_operand op2)
-  | I_imul (op1,reg1)    -> sprintf "\timul %s,%s\n" (string_of_operand op1) (string_of_reg reg1)
+  | I_imul (op1,op2)    -> sprintf "\timul %s,%s\n" (string_of_operand op1) (string_of_operand op2)
   | I_idiv reg1          -> sprintf "\tidiv %s\n" (string_of_operand reg1)
   | I_idivw mem          -> sprintf "\tidivw %s\n" (string_of_memory_location mem)
   | I_jmp label          -> sprintf "\tjmp %s\n" (string_of_targ_label label)
@@ -442,7 +442,7 @@ and ins_of_quad qd =
     ld_ins @
     [I_movq (Const(Imm8 type_size),Reg (Rcx,B64))] @
     (* Offset goes to RCX *)
-    [I_imul (Reg(Rax,B16), Rcx) ] @ (* TODO double check imul has the correct format *)
+    [I_imul (Reg(Rax,B16), Reg (Rcx, B16)) ] @ (* TODO double check imul has the correct format *)
     (* address goes to RAX*)
     ld_addr @
     (* sum offset (RCX) and address (RAX) *)
@@ -486,7 +486,7 @@ and ins_of_quad qd =
     let rsize = regSizeOfOperand qd.quad_argX in
     ld1_ins @
     ld2_ins @
-    [I_imul (Reg (Rcx,rsize),(Rax,rsize)) ] @ 
+    [I_imul (Reg (Rcx,rsize), Reg (Rax,rsize)) ] @ 
     st_ins
   | Op_div ->
     let ld1_ins = load Rax qd.quad_argX in
