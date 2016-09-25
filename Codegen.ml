@@ -434,11 +434,11 @@ and ins_of_quad qd =
       let ld_ins = load Rax qd.quad_argX in
       ld_ins @ store Rax qd.quad_argZ
     else []
-  | Op_array  ->
+  | Op_array ->
     let ld_ins  = load Rax qd.quad_argY in
     let ld_addr = load_addr Rax qd.quad_argX in (* TODO Test this is correct *)
     let st_ins  = store Rax qd.quad_argZ in
-    let type_size = qd.quad_argX |> type_of_operand |> deref_expr |> sizeOfType  in 
+    let type_size = qd.quad_argX |> type_of_operand |> (*deref_expr |>*) sizeOfType  in 
     ld_ins @
     [I_movq (Const(Imm8 type_size),Reg (Rcx,B64))] @
     (* Offset goes to RCX *)
