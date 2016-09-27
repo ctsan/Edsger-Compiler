@@ -440,13 +440,13 @@ and ins_of_quad qd =
     let st_ins  = store Rax qd.quad_argZ in
     let type_size = qd.quad_argX |> type_of_operand |> (*deref_expr |>*) sizeOfType  in 
     ld_ins @
-    [I_movq (Const(Imm8 type_size),Reg (Rcx,B64))] @
+    [I_mov (Const(Imm8 type_size),Reg (Rcx,B16))] @
     (* Offset goes to RCX *)
     [I_imul (Reg(Rax,B16), Reg (Rcx, B16)) ] @ (* TODO double check imul has the correct format *)
     (* address goes to RAX*)
     ld_addr @
     (* sum offset (RCX) and address (RAX) *)
-    [I_addq (Reg (Rcx,B64),Reg (Rax,B64))] @
+    [I_addq (Reg (Rcx,B16),Reg (Rax,B64))] @
     st_ins
   | Op_plus ->
     let ld1_ins = load Rax qd.quad_argX in
