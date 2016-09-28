@@ -228,10 +228,10 @@ let update_AL callee called =
   if (np > nx) then
     [I_pushq (Reg (Rbp, B64))]
   else if (np = nx) then
-    [I_pushq (Mem (Some 4, Rbp, None,None))]
+    [I_pushq (Mem (Some (ptrBytes*2), Rbp, None,None))]
   else
-    let fst = I_movq (Mem (Some 4, Rbp, None,None),Reg (Rsi, B64)) in
-    let lst = [I_pushq (Mem (Some 4, Rsi, None,None))] in
+    let fst = I_movq (Mem (Some (ptrBytes*2), Rbp, None,None),Reg (Rsi, B64)) in
+    let lst = [I_pushq (Mem (Some (ptrBytes*2), Rsi, None,None))] in
     let rec loopins acc = function
     | 0 ->
         acc
@@ -610,7 +610,7 @@ and ins_of_quad qd =
     update_AL (Stack.top_exn call_stack) called_ent @
     [
      I_call (uniq_string_of_fentry(ent));
-     I_addq (Reg (Rsp,B64), Const (Imm8 (par_size + 4))) (* TODO size ?? *)
+     I_addq (Reg (Rsp,B64), Const (Imm8 (par_size + ptrBytes * 2))) (* TODO size ?? *)
     ]
   | Op_par ->
     let xsize = size_of_operand qd.quad_argX in
