@@ -425,8 +425,8 @@ and genquads_expr ast =
   | E_addr x ->
     let tprop = genquads_expr x in
     let w = Temp( lookup_type_of_expr x |> newTemp) in
-    addQuad(genQuad Op_assign tprop.place Empty w);
-    prop.place <- Address (w);
+    addQuad(genQuad Op_assign (Address(tprop.place)) Empty w);
+    prop.place <- w;
     prop
   | E_deref x -> (* TODO: Optionally avoid using one temporary in the first step *)
     let tprop = genquads_expr x in

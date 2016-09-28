@@ -47,6 +47,7 @@ type ins_86_64 =
   | I_movq  of operand * operand
 
   | I_pushq of operand (* reg64, mem, const64 *)
+  | I_pushw of operand (* Change to enforce 16bit operand *)
   | I_popq  of operand   (* reg64, mem *)
   | I_leaq  of memory_location * reg (* move the address of memory location, to 64bit-register *)
 
@@ -158,6 +159,7 @@ let string_of_ins_86_64 = function
   | I_movl (op1,op2)     -> sprintf "\tmovl %s,%s\n" (string_of_operand op1) (string_of_operand op2)
   | I_movq (op1,op2)     -> sprintf "\tmovq %s,%s\n" (string_of_operand op1) (string_of_operand op2)
   | I_pushq op           -> sprintf "\tpushq %s\n" (string_of_operand op)
+  | I_pushw op           -> sprintf "\tpushw %s\n" (string_of_operand op)
   | I_popq op            -> sprintf "\tpopq %s\n" (string_of_operand op)
   | I_leaq (mem,reg1)    -> sprintf "\tleaq %s,%s\n" (string_of_memory_location mem) (string_of_reg reg1)
   | I_addb (op1,op2)     -> sprintf "\taddb %s,%s\n" (string_of_operand op1) (string_of_operand op2)
@@ -438,7 +440,7 @@ and ins_of_quad qd =
     let ld_ins  = load Rax qd.quad_argY in
     let ld_addr = load_addr Rax qd.quad_argX in (* TODO Test this is correct *)
     let st_ins  = store Rax qd.quad_argZ in
-    let type_size = qd.quad_argX |> type_of_operand |> (*deref_expr |>*) sizeOfType  in 
+    let type_size = qd.quad_argX |> type_of_operand |> deref_expr |>  sizeOfType   in 
     ld_ins @
     [I_movw (Const(Imm8 type_size),Reg (Rcx,B16))] @
     (* Offset goes to RCX *)
@@ -622,10 +624,10 @@ and ins_of_quad qd =
         (* TODO !IMPORTANT You probably can't do the following *)
         | V when xsize = intBytes  ->
           load (Rax) qd.quad_argX @ (* TODO fix register based on size *)
-          [I_pushq (Reg (Rax, B16))]         (* maybe correct here *)
+          [I_pushw (Reg (Rax, B16))]         (* maybe correct here *)
         | V when xsize = ptrBytes  ->
           load (Rax) qd.quad_argX @ (* TODO fix register based on size *)
-          [I_pushq (Reg (Rax, B16))]         (* maybe correct here *)
+          [I_pushq (Reg (Rax, B64))]         (* maybe correct here *)
         | V when xsize = charBytes ->
           load (Rax) qd.quad_argX @
           [I_subq (Reg (Rsp, B64), Const (Imm8 1));
