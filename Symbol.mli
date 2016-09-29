@@ -80,7 +80,7 @@ val newParameter     : Identifier.id -> Types.typ -> pass_mode ->
                                         entry -> bool -> entry
 val newTemporary     : Types.typ -> entry
 
-val add_uniq_id      : entry -> int -> unit
+val uniq_id_of_fun   : entry -> int
 
 val endLabelScope	   : entry -> unit
 

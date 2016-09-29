@@ -80,7 +80,7 @@ let rec eval_expr expression =
   | E_assign (x,y) ->
     let lval = eval_expr x in
     let rval = eval_expr y in
-    asrt ~condition:(is_valid_lvalue x) ~msg:"This is not a valid l-value";
+    asrt ~condition:(is_valid_lvalue x)   ~msg:"This is not a valid l-value";
     asrt ~condition:(equalType rval lval) ~msg:"l-value different type from r-value";
     rval
   | E_mul_assign (x,y) -> eval_expr (E_assign (x, E_mult (x,y)))
@@ -102,7 +102,6 @@ let rec eval_expr expression =
     else
       raise (Terminate "operator '&' should have an l-value as operand")
   | E_deref x ->  
-
     deref_expr (eval_expr x) (* TODO Ask a teacher whether we should check if operand is l-value *)
   (* TODO check if operands are l-values and of Arithmetic Type or Poitner Type *)
   | E_incr_bef x | E_decr_bef x | E_incr_aft x | E_decr_aft x ->
@@ -111,7 +110,7 @@ let rec eval_expr expression =
     x_expr
   | E_array_access (x,y) ->
     asrt ~condition:(equalType (eval_expr y) (TYPE_int 0)) ~msg:"Array index not int";
-    deref_expr (eval_expr x)
+    deref_expr (eval_expr x);
   | E_delete x ->
     asrt ~condition:(is_pointer (eval_expr x)) ~msg:"can't delete something that isn't a pointer";
     TYPE_null

@@ -137,9 +137,19 @@ let newEntry id inf err =
     error "duplicate identifier %a" pretty_id id;
     e
 
-let add_uniq_id ent id =
+
+let func_id = ref 0
+let get_func_id () = incr func_id; !func_id
+let cur_func_id () = !func_id
+
+let uniq_id_of_fun ent =
   match ent.entry_info with
-  | ENTRY_function f -> f.function_uniq_id <- Some id
+  | ENTRY_function f ->
+        (
+         match f.function_uniq_id with
+         | Some id -> id
+         | None -> raise (Failure "Every function should have a unique id in an earlier stage")
+        )
   | _ -> raise (Invalid_argument "function should be passed")
 
 let string_of_entry e =
@@ -302,7 +312,7 @@ let newFunction id err =
       function_result = TYPE_none;
       function_pstatus = PARDEF_DEFINE;
       function_initquad = 0;
-      function_uniq_id  = None;
+      function_uniq_id  = Some (get_func_id ());
     } in
     newEntry id (ENTRY_function inf) false
 

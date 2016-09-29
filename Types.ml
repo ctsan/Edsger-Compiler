@@ -63,22 +63,23 @@ let rec addr_of_point = function
     | TYPE_null         -> TYPE_null
     | _                 -> raise (Terminate "bad addr type")
 
-let rec deref_expr = function
+let rec deref_expr =
+  function
     | TYPE_int x when x>0           -> TYPE_int (x-1)
     | TYPE_char x when x>0          -> TYPE_char (x-1)
     | TYPE_bool x when x>0          -> TYPE_bool (x-1)
     | TYPE_double x when x>0        -> TYPE_double (x-1)
     | TYPE_array (x,y)              -> TYPE_array (deref_expr x,y)
-    | what                             -> 
+    | what                          ->
             (* NOTE: temporary of course *)
             (match what with
-                | TYPE_int x           -> raise (Terminate ("TYPE_int " ^ (string_of_int x)))
-                | TYPE_char x          -> raise (Terminate ("TYPE_char " ^ (string_of_int x)))
-                | TYPE_bool x          -> raise (Terminate ("TYPE_bool " ^ (string_of_int x)))
-                | TYPE_double x        -> raise (Terminate ("TYPE_double " ^ (string_of_int x)))
+                | TYPE_int x           -> raise (Terminate ("Cannot deref TYPE_int " ^ (string_of_int x)))
+                | TYPE_char x          -> raise (Terminate ("Cannot deref TYPE_char " ^ (string_of_int x)))
+                | TYPE_bool x          -> raise (Terminate ("Cannot deref TYPE_bool " ^ (string_of_int x)))
+                | TYPE_double x        -> raise (Terminate ("Cannot deref TYPE_double " ^ (string_of_int x)))
                 | TYPE_array (x,y)              -> TYPE_array (deref_expr x,y)
 	            | _ -> raise (Terminate "deref_expr wat")
-)
+    )
 
 let rec equalType t1 t2 =
    (let open Core.Std in

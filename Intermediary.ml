@@ -466,7 +466,7 @@ and genquads_expr ast =
   | E_array_access (x,y) ->  (* TODO FIX *)
     let aprop = genquads_expr x in
     let iprop = genquads_expr y in
-    let w = Temp(newTemp (TYPE_int 0)) in  (* Generate Temporary just before use for better ordering*)
+    let w = Temp(lookup_type_of_expr x |> newTemp ) in  (* Generate Temporary just before use for better ordering*)
     addQuad(genQuad Op_array aprop.place iprop.place w);
     prop.place <- Deref (w); (* The result should be the deref of this *)
     prop

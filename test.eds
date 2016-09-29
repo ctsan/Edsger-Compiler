@@ -1,3 +1,8 @@
+#include "stdio.h"
+void lol() {
+    int i ;
+    i = readInteger ();
+}
 void main () {
     int i;
     bool j;
@@ -10,10 +15,7 @@ void main () {
     return;
 }
 
-int called (int a, char b, bool c, bool * d) {
-    return 9;
-}
-
+int called (int a,char b, bool c, bool * d);
 void calling () {
     int assign;
     bool d;
@@ -21,6 +23,10 @@ void calling () {
     d = true;
     
     assign = called(9,'a',false, &d);
+}
+
+int called (int a, char b, bool c, bool * d) {
+    return 9;
 }
 
 void arr() {

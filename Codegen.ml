@@ -81,11 +81,6 @@ type ins_86_64 =
   | I_call  of label_id
   | I_empty (* for debugging *)
 
-let func_id = ref 0
-
-let get_func_id () = incr func_id; !func_id
-
-let cur_func_id () = !func_id
 
 let string_of_imm = function
   | Imm8  i
@@ -306,7 +301,6 @@ let rec load reg a =
         [I_movq (Mem (Some (lookup_bp_offset ent), Rsi, None,None),Reg (Rsi, B64));
         I_movq (Mem (None, Rsi, None,None), Reg (reg,rsize)) |> transMov rsize]) 
   | Address i -> load_addr reg i
-  (* TODO use proper `mov` later later. *)
   | Deref i -> 
       load Rdi i @ 
       [I_movq (Mem (None,Rdi,None,None),Reg (reg,B64))] (* TODO fix movq *)
@@ -394,15 +388,14 @@ and label_name p =
     (* TODO: WE NEED A QUEUE *)
     match p with
     | UnitName ent ->
-      let id = get_func_id () in
-      add_uniq_id ent id;
+      let id = uniq_id_of_fun ent in
       sprintf "_%s_%d" (string_of_entry ent) id
     | _ -> raise (Failure "This should be called with procedure name\n")
 
 (* genearte label for the end of a unit*)
 and label_end_of p =
     match p with
-    | UnitName ent -> sprintf "@%s_%d" (string_of_entry ent) (cur_func_id ())
+    | UnitName ent -> sprintf "@%s_%d" (string_of_entry ent) (uniq_id_of_fun ent)
     | _ -> raise (Failure "This should be called with procedure name\n")
 
 (* generate a label for the end of a unit *)
