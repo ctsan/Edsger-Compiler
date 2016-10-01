@@ -43,6 +43,7 @@ type ins_86_64 =
   | D_long  of label_id * imm  (* 32bit integer *)
   | D_zero  of label_id * int  (* number of bytes initialized as zero *)
   | D_asciz of label_id * string
+  | M_Globl of label_id
   | M_Label of label_id
 
   | I_movb  of operand * operand
@@ -156,6 +157,7 @@ let string_of_ins_86_64 = function
   | D_long  (label,num)  -> (string_of_label label) ^ sprintf "\t.long " ^ string_of_imm num
   | D_zero (label,total) -> (string_of_label label) ^ sprintf "\t.zero %d\n" total
   | D_asciz (label, str) -> (string_of_label label) ^ sprintf "\t.asciz\t\"%s\"\n" str
+  | M_Globl label        -> sprintf "%s\n" (string_of_targ_label label)
   | M_Label label        -> sprintf "%s" (string_of_label label)
   | I_movb (op1,op2)     -> sprintf "\tmovb %s,%s\n" (string_of_operand op1) (string_of_operand op2)
   | I_movw (op1,op2)     -> sprintf "\tmovw %s,%s\n" (string_of_operand op1) (string_of_operand op2)
@@ -587,12 +589,14 @@ and ins_of_quad qd =
       | _ -> raise (Failure "This can't happen")
       in
       if id_name entr_id = "main_0" then
-        "main"
-      else label_name qd.quad_argX
+        [M_Globl ".globl main";
+         M_Label "main"]
+      else 
+        [M_Label (label_name qd.quad_argX)]
     in
     let size = lookup_fr_size () in
+    final_label @ 
     [
-     M_Label (final_label);
      I_pushq (Reg (Rbp, B64));
      I_movq (Reg (Rsp, B64), Reg (Rbp, B64));
      I_subq (Const(Imm8 size), Reg (Rsp, B64))] (*TODO Imm8 size *)
