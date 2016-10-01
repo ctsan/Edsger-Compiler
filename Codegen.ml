@@ -203,11 +203,11 @@ let call_stack = Stack.create ()
 let add_instruction i =
   instructions := i :: !instructions
 
-let label_counter = ref 0;
+let label_counter = ref 0
 
 let uniq_lab_of_str str =
     incr label_counter;
-    sprintf ".LC.%d" !lbael_counter
+    sprintf ".LC.%d" (!label_counter);;
 
 (* input: Takes entry l of parameter *)
 (* output: returns  ins_86_64 list *)
