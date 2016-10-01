@@ -42,6 +42,7 @@ type ins_86_64 =
   | D_short of label_id * imm  (* 16bit *)
   | D_long  of label_id * imm  (* 32bit integer *)
   | D_zero  of label_id * int  (* number of bytes initialized as zero *)
+  | D_asciz of label_id * string
   | M_Label of label_id
 
   | I_movb  of operand * operand
@@ -154,6 +155,7 @@ let string_of_ins_86_64 = function
   | D_short  (label,num) -> (string_of_label label) ^ sprintf "\t.short " ^ string_of_imm num
   | D_long  (label,num)  -> (string_of_label label) ^ sprintf "\t.long " ^ string_of_imm num
   | D_zero (label,total) -> (string_of_label label) ^ sprintf "\t.zero %d\n" total
+  | D_asciz (label, str) -> (string_of_label label) ^ sprintf "\t.asciz\t\"%s\"\n" str
   | M_Label label        -> sprintf "%s" (string_of_label label)
   | I_movb (op1,op2)     -> sprintf "\tmovb %s,%s\n" (string_of_operand op1) (string_of_operand op2)
   | I_movw (op1,op2)     -> sprintf "\tmovw %s,%s\n" (string_of_operand op1) (string_of_operand op2)
@@ -207,6 +209,8 @@ let instructions:ins_86_64 list ref = ref []
 let call_stack = Stack.create ()
 
 let str_lab_stk = Stack.create ()
+
+let make_inst_of_stk stk = Stack.fold stk ~init:[] ~f:(fun acc (strlab, str) ->  (D_asciz (strlab, str))::acc )
 
 let add_instruction i =
   instructions := i :: !instructions
@@ -325,7 +329,7 @@ let rec load reg a =
        |> transMov rsize]
   | String str ->
       let strlab = uniq_lab_of_str str in
-      Stack.push str_lab_stk (str, strlab);
+      Stack.push str_lab_stk (strlab, str);
       [I_leaq ((Some (Str strlab), Rip, None, None), reg)]
   | _ -> raise (Terminate "bad quad entry")
 
@@ -592,8 +596,9 @@ and ins_of_quad qd =
      I_movq (Reg (Rbp, B64), Reg (Rsp, B64));
      I_popq (Reg (Rbp, B64));
      I_ret
-    ]
+    ] @
      (* M_Label endp  TODO use endp if at&t will be used *)
+    make_inst_of_stk str_lab_stk
   | Op_retv ->
     let current = Stack.top_exn call_stack in
     load Rax qd.quad_argX @
