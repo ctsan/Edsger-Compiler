@@ -338,7 +338,7 @@ let rec load reg a =
 and label_of e =
   match e with
   (* | String str -> "@p" ^ str *)
-  | Label int -> "@" ^ Int.to_string int
+  | Label int -> ".$" ^ Int.to_string int
   | _ -> raise (Terminate "Label can only be string")
 
 (* input: This function takes a destination register, and a source argument *)
@@ -417,7 +417,7 @@ and label_name p =
 (* genearte label for the end of a unit*)
 and label_end_of p =
     match p with
-    | UnitName ent -> sprintf "@%s_%d" (string_of_entry ent) (uniq_id_of_fun ent)
+    | UnitName ent -> sprintf ".$%s_%d" (string_of_entry ent) (uniq_id_of_fun ent)
     | _ -> raise (Failure "This should be called with procedure name\n")
 
 (* generate a label for the end of a unit *)
@@ -439,7 +439,7 @@ and label_general p =
     (* TODO: need a hashtbl *)
     (* assign value n in hashtbl for p *)
     let n = 1 in
-    sprintf "@%d" n
+    sprintf ".$%d" n
 
 
 
@@ -628,7 +628,7 @@ and ins_of_quad qd =
     update_AL (Stack.top_exn call_stack) called_ent @
     [
      I_call (uniq_string_of_fentry(ent));
-     I_addq (Reg (Rsp,B64), Const (Imm8 (par_size + ptrBytes * 2))) (* TODO size ?? *)
+     I_addq (Const (Imm8 (par_size + ptrBytes * 2)),Reg (Rsp,B64)) (* TODO size ?? *)
     ]
   | Op_par ->
     let xsize = size_of_operand qd.quad_argX in
@@ -670,6 +670,14 @@ let print_instructions lst =
   lst
   |> ListLabels.flatten
   |> List.iter ~f:(fun ins -> printf "%s" (string_of_ins_86_64 ins))
+
+let write_instructions lst ~filename =
+  let module O = Out_channel in
+  let ofile = O.create filename in
+  lst
+  |> ListLabels.flatten
+  |> List.iter ~f:(fun ins -> O.output_string ofile (string_of_ins_86_64 ins))
+  ; O.close ofile
 
 let instrss: ins_86_64 list list list ref = ref []
 

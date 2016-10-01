@@ -155,12 +155,7 @@ and check tree =
       if (not (fun_is_defined (id_make "main_0")))
       then raise (Terminate "main is not implemented");
       printSymbolTable ();
-      print_quads ();
       (* let ins_list = list_of_quads () |> Codegen.quads_to_ins  in *)
-      print_newline();
-      print_newline();
-      Codegen.get_all_instructions () |> Codegen.print_instructions;
-      print_newline()
   (* )) *)
 
 and check_all_decls decls =

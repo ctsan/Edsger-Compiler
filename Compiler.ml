@@ -7,6 +7,8 @@ let compile_channel channel =
   try
     let ast_tree = Parser.program Lexer.lexer lexbuf in
     Semantic.check ast_tree;
+    Intermediary.write_quads "out.imm";
+    Codegen.get_all_instructions () |> Codegen.write_instructions ~filename:"out.s";
     exit 0
   with
   | Parser.Error ->

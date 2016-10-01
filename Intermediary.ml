@@ -600,3 +600,10 @@ let rec genquads_stmt ast =
 
 let print_quads () =
   Printf.printf "%a" pprint_quads (List.rev !quads);
+  Printf.printf "\n"
+
+let write_quads ~filename =
+  let module O = Out_channel in
+  let ofile = O.create filename in
+  Printf.fprintf ofile "%a\n" pprint_quads (List.rev !quads);
+  O.close ofile
