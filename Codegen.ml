@@ -581,9 +581,18 @@ and ins_of_quad qd =
     (match qd.quad_argX with
     | UnitName ent -> Stack.push call_stack (ent)
     | _ -> raise (Failure "incorrect argument"));
+    let final_label = 
+      let entr_id = match qd.quad_argX with
+      | UnitName e -> e.entry_id
+      | _ -> raise (Failure "This can't happen")
+      in
+      if id_name entr_id = "main_0" then
+        "main"
+      else label_name qd.quad_argX
+    in
     let size = lookup_fr_size () in
     [
-     M_Label (label_name qd.quad_argX);
+     M_Label (final_label);
      I_pushq (Reg (Rbp, B64));
      I_movq (Reg (Rsp, B64), Reg (Rbp, B64));
      I_subq (Const(Imm8 size), Reg (Rsp, B64))] (*TODO Imm8 size *)
@@ -616,6 +625,11 @@ and ins_of_quad qd =
             | UnitName e -> e
             | _ -> raise (Terminate "call with non-function")
     in
+    let final_tar_lab =
+      if id_name (ent.entry_id) = "main_0" then "main"
+      else if fun_is_globally_defined ent.entry_id then uniq_string_of_fentry(ent)
+      else "_" ^ (id_name ent.entry_id |> String.rsplit2_exn ~on:'_' |> fst)
+    in
     let par_size = match ent.entry_info with
                     | ENTRY_function f -> size_of_params f.function_paramlist (* TODO implement *)
                     | _ -> raise (Terminate "call with non-function")
@@ -627,7 +641,7 @@ and ins_of_quad qd =
     fix_procs_offset_ins called_ent @
     update_AL (Stack.top_exn call_stack) called_ent @
     [
-     I_call (uniq_string_of_fentry(ent));
+     I_call (final_tar_lab);
      I_addq (Const (Imm8 (par_size + ptrBytes * 2)),Reg (Rsp,B64)) (* TODO size ?? *)
     ]
   | Op_par ->

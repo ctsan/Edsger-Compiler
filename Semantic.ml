@@ -147,6 +147,7 @@ and check_binary_logical_operator x y =
 and check tree =
   (* ignore(ast >>| fun tree -> ( *)
       initSymbolTable 256;
+      scan_funcs tree;
       openScope();
       check_all_decls tree;
       (* Check that main returns void and is implemented *)
@@ -157,6 +158,12 @@ and check tree =
       printSymbolTable ();
       (* let ins_list = list_of_quads () |> Codegen.quads_to_ins  in *)
   (* )) *)
+
+and scan_funcs decls =
+  List.iter decls (function 
+    | D_func_def (_,id,_,_,_) -> (set_fun_globally_defined (id_make id))
+    | _ -> ()
+  )
 
 and check_all_decls decls =
   List.iter decls check_a_declaration;

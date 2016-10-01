@@ -371,6 +371,15 @@ let fun_is_defined f =
   | ENTRY_function inf -> not inf.function_isForward
   | _ -> Printf.printf "Cannot check status of non-function"; raise Exit
 
+
+module Hset = Core.Std.Hash_set
+let defined_funcs_hs = Hset.Poly.create ()
+
+let fun_is_globally_defined id = Hset.mem defined_funcs_hs id
+
+let set_fun_globally_defined id =
+  Hset.add defined_funcs_hs id
+
 let newTemporary typ =
   let id = id_make ("$" ^ string_of_int !tempNumber) in
   !currentScope.sco_negofs <- !currentScope.sco_negofs - sizeOfType typ;

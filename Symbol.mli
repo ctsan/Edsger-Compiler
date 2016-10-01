@@ -104,6 +104,8 @@ val lookup_pass_types  : Identifier.id -> Types.typ list
 val lookup_fr_size  : unit -> int
 
 val fun_is_defined : Identifier.id -> bool
+val fun_is_globally_defined : Identifier.id -> bool
+val set_fun_globally_defined : Identifier.id -> unit
 
 val is_mutable: Identifier.id -> bool
 
@@ -113,3 +115,4 @@ val start_negative_offset : int   (* Αρχικό αρνητικό offset στο
 val size_of_entry : entry -> int
 val size_of_entry_deref : entry -> int
 val size_of_params : entry list -> int
+
