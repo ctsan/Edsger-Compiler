@@ -12,6 +12,7 @@ let string_of_targ_label l = sprintf "%s" l
 type reg =
   | Rax | Rbx | Rcx | Rdx
   | Rsi | Rdi | Rbp | Rsp
+  | Rip
   | Rth of int (* R8,R9,R10,R11,R12,R13,R14,R15 *)
 
      (* e.g. rax,   eax,   ax,   ah,   al *)
@@ -25,7 +26,9 @@ type imm =
   | Imm32 of int
   | Imm64 of int
 
-type memory_location = int option * reg * reg option * int option
+type str_or_int = Str of string | Num of int
+
+type memory_location = str_of_int option * reg * reg option * int option
 
 type operand =
   | Reg   of reg_form
@@ -99,6 +102,7 @@ let string_of_reg r =
   | Rdi -> "%rdi"
   | Rbp -> "%rbp"
   | Rsp -> "%rsp"
+  | Rip -> "%rip"
   | Rth i -> "%r" ^ Int.to_string i
 
 let string_of_reg_form rf =
@@ -127,12 +131,14 @@ let string_of_reg_form rf =
 
 let string_of_memory_location mloc =
   match mloc with
-  | (None, r, None,None) | (Some 0, r, None,None) ->
+  | (None, r, None,None) | (Some (Num 0), r, None,None) ->
      sprintf "(%s)" (string_of_reg r)
   (* | (Some x, r, None,None) when x > 0 -> *)
   (*     "+" ^ Int.to_string x ^ (sprintf "(%s)" (string_of_reg r)) *)
-  | (Some x, r, None,None) ->
+  | (Some (Num x), r, None,None) ->
       Int.to_string x ^ (sprintf "(%s)" (string_of_reg r))
+  | (Some (Str str), r, None, None) ->
+      sprintf "%s(%s)" str (string_of_reg r)
   | _ ->
       "No clue what's this or if it's needed"
   (* TODO: ^ ???? *)
@@ -199,6 +205,8 @@ let is_encoded_as_int op =
 
 let instructions:ins_86_64 list ref = ref []
 let call_stack = Stack.create ()
+
+let str_lab_stk = Stack.create ()
 
 let add_instruction i =
   instructions := i :: !instructions
@@ -309,6 +317,10 @@ let rec load reg a =
       let rsize = regSizeOfEntry (n, false) in
       [I_movq (Mem (Some (lookup_bp_offset n),Rbp,None,None), Reg (reg, rsize))
        |> transMov rsize]
+  | String str ->
+      let strlab = uniq_lab_of_str str in
+      Stack.push str_lab_stk (str, strlab);
+      [I_leaq ((Some (Str strlab), Rip, None, None), Reg (reg, B64))]
   | _ -> raise (Terminate "bad quad entry")
 
 (* Takes operand of quad that is String str (Label int????) *)
@@ -330,13 +342,13 @@ and load_addr reg a =
   | Var ent ->
     if is_local ent then
      (if (not (is_par ent) || lookup_passmode ent = PASS_BY_VALUE) then        
-        [I_leaq ( (Some (lookup_bp_offset ent), Rbp, None,None) ,reg)]
+        [I_leaq ( (Some (Num (lookup_bp_offset ent)), Rbp, None,None) ,reg)]
       else
         [I_movq (Mem (Some (lookup_bp_offset ent), Rbp, None,None), Reg (reg, B64))])
     else
      (if (not (is_par ent) || lookup_passmode ent = PASS_BY_VALUE) then
         get_AR(ent) @
-        [I_leaq ((Some (lookup_bp_offset ent), Rsi, None,None),reg)]
+        [I_leaq ((Some (Num (lookup_bp_offset ent)), Rsi, None,None),reg)]
       else        
         get_AR(ent) @
         [I_movq (Mem (Some (lookup_bp_offset ent), Rsi, None,None), Reg (reg, B64))])
@@ -344,7 +356,7 @@ and load_addr reg a =
   | Deref i -> load reg i
   | Temp n ->
       let rsize = regSizeOfEntry (n, false) in
-      [I_leaq ((Some (lookup_bp_offset n),Rbp,None,None), reg)] (* fix type *)
+      [I_leaq ((Some (Num (lookup_bp_offset n)),Rbp,None,None), reg)] (* fix type *)
   | _ -> raise (Terminate "bad quad entry")
 
 
