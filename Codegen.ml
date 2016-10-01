@@ -28,7 +28,7 @@ type imm =
 
 type str_or_int = Str of string | Num of int
 
-type memory_location = str_of_int option * reg * reg option * int option
+type memory_location = str_or_int option * reg * reg option * int option
 
 type operand =
   | Reg   of reg_form
@@ -220,14 +220,14 @@ let uniq_lab_of_str str =
 (* input: Takes entry l of parameter *)
 (* output: returns  ins_86_64 list *)
 let get_AR l =
-  let base = I_movq (Reg (Rsi, B64), Mem (Some 4, Rbp, None,None)) in
+  let base = I_movq (Reg (Rsi, B64), Mem (Some (Num 4), Rbp, None,None)) in
   let ncur = l.entry_scope.sco_nesting in
   let na = (Stack.top_exn call_stack).entry_scope.sco_nesting in
   let rec loopins acc = function
     | 0 ->
         acc
     | n ->
-        loopins ((I_movq (Mem (Some 4, Rsi, None,None), Reg (Rsi, B64)))::acc) (n-1)
+        loopins ((I_movq (Mem (Some (Num 4), Rsi, None,None), Reg (Rsi, B64)))::acc) (n-1)
   in
     base::(loopins [] (ncur-na-1))
 
@@ -239,15 +239,15 @@ let update_AL callee called =
   if (np > nx) then
     [I_pushq (Reg (Rbp, B64))]
   else if (np = nx) then
-    [I_pushq (Mem (Some (ptrBytes*2), Rbp, None,None))]
+    [I_pushq (Mem (Some (Num (ptrBytes*2)), Rbp, None,None))]
   else
-    let fst = I_movq (Mem (Some (ptrBytes*2), Rbp, None,None),Reg (Rsi, B64)) in
-    let lst = [I_pushq (Mem (Some (ptrBytes*2), Rsi, None,None))] in
+    let fst = I_movq (Mem (Some (Num (ptrBytes*2)), Rbp, None,None),Reg (Rsi, B64)) in
+    let lst = [I_pushq (Mem (Some (Num (ptrBytes*2)), Rsi, None,None))] in
     let rec loopins acc = function
     | 0 ->
         acc
     | n ->
-        loopins ((I_movq (Mem (Some 4, Rsi, None,None), Reg (Rsi, B64)))::acc) (n-1)
+        loopins ((I_movq (Mem ((Some (Num 4)), Rsi, None,None), Reg (Rsi, B64)))::acc) (n-1)
   in
     fst::(loopins [] (np-nx-1)) @ lst
 
@@ -282,7 +282,7 @@ let transMov rsize = function
 (* input: the register to which, we will move address of the result *)
 (* output: needed ins_86_64 list *)
 let rec load_result_address reg =
-  [ I_movq (Mem (Some (3*ptrBytes), Rbp,None,None),reg) ]
+  [ I_movq (Mem (Some (Num (3*ptrBytes)), Rbp,None,None),reg) ]
 
 (* input: This function takes a destination register, and a source argument *)
 (* output: a list of the necessery assembly instructions *)
@@ -298,21 +298,21 @@ let rec load reg a =
     if is_local ent then
      (if (not (is_par ent) || lookup_passmode ent = PASS_BY_VALUE) then
         let rsize = regSizeOfEntry (ent, false) in
-        [I_movq (Mem (Some (lookup_bp_offset ent), Rbp, None,None), Reg (reg,rsize)) 
+        [I_movq (Mem (Some (Num (lookup_bp_offset ent)), Rbp, None,None), Reg (reg,rsize)) 
          |> transMov rsize]
       else
         let rsize = regSizeOfEntry (ent, true) in
-        [I_movq (Mem (Some (lookup_bp_offset ent), Rbp, None,None),Reg (Rsi, B64));
+        [I_movq (Mem (Some (Num (lookup_bp_offset ent)), Rbp, None,None),Reg (Rsi, B64));
          I_movq (Mem (None, Rsi, None,None), Reg (reg,rsize)) |> transMov rsize]) 
     else
      (if (not (is_par ent) || lookup_passmode ent = PASS_BY_VALUE) then
         let rsize = regSizeOfEntry (ent, false) in 
         get_AR(ent) @
-        [I_movq (Mem (Some (lookup_bp_offset ent), Rsi, None,None), Reg (reg,rsize)) |> transMov rsize]
+        [I_movq (Mem (Some (Num (lookup_bp_offset ent)), Rsi, None,None), Reg (reg,rsize)) |> transMov rsize]
       else
         let rsize = regSizeOfEntry (ent, true) in
         get_AR(ent) @
-        [I_movq (Mem (Some (lookup_bp_offset ent), Rsi, None,None),Reg (Rsi, B64));
+        [I_movq (Mem (Some (Num (lookup_bp_offset ent)), Rsi, None,None),Reg (Rsi, B64));
         I_movq (Mem (None, Rsi, None,None), Reg (reg,rsize)) |> transMov rsize]) 
   | Address i -> load_addr reg i
   | Deref i -> 
@@ -321,12 +321,12 @@ let rec load reg a =
   (* TODO adjust `mov` size*)
   | Temp n ->
       let rsize = regSizeOfEntry (n, false) in
-      [I_movq (Mem (Some (lookup_bp_offset n),Rbp,None,None), Reg (reg, rsize))
+      [I_movq (Mem (Some (Num (lookup_bp_offset n)),Rbp,None,None), Reg (reg, rsize))
        |> transMov rsize]
   | String str ->
       let strlab = uniq_lab_of_str str in
       Stack.push str_lab_stk (str, strlab);
-      [I_leaq ((Some (Str strlab), Rip, None, None), Reg (reg, B64))]
+      [I_leaq ((Some (Str strlab), Rip, None, None), reg)]
   | _ -> raise (Terminate "bad quad entry")
 
 (* Takes operand of quad that is String str (Label int????) *)
@@ -350,14 +350,14 @@ and load_addr reg a =
      (if (not (is_par ent) || lookup_passmode ent = PASS_BY_VALUE) then        
         [I_leaq ( (Some (Num (lookup_bp_offset ent)), Rbp, None,None) ,reg)]
       else
-        [I_movq (Mem (Some (lookup_bp_offset ent), Rbp, None,None), Reg (reg, B64))])
+        [I_movq (Mem (Some (Num (lookup_bp_offset ent)), Rbp, None,None), Reg (reg, B64))])
     else
      (if (not (is_par ent) || lookup_passmode ent = PASS_BY_VALUE) then
         get_AR(ent) @
         [I_leaq ((Some (Num (lookup_bp_offset ent)), Rsi, None,None),reg)]
       else        
         get_AR(ent) @
-        [I_movq (Mem (Some (lookup_bp_offset ent), Rsi, None,None), Reg (reg, B64))])
+        [I_movq (Mem (Some (Num (lookup_bp_offset ent)), Rsi, None,None), Reg (reg, B64))])
   (* TODO use proper `mov` later later. *)
   | Deref i -> load reg i
   | Temp n ->
@@ -373,22 +373,22 @@ and store reg a =
     if is_local ent then
      (if (not (is_par ent) || lookup_passmode ent = PASS_BY_VALUE) then
         let rsize = regSizeOfEntry (ent, false) in
-        [I_movq (Reg (reg,rsize), Mem (Some (lookup_bp_offset ent), Rbp, None,None))
+        [I_movq (Reg (reg,rsize), Mem (Some (Num (lookup_bp_offset ent)), Rbp, None,None))
          |> transMov rsize]
       else
         let rsize = regSizeOfEntry (ent, true) in
-        [I_movq (Reg (Rsi, B64),Mem (Some (lookup_bp_offset ent), Rbp, None,None));
+        [I_movq (Reg (Rsi, B64),Mem (Some (Num (lookup_bp_offset ent)), Rbp, None,None));
         I_movq (Reg (reg,rsize),Mem (None, Rsi, None,None)) |> transMov rsize])
     else
      (if (not (is_par ent) || lookup_passmode ent = PASS_BY_VALUE) then
         let rsize = regSizeOfEntry (ent, false) in
         get_AR(ent) @
-        [I_movq (Reg (reg,rsize),Mem (Some (lookup_bp_offset ent), Rsi, None,None))
+        [I_movq (Reg (reg,rsize),Mem (Some (Num (lookup_bp_offset ent)), Rsi, None,None))
          |> transMov rsize]
       else
         let rsize = regSizeOfEntry (ent, true) in
         get_AR(ent) @
-        [I_movq (Mem (Some (lookup_bp_offset ent), Rsi, None,None),Reg (Rsi, B64));
+        [I_movq (Mem (Some (Num (lookup_bp_offset ent)), Rsi, None,None),Reg (Rsi, B64));
          I_movq (Reg (reg,rsize),Mem (None, Rsi, None,None)) |> transMov rsize])
   | Deref i -> 
       load Rdi i @ 
@@ -396,7 +396,7 @@ and store reg a =
   (* TODO Add Temp like the `load` case *)
   | Temp n -> 
       let rsize = regSizeOfEntry (n, false) in
-      [I_movq (Reg (reg, rsize),Mem (Some (lookup_bp_offset n),Rbp,None,None))
+      [I_movq (Reg (reg, rsize),Mem (Some (Num (lookup_bp_offset n)),Rbp,None,None))
        |> transMov rsize]
   | _ -> raise (Terminate "bad quad entry")
 
@@ -643,7 +643,7 @@ and ins_of_quad qd =
           load (Rax) qd.quad_argX @
           [I_subq (Reg (Rsp, B64), Const (Imm8 1));
           I_movq (Reg (Rsp, B64), Reg (Rsi, B64));
-          I_movb (Reg (Rax, B8L), Mem (Some 0, Rsi ,None,None))
+          I_movb (Reg (Rax, B8L), Mem (Some (Num 0), Rsi ,None,None))
           ]
         | V when xsize = doubleBytes ->
           [] (* TODO doubles *)
