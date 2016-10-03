@@ -301,6 +301,9 @@ let rec load reg a =
   | Char chr ->
       [I_movb(Const (Imm8 (Char.to_int chr)), Reg (reg, B8L))]
   | Var ent ->
+    if not (is_mutable ent.entry_id) then 
+      load_addr reg a
+    else
     if is_local ent then
      (if (not (is_par ent) || lookup_passmode ent = PASS_BY_VALUE) then
         let rsize = regSizeOfEntry (ent, false) in

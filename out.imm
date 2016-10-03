@@ -1,6 +1,9 @@
 
 
 0 :	unit, main_0, -, -
-1 :	par, "Hello World!\n", V, -
-2 :	call, -, -, writeString_1
-3 :	endu, -, -, main_0
+1 :	par, 7, V, -
+2 :	par, t, V, -
+3 :	call, -, -, readString_2
+4 :	par, t, V, -
+5 :	call, -, -, writeString_1
+6 :	endu, -, -, main_0
