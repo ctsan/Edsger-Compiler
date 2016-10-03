@@ -33,5 +33,6 @@ main:
 .$main_0_11:
 	movq %rbp,%rsp
 	popq %rbp
+	movq $0,%rax
 	ret
 
