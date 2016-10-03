@@ -1,5 +1,0 @@
-void edsger_exit(int num);
-
-void main() {
-    edsger_exit(4);
-}
