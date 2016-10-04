@@ -17,3 +17,7 @@ _build/
 
 # Compiler executable
 Compiler
+
+# Compiler outputs
+out.s
+out.imm
