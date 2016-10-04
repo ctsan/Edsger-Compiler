@@ -2,6 +2,9 @@
 
 void main() {
   int x;
-  x = 5;
+  x = 4;
   writeInteger(x);
+  x = 2;
+  writeInteger(x);
+  writeString("\n");
 }

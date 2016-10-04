@@ -1,11 +1,6 @@
 #include "stdio.h"
 
-void main () {
-
-    char t[20];
-
-    readString(7,t);
-
-    writeString(t);
-
+void main() {
+  char *c;  
+  readString(7, c);
 }
