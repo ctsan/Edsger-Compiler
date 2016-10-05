@@ -1,8 +1,0 @@
-
-
-0 :	unit, main_0, -, -
-1 :	par, $1, RET, -
-2 :	call, -, -, readChar_0
-3 :	par, t, V, -
-4 :	call, -, -, writeChar_1
-5 :	endu, -, -, main_0

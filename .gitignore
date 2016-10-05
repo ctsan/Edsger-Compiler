@@ -21,4 +21,4 @@ Compiler
 *.o
 *.s
 *.imm
-
+*.a
