@@ -12,12 +12,12 @@ void main() {
 	for (i=0; i<100; i++) {
 		x += 1;
 	}
-  //for (i=99; i>=0; i--) {
-    //y += 1;
- //   if (i == 30) break;
-  //}
+  for (i=99; i>=0; i -= 1) {
+    y += 1;
+    if (i == 30) break;
+  }
   for (i=0; i<100; i++) {
-    //if (i == 30) continue; // continue is broken
+    //if (i != 30 || i != 3) continue; // continue is broken
     z += 1;
   }
   writeInteger(x);
