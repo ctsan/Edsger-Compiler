@@ -5,7 +5,7 @@ int fyes (int n) {
 }
 
 int find (int n) {
-    return n;
+    return fyes(n);
 }
 
 void main () {
