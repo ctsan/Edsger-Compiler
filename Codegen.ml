@@ -492,10 +492,10 @@ and ins_of_quad qd =
     let st_ins = store Rax qd.quad_argZ in
     let rsize = regSizeOfOperand qd.quad_argX in
     let sub_ins (r1,r2) = 
-      if rsize = B8L then [I_subb (r1,r2)]
-      else if rsize = B16 then [I_subw (r1,r2)]
+      if rsize = B8L then [I_subb (r2,r1)]
+      else if rsize = B16 then [I_subw (r2,r1)]
       (*else if rsize = ?? then raise (Terminate "double in ins_of_quad op_plus")*)
-      else if rsize = B64 then [I_subq (r1,r2)]
+      else if rsize = B64 then [I_subq (r2,r1)]
       else raise (Terminate "Strange rsize of operand") in
     ld1_ins @
     ld2_ins @
@@ -668,7 +668,7 @@ and ins_of_quad qd =
           [I_pushq (Reg (Rax, B64))]         (* maybe correct here *)
         | V when xsize = charBytes ->
           load (Rax) qd.quad_argX @
-          [I_subq (Reg (Rsp, B64), Const (Imm8 1));
+          [I_subq (Const (Imm8 1), Reg (Rsp, B64));
           I_movq (Reg (Rsp, B64), Reg (Rsi, B64));
           I_movb (Reg (Rax, B8L), Mem (Some (Num 0), Rsi ,None,None))
           ]
