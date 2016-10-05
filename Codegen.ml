@@ -548,14 +548,14 @@ and ins_of_quad qd =
     let rsize = regSizeOfOperand qd.quad_argX in
     ld1_ins @
     ld2_ins @
-    [I_cmp (Reg (Rax,rsize),Reg (Rdx,rsize));
+    [I_cmp (Reg (Rdx,rsize),Reg (Rax,rsize));
      I_je (label_of(qd.quad_argZ))]
   (* | Op_neq -> *)
   (*   let ld1_ins = load (Reg (Rax,B64)) qd.quad_argX in *)
   (*   let ld2_ins = load (Reg (Rdx,B64)) qd.quad_argY in *)
   (*   ld1_ins @ *)
   (*   ld2_ins @ *)
-  (*   [I_cmp (Reg (Rax,B64),Reg (Rdx,B64)); *)
+  (*   [I_cmp (Reg (Rdx,B64),Reg (Rax,B64)); *)
   (*    I_jne (label_of(qd.quad_argZ))] *)
   | Op_lt ->
     let ld1_ins = load Rax qd.quad_argX in
@@ -563,7 +563,7 @@ and ins_of_quad qd =
     let rsize = regSizeOfOperand qd.quad_argX in
     ld1_ins @
     ld2_ins @
-    [I_cmp (Reg (Rax,rsize),Reg (Rdx,rsize)); 
+    [I_cmp (Reg (Rdx,rsize),Reg (Rax,rsize)); 
      I_jl (label_of(qd.quad_argZ))]
   | Op_gt ->
     let ld1_ins = load Rax qd.quad_argX in
@@ -571,12 +571,12 @@ and ins_of_quad qd =
     let rsize = regSizeOfOperand qd.quad_argX in
     ld1_ins @
     ld2_ins @
-    [I_cmp (Reg (Rax,rsize),Reg (Rdx,rsize));
+    [I_cmp (Reg (Rdx,rsize),Reg (Rax,rsize));
      I_jg (label_of(qd.quad_argZ))]
   | Op_ifb ->
     let ld1_ins = load Rax qd.quad_argX in
     ld1_ins @
-    [I_cmp (Reg (Rax,B8L),Const (Imm8 0)); (* TODO no or so immediate cmp *)
+    [I_cmp (Const (Imm8 0), Reg (Rax,B8L)); (* TODO no or so immediate cmp *)
      I_jne (label_of(qd.quad_argZ))]
   | Op_jump ->
     [I_jmp (label_of (qd.quad_argZ))]
