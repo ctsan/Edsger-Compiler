@@ -670,7 +670,7 @@ and ins_of_quad qd =
           [I_pushq (Reg (Rax, B64))]         (* maybe correct here *)
         | V when xsize = charBytes ->
           load (Rax) qd.quad_argX @
-          [I_subq (Reg (Rsp, B64), Const (Imm8 1));
+          [I_subq (Const (Imm8 1), Reg (Rsp, B64));
           I_movq (Reg (Rsp, B64), Reg (Rsi, B64));
           I_movb (Reg (Rax, B8L), Mem (Some (Num 0), Rsi ,None,None))
           ]
