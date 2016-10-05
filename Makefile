@@ -29,6 +29,7 @@ $(EXENAME): Parser.mly Lexer.mll $(wildcard *.ml) $(wildcard *.mli)
 .PHONY: clean test ftest
 
 clean:
+	$(RM) **/*.o **/*.a
 	$(RM) *.cmo *.cmi *~ 
 	$(RM) Lexer.ml 
 	$(RM) Parser.ml Parser.mli

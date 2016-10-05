@@ -212,14 +212,16 @@ let call_stack = Stack.create ()
 
 let str_lab_stk = Stack.create ()
 
-let make_inst_of_stk stk = Stack.fold stk ~init:[] ~f:(fun acc (strlab, str) ->  (D_asciz (strlab, str))::acc )
+let make_inst_of_stk stk =
+  let res = Stack.fold stk ~init:[] ~f:(fun acc (strlab, str) -> (D_asciz (strlab, str))::acc ) in
+  Stack.clear stk; res
 
 let add_instruction i =
   instructions := i :: !instructions
 
 let label_counter = ref 0
 
-let uniq_lab_of_str str =
+let uniq_lab_of_str () =
     incr label_counter;
     sprintf ".LC.%d" (!label_counter);;
 
@@ -333,7 +335,7 @@ let rec load reg a =
       [I_movq (Mem (Some (Num (lookup_bp_offset n)),Rbp,None,None), Reg (reg, rsize))
        |> transMov rsize]
   | String str ->
-      let strlab = uniq_lab_of_str str in
+      let strlab = uniq_lab_of_str () in
       Stack.push str_lab_stk (strlab, str);
       [I_leaq ((Some (Str strlab), Rip, None, None), reg)]
   | _ -> raise (Terminate "bad quad entry")
@@ -611,7 +613,7 @@ and ins_of_quad qd =
      M_Label endof;
      I_movq (Reg (Rbp, B64), Reg (Rsp, B64));
      I_popq (Reg (Rbp, B64));
-     I_movq (Const(Imm8 0), Reg (Rax, B64)); (* to return 0 to OS, prone to error*)
+     (* I_movq (Const(Imm8 0), Reg (Rax, B64)); (\* to return 0 to OS, prone to error*\) *)
      I_ret
     ] @
      (* M_Label endp  TODO use endp if at&t will be used *)

@@ -1,0 +1,176 @@
+.$0:
+_fyes_1_11:
+	pushq %rbp
+	movq %rsp,%rbp
+	subq $2,%rsp
+
+.$1:
+	movw 32(%rbp),%ax
+	movw $2,%cx
+	imul %cx,%ax
+	movw %ax,-2(%rbp)
+
+.$2:
+	movw -2(%rbp),%ax
+	movq 24(%rbp),%rdx
+	movq %rax,(%rdx)
+
+.$3:
+	jmp .$fyes_1_11
+
+.$4:
+.$fyes_1_11:
+	movq %rbp,%rsp
+	popq %rbp
+	ret
+
+.$5:
+_find_1_12:
+	pushq %rbp
+	movq %rsp,%rbp
+	subq $2,%rsp
+
+.$6:
+	movw 32(%rbp),%ax
+	pushw %ax
+
+.$7:
+	leaq -2(%rbp),%rsi
+	pushq %rsi
+
+.$8:
+	pushq 16(%rbp)
+	call _fyes_1_11
+	addq $18,%rsp
+
+.$9:
+	movw -2(%rbp),%ax
+	movq 24(%rbp),%rdx
+	movq %rax,(%rdx)
+
+.$10:
+	jmp .$find_1_12
+
+.$11:
+.$find_1_12:
+	movq %rbp,%rsp
+	popq %rbp
+	ret
+
+.$12:
+.globl main
+main:
+	pushq %rbp
+	movq %rsp,%rbp
+	subq $4,%rsp
+
+.$13:
+	movw $5,%ax
+	pushw %ax
+
+.$14:
+	leaq -4(%rbp),%rsi
+	pushq %rsi
+
+.$15:
+	pushq 16(%rbp)
+	call _find_1_12
+	addq $18,%rsp
+
+.$16:
+	movw -4(%rbp),%ax
+	movw %ax,-2(%rbp)
+
+.$17:
+	movw -2(%rbp),%ax
+	movw $11,%dx
+	cmp %dx,%ax
+	je .$19
+
+.$18:
+	jmp .$22
+
+.$19:
+	leaq .LC.1(%rip),%rax
+	pushq %rax
+
+.$20:
+	subq $8,%rsp
+	pushq 16(%rbp)
+	call _writeString
+	addq $24,%rsp
+
+.$21:
+	jmp .$34
+
+.$22:
+	movw -2(%rbp),%ax
+	movw $9,%dx
+	cmp %dx,%ax
+	je .$24
+
+.$23:
+	jmp .$27
+
+.$24:
+	leaq .LC.2(%rip),%rax
+	pushq %rax
+
+.$25:
+	subq $8,%rsp
+	pushq 16(%rbp)
+	call _writeString
+	addq $24,%rsp
+
+.$26:
+	jmp .$34
+
+.$27:
+	movw -2(%rbp),%ax
+	movw $10,%dx
+	cmp %dx,%ax
+	je .$29
+
+.$28:
+	jmp .$32
+
+.$29:
+	leaq .LC.3(%rip),%rax
+	pushq %rax
+
+.$30:
+	subq $8,%rsp
+	pushq 16(%rbp)
+	call _writeString
+	addq $24,%rsp
+
+.$31:
+	jmp .$34
+
+.$32:
+	leaq .LC.4(%rip),%rax
+	pushq %rax
+
+.$33:
+	subq $8,%rsp
+	pushq 16(%rbp)
+	call _writeString
+	addq $24,%rsp
+
+.$34:
+	jmp .$main_0_13
+
+.$35:
+.$main_0_13:
+	movq %rbp,%rsp
+	popq %rbp
+	ret
+.LC.1:
+	.asciz	"Wrong"
+.LC.2:
+	.asciz	"Wrong"
+.LC.3:
+	.asciz	"Right\n"
+.LC.4:
+	.asciz	"Very Wrong"
+

@@ -1,0 +1,91 @@
+.$0:
+_fcall_with_return_1_11:
+	pushq %rbp
+	movq %rsp,%rbp
+	subq $2,%rsp
+
+.$1:
+	movw 32(%rbp),%ax
+	movw $2,%cx
+	imul %cx,%ax
+	movw %ax,-2(%rbp)
+
+.$2:
+	movw -2(%rbp),%ax
+	movq 24(%rbp),%rdx
+	movq %rax,(%rdx)
+
+.$3:
+	jmp .$fcall_with_return_1_11
+
+.$4:
+.$fcall_with_return_1_11:
+	movq %rbp,%rsp
+	popq %rbp
+	ret
+
+.$5:
+.globl main
+main:
+	pushq %rbp
+	movq %rsp,%rbp
+	subq $2,%rsp
+
+.$6:
+	movw $123,%ax
+	pushw %ax
+
+.$7:
+	leaq -2(%rbp),%rsi
+	pushq %rsi
+
+.$8:
+	pushq 16(%rbp)
+	call _fcall_with_return_1_11
+	addq $18,%rsp
+
+.$9:
+	movw -2(%rbp),%ax
+	movw $246,%dx
+	cmp %dx,%ax
+	je .$11
+
+.$10:
+	jmp .$14
+
+.$11:
+	leaq .LC.1(%rip),%rax
+	pushq %rax
+
+.$12:
+	subq $8,%rsp
+	pushq 16(%rbp)
+	call _writeString
+	addq $24,%rsp
+
+.$13:
+	jmp .$16
+
+.$14:
+	leaq .LC.2(%rip),%rax
+	pushq %rax
+
+.$15:
+	subq $8,%rsp
+	pushq 16(%rbp)
+	call _writeString
+	addq $24,%rsp
+
+.$16:
+	jmp .$main_0_12
+
+.$17:
+.$main_0_12:
+	movq %rbp,%rsp
+	popq %rbp
+	ret
+.LC.1:
+	.asciz	"Right\n"
+.LC.2:
+	.asciz	"Wrong\n"
+

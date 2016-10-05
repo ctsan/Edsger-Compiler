@@ -17,7 +17,7 @@ void main() {
  //   if (i == 30) break;
   //}
   for (i=0; i<100; i++) {
-    //if (i == 30) continue; // continue is broken
+    if (i == 30) continue; // continue is broken
     z += 1;
   }
   writeInteger(x);

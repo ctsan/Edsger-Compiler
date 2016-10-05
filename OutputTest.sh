@@ -43,6 +43,11 @@ tests=`ls -d ${testcase}?.eds | wc -l`
     #set -x
     "./$bin" "$file_source" > /dev/null
     #set +x
+    OS=$(uname -s)
+    if [ $OS == "Darwin" ] 
+    then
+        perl -pi -e 's/main/_main/' out.s
+    fi
     gcc -c out.s
     gcc -o output out.o lib.a
     ./output < $input > "$file_out_tst"
