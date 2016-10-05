@@ -1,35 +1,32 @@
 .$0:
-.globl main
-main:
+.globl _main
+_main:
 	pushq %rbp
 	movq %rsp,%rbp
-	subq $20,%rsp
+	subq $2,%rsp
 
 .$1:
-	movw $7,%ax
-	pushw %ax
+	leaq -2(%rbp),%rsi
+	pushq %rsi
 
 .$2:
-	leaq -20(%rbp),%rax
-	pushq %rax
+	pushq 16(%rbp)
+	call _readChar
+	addq $16,%rsp
 
 .$3:
-	subq $8,%rsp
-	pushq 16(%rbp)
-	call _readString
-	addq $26,%rsp
+	movb -1(%rbp),%al
+	subq $1,%rsp
+	movq %rsp,%rsi
+	movb %al,(%rsi)
 
 .$4:
-	leaq -20(%rbp),%rax
-	pushq %rax
-
-.$5:
 	subq $8,%rsp
 	pushq 16(%rbp)
-	call _writeString
-	addq $24,%rsp
+	call _writeChar
+	addq $17,%rsp
 
-.$6:
+.$5:
 .$main_0_11:
 	movq %rbp,%rsp
 	popq %rbp
