@@ -31,17 +31,20 @@ let arguments =
   +> flag "-O" no_arg ~doc:" Optimization Flag."
   +> flag "-f" no_arg ~doc:" Get src code from stdin, output assembly on stdout."
   +> flag "-i" no_arg ~doc:" Get src code from stdin, output IR on stdout."
+  +> flag "-c" no_arg ~doc:" Compile to object file for Linux"
+  +> flag "-C" no_arg ~doc:" Compile to object file for Mac"
+  +> flag "-a" no_arg ~doc:" Compile and link"
   +> anon (maybe_with_default "-" ("filename" %: file))
 
 let command =
   Command.basic
     ~summary:"Edsger Compiler (C.Tsanikidis,A.Aggelakis)." arguments
-    (fun optim assembly intermediary filename () ->
+    (fun o f i clin cmac a filename () ->
        let file_channel =
          if filename="-" then stdin
          else open_in filename
        in
-       match (assembly,intermediary) with
+       match (clin,cmac) with
        | (true,true) ->
          eprintf_color Red "Bad combination of flags. Aborting...\n"; eclear (); exit 124;
        | _ -> compile_channel file_channel (* TODO Later Stages *)

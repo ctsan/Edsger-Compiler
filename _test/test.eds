@@ -1,0 +1,39 @@
+#include "stdio.h"
+void lol() {
+    int i ;
+    i = readInteger ();
+}
+void main () {
+    int i;
+    bool j;
+    char k;
+    char* e;
+    i = i+1;
+    j = true;
+    k = 'f';
+    e = e+1;
+    return;
+}
+
+int called (int a,char b, bool c, bool * d);
+void calling () {
+    int assign;
+    bool d;
+
+    d = true;
+    
+    assign = called(9,'a',false, &d);
+}
+
+int called (int a, char b, bool c, bool * d) {
+    return 9;
+}
+
+void arr() {
+    int test[100];
+    int * i;
+
+    test [ 10 ] = 14;
+    i = test;
+    *(i+10) = 14;
+}
