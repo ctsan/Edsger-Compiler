@@ -48,6 +48,7 @@ TEST_SW  := $(wildcard $(TESTINPUT)semantic*w.txt)
 TEST_SC  := $(wildcard $(TESTINPUT)semantic*c.txt)
 
 TESTING_COMMAND = bash ./_test/Test.sh
+UNIT_TEST_COMMAND = bash ./OutputTest.sh
 
 test: Compiler  # Test for errors
 	@printf "LEXER:\n"
@@ -58,7 +59,9 @@ test: Compiler  # Test for errors
 	@printf "SEMANTIC:\n"
 	@$(TESTING_COMMAND) $(EXE_FULL_PATH) 3 -eq $(TEST_SW)
 	@$(TESTING_COMMAND) $(EXE_FULL_PATH) 0 -eq $(TEST_SC)
-
+	@printf "Unit Tests:\n"
+	@$(UNIT_TEST_COMMAND)
+# TODO check if this could be done better than simply executing
 
 #####################################################################
 #-----|                        THE END                        #-----|

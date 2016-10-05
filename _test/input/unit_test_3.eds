@@ -2,10 +2,11 @@
 
 void main () {
 
-    char t[20];
 
+char t[20];
     readString(7,t);
 
     writeString(t);
+    writeString("\n");
 
 }
