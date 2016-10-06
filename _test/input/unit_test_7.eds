@@ -10,7 +10,7 @@ int fib(int n) {
 }
 
 void main () {
-    if (fib(5)==8) 
+    if (fib(6)==13) 
         writeString("Right\n");
     else
         writeString("Wrong\n");

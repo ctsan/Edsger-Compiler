@@ -85,13 +85,13 @@ let rec equalType t1 t2 =
    (let open Core.Std in
    match t1, t2 with
    (*-------------------- Manage Arrays ---------------------------*)
-   | TYPE_array (et1, sz1), TYPE_array (et2, sz2) -> printf "c1\n";equalType et1 et2
-   | _, TYPE_array _                              -> printf "c2\n";equalType t2 t1
+   | TYPE_array (et1, sz1), TYPE_array (et2, sz2) -> equalType et1 et2
+   | _, TYPE_array _                              -> equalType t2 t1
    | TYPE_array (et1, sz1), t2                    -> equalType (addr_of_point et1) t2
    (*-------------------- Manage Nulls ----------------------------*)
-   | t1, TYPE_null  when t1 <> TYPE_null          -> printf "c3\n";equalType t2 t1
-   | TYPE_null, t2 when is_pointer t2             -> printf "c4\n";true
-   | _                                            -> printf "c5\n";t1 = t2
+   | t1, TYPE_null  when t1 <> TYPE_null          -> equalType t2 t1
+   | TYPE_null, t2 when is_pointer t2             -> true
+   | _                                            -> t1 = t2
    )
 
 let arithmetic_type = function

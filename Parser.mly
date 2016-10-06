@@ -255,7 +255,6 @@ expression:
         { let params = (match params with
            | None -> None
            | Some (hd::tl) ->
-                   printf "some chosen\n";
                    let rec flatten_commas acc expr =
                        match expr with
                        | E_comma (x,y) -> flatten_commas (y::acc) x

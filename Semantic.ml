@@ -31,8 +31,7 @@ let rec eval_const_int = function
   | _ -> raise (Terminate "Not Constant Int Expression")
 
 let is_valid_lvalue = function
-  | E_id n           -> if is_mutable (id_make n) then printf "mutable\n" else printf "not mutable\n";
-                        is_mutable (id_make n)
+  | E_id n           -> is_mutable (id_make n)
   | E_array_access _ -> true
   | E_deref _        -> true
   | _ -> false
@@ -230,7 +229,7 @@ and check_a_declaration  =
         printf "- fun def %s\n" id;
         let fun_entry = def_func_head typ id params ~forward:false in
         (match fun_decls with
-         | Some declerations -> check_all_decls declerations
+         | Some declerations -> scan_funcs declerations; check_all_decls declerations
          | None -> ()
         );
         (* This Folding Returns whether return statement is guaranteed or not *)

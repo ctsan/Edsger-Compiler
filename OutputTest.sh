@@ -13,7 +13,7 @@ testcase="./_test/input/unit_test_"
 # An array, do not have to declare it, but is supposedly faster
 #declare -a file_base=("$basae/unit_test_1" "$base/unit_test_2")
 # Number of tests
-tests=`ls -d ${testcase}?.eds | wc -l`
+tests=`ls -d ${testcase}*.eds | wc -l`
 
 # Loop the array
 #for file in "${file_base[@]}"; do

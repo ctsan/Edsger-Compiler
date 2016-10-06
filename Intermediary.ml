@@ -521,7 +521,7 @@ let breaks_for_resp_bp = String.Table.create ();;
 let rec genquads_stmt ast =
   let prop = newProp () in
   match ast with
-  | S_expr expr -> printf "(expr)\n"; genquads_expr expr
+  | S_expr expr ->  genquads_expr expr
   | S_if (cond, ifstmt,None)  ->
     let cprop = genquads_expr cond |> output_condition in
     backpatch cprop.trues (nextQuad ());
@@ -595,7 +595,7 @@ let rec genquads_stmt ast =
      | None -> ());
     addQuad ( genQuad Op_ret Empty Empty Empty );
     prop
-  | _ -> printf "(else)\n"; prop
+  | _ ->  prop
 
 
 let print_quads () =

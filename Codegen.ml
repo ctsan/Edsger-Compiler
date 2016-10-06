@@ -228,16 +228,12 @@ let uniq_lab_of_str () =
 (* input: Takes entry l of parameter *)
 (* output: returns  ins_86_64 list *)
 let get_AR l =
-  let base = I_movq (Reg (Rsi, B64), Mem (Some (Num 4), Rbp, None,None)) in
+  let base = I_movq (Mem (Some (Num (2*ptrBytes)), Rbp, None,None),Reg (Rsi, B64)) in
   let ncur = l.entry_scope.sco_nesting in
   let na = (Stack.top_exn call_stack).entry_scope.sco_nesting in
-  let rec loopins acc = function
-    | 0 ->
-        acc
-    | n ->
-        loopins ((I_movq (Mem (Some (Num 4), Rsi, None,None), Reg (Rsi, B64)))::acc) (n-1)
-  in
-    base::(loopins [] (ncur-na-1))
+  let rest = List.(range 0 (ncur-na-1) |>
+                   map ~f:(fun _ -> I_movq (Mem (Some (Num (2*ptrBytes)), Rsi, None,None), Reg (Rsi, B64))))  in
+  base::rest
 
 (* input: Takes callee and called function entries *)
 (* output: returns ins_86_64 list *)
@@ -250,14 +246,10 @@ let update_AL callee called =
     [I_pushq (Mem (Some (Num (ptrBytes*2)), Rbp, None,None))]
   else
     let fst = I_movq (Mem (Some (Num (ptrBytes*2)), Rbp, None,None),Reg (Rsi, B64)) in
+    let nth = I_movq (Mem ((Some (Num (ptrBytes*2))), Rsi, None,None), Reg (Rsi, B64)) in
     let lst = [I_pushq (Mem (Some (Num (ptrBytes*2)), Rsi, None,None))] in
-    let rec loopins acc = function
-    | 0 ->
-        acc
-    | n ->
-        loopins ((I_movq (Mem ((Some (Num 4)), Rsi, None,None), Reg (Rsi, B64)))::acc) (n-1)
-  in
-    fst::(loopins [] (np-nx-1)) @ lst
+    let med_elts = List.range 0 (np-nx-1) |> List.map ~f:(fun _ -> nth ) in
+    fst :: med_elts @ lst
 
 let is_par e = match e.entry_info with
 | ENTRY_parameter _ -> true
