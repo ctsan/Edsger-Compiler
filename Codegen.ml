@@ -620,9 +620,15 @@ and ins_of_quad qd =
     make_inst_of_stk str_lab_stk
   | Op_retv ->
     let current = Stack.top_exn call_stack in
+    let rsize = regSizeOfOperand qd.quad_argX in
+    let mv_ins (r1,r2) =
+      if rsize = B8L then [I_movb (r1,r2)]
+      else if rsize = B16 then [I_movw (r1,r2)]
+      else if rsize = B64 then [I_movq (r1,r2)]
+      else raise (Terminate "Strange rsize of operand retv") in
     load Rax qd.quad_argX @
     load_result_address (Reg (Rdx,B64)) @
-    [ I_movq (Reg (Rax,B64), Mem (None,Rdx,None,None)) ] (* TODO fix size (Size of Result Type) *)
+    mv_ins(Reg (Rax,rsize), Mem (None,Rdx,None,None)) (* TODO fix size (Size of Result Type) *)
   | Op_ret ->
     let current = Stack.top_exn call_stack in
     [I_jmp (label_end_of (UnitName current))]
