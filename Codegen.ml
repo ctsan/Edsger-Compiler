@@ -240,7 +240,7 @@ let get_AR l =
 let update_AL callee called =
   let np = callee.entry_scope.sco_nesting in
   let nx = called.entry_scope.sco_nesting in
-  if (np > nx) then
+  if (np < nx) then
     [I_pushq (Reg (Rbp, B64))]
   else if (np = nx) then
     [I_pushq (Mem (Some (Num (ptrBytes*2)), Rbp, None,None))]
