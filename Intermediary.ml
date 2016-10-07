@@ -535,14 +535,20 @@ and genquads_expr ast =
   | _ -> prop
     (*t*)
 
-(* Associate labels to qtags for 'continue' stmt*)
-let label_to_qtag = String.Table.create ();;
-(* for continue with no label use the most recent enclosing *)
-let fors_qtags    = Stack.create ();;
+(* (\* Associate labels to qtags for 'continue' stmt*\) *)
+(* let label_to_qtag = String.Table.create ();; *)
+(* (\* for continue with no label use the most recent enclosing *\) *)
+(* let fors_qtags    = Stack.create ();; *)
+
 (* for backpatching breaks with enclosing for *)
 let breaks_for_bp = Stack.create ();;
 (* for backpatching breaks with respecting for *)
 let breaks_for_resp_bp = String.Table.create ();;
+
+(* for backpatching breaks with enclosing for *)
+let continues_for_bp = Stack.create ();;
+(* for backpatching breaks with respecting for *)
+let continues_for_resp_bp = String.Table.create ();;
 
 let rec genquads_stmt ast =
   let prop = newProp () in
@@ -568,14 +574,25 @@ let rec genquads_stmt ast =
   | S_for (label,expr1,expr2,expr3,stmt) ->
     let _   = expr1 >>| genquads_expr in
     let start_loop = nextQuad () in
-    let _ = label >>| (fun label -> Hashtbl.set label_to_qtag ~key:label ~data:start_loop) in
-    Stack.push fors_qtags start_loop; (* store this for keeping track of the most recent for*)
+    (* let _ = label >>| (fun label -> Hashtbl.set label_to_qtag ~key:label ~data:start_loop) in *)
+    (* Stack.push fors_qtags start_loop; (\* store this for keeping track of the most recent for*\) *)
     let guardprop  = expr2 >>| genquads_expr >>| output_condition in
     (match guardprop with
      | Some grop -> backpatch grop.trues (nextQuad ())
      | None -> ());
     let stmts_prop     = genquads_stmt stmt  in
+
     backpatch stmts_prop.next (nextQuad ()); (* TODO do tests to check this, vs closeQuad *)
+
+    let target_continue = match label with
+      | None -> []
+      | Some l ->
+        (match Hashtbl.find continues_for_resp_bp l with
+         | Some res -> res  (* TODO Remove this after returnign it*)
+         | None -> [])
+    in
+    backpatch (Stack.to_list continues_for_bp) (nextQuad ());
+    backpatch target_continue (nextQuad ());
     let _     = expr3 >>| genquads_expr in
     addQuad(genQuad Op_jump Empty Empty (Label start_loop));
     let target_breaks = match label with
@@ -588,6 +605,7 @@ let rec genquads_stmt ast =
     prop.next <-
       (Stack.to_list breaks_for_bp) @ target_breaks
       @ (match guardprop with None -> [] | Some gprop -> gprop.falses);
+    Stack.clear continues_for_bp;
     Stack.clear breaks_for_bp;
     prop
   | S_braces bl   -> (match bl with
@@ -602,10 +620,18 @@ let rec genquads_stmt ast =
       | _ -> prop) (* TODO Check again *)
   | S_continue label ->
     (match label with
-     | None ->  addQuad(genQuad Op_jump Empty Empty (Label (Stack.pop_exn fors_qtags)))
-     | Some l -> let for_qtag = String.Table.find_exn label_to_qtag l in
-       addQuad(genQuad Op_jump Empty Empty (Label for_qtag))
+     | None ->
+       Stack.push continues_for_bp (nextQuad ());
+       addQuad(genQuad Op_jump Empty Empty Star)
+     | Some l ->
+       Hashtbl.add_multi continues_for_resp_bp ~key:l ~data:(nextQuad ());
+       addQuad(genQuad Op_jump Empty Empty Star)
     ); prop
+    (* (match label with *)
+    (*  | None ->  addQuad(genQuad Op_jump Empty Empty (Label (Stack.pop_exn fors_qtags))) *)
+    (*  | Some l -> let for_qtag = String.Table.find_exn label_to_qtag l in *)
+    (*    addQuad(genQuad Op_jump Empty Empty (Label for_qtag)) *)
+    (* ); prop *)
   | S_break label ->
     (match label with
      | None ->
