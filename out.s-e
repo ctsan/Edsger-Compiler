@@ -3,57 +3,53 @@
 main:
 	pushq %rbp
 	movq %rsp,%rbp
-	subq $3,%rsp
+	subq $6,%rsp
 
 .$1:
-	leaq -2(%rbp),%rsi
+	leaq -4(%rbp),%rsi
 	pushq %rsi
 
 .$2:
 	pushq 16(%rbp)
-	call _readChar
+	call _readInteger
 	addq $16,%rsp
 
 .$3:
-	movb -2(%rbp),%al
-	movb %al,-1(%rbp)
+	movw -4(%rbp),%ax
+	movw %ax,-2(%rbp)
 
 .$4:
-	movb -1(%rbp),%al
-	subq $1,%rsp
-	movq %rsp,%rsi
-	movb %al,(%rsi)
+	movw -2(%rbp),%ax
+	pushw %ax
 
 .$5:
 	subq $8,%rsp
 	pushq 16(%rbp)
-	call _writeChar
-	addq $17,%rsp
+	call _writeInteger
+	addq $18,%rsp
 
 .$6:
-	leaq -3(%rbp),%rsi
+	leaq -6(%rbp),%rsi
 	pushq %rsi
 
 .$7:
 	pushq 16(%rbp)
-	call _readChar
+	call _readInteger
 	addq $16,%rsp
 
 .$8:
-	movb -3(%rbp),%al
-	movb %al,-1(%rbp)
+	movw -6(%rbp),%ax
+	movw %ax,-2(%rbp)
 
 .$9:
-	movb -1(%rbp),%al
-	subq $1,%rsp
-	movq %rsp,%rsi
-	movb %al,(%rsi)
+	movw -2(%rbp),%ax
+	pushw %ax
 
 .$10:
 	subq $8,%rsp
 	pushq 16(%rbp)
-	call _writeChar
-	addq $17,%rsp
+	call _writeInteger
+	addq $18,%rsp
 
 .$11:
 	movb $10,%al

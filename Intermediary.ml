@@ -369,7 +369,8 @@ and genquads_expr ast =
     prop.place <- yprop.place;
     prop
   | E_assign (x,y) ->
-    let yprop = genquads_expr y |> output_expression (lookup_type_of_expr y) in
+    (* TODO changed the following line to 'x' from 'y' without much consideration.*)
+    let yprop = genquads_expr y |> output_expression (lookup_type_of_expr x) in
     closequad yprop;
     (* backpatch yprop.next (nextQuad ()); *)
     let xprop = genquads_expr x in
@@ -461,8 +462,33 @@ and genquads_expr ast =
     addQuad (genQuad Op_assign w Empty rprop.place);
     prop.place <- ww;
     prop
-  (* | E_decr_bef x -> (ignore (eval_expr x); TYPE_int 0) *)
-  (* | E_decr_aft x -> (ignore (eval_expr x); TYPE_int 0) (\*we need an lvalue check function*\) *)
+  | E_decr_bef x -> 
+    let expand_as_sub one_of_type =
+      E_min_assign (x,one_of_type)
+    in let rs = match_ar_or_ptr ~expr:x
+           ~if_int:(lazy (E_int "1"))
+           ~if_pointer:(lazy (E_int "1"))
+           ~if_double:(lazy (E_double "1.0"))
+    in genquads_expr (expand_as_sub rs)
+  | E_decr_aft x ->
+    let rprop = genquads_expr x in
+    let result_type = lookup_type_of_expr x in
+    let ww    = Temp(newTemp result_type) in
+    addQuad (genQuad Op_assign rprop.place Empty ww);
+    let rs = match_ar_or_ptr ~expr:x
+        ~if_int:(lazy (E_int "1"))
+        ~if_pointer:(lazy (E_int "-1")) (* TODO TODO TODO This should probably be changed *)
+        ~if_double:(lazy (E_double "1.0"))
+    in
+    let w = Temp(newTemp result_type ) in
+    let _ = match_ar_or_ptr ~expr:x
+        ~if_int:(lazy (addQuad(genQuad Op_minus  rprop.place (genquads_expr rs).place w)))
+        ~if_pointer:(lazy (addQuad(genQuad Op_array rprop.place (genquads_expr rs).place w)))
+        ~if_double:(lazy (addQuad(genQuad Op_minus   rprop.place (genquads_expr rs).place w)))
+    in
+    addQuad (genQuad Op_assign w Empty rprop.place);
+    prop.place <- ww;
+    prop
   | E_array_access (x,y) ->  (* TODO FIX *)
     let aprop = genquads_expr x in
     let iprop = genquads_expr y in
