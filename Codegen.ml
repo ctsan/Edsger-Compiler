@@ -229,9 +229,9 @@ let uniq_lab_of_str () =
 (* output: returns  ins_86_64 list *)
 let get_AR l =
   let base = I_movq (Mem (Some (Num (2*ptrBytes)), Rbp, None,None),Reg (Rsi, B64)) in
-  let ncur = l.entry_scope.sco_nesting in
-  let na = (Stack.top_exn call_stack).entry_scope.sco_nesting in
-  let rest = List.(range 0 (ncur-na-1) |>
+  let na = l.entry_scope.sco_nesting in
+  let ncur = (Stack.top_exn call_stack).entry_scope.sco_nesting in
+  let rest = List.(range 0 (ncur-na) |> (* TODO Test again, since it doesnt agree with quads.pdf *)
                    map ~f:(fun _ -> I_movq (Mem (Some (Num (2*ptrBytes)), Rsi, None,None), Reg (Rsi, B64))))  in
   base::rest
 
