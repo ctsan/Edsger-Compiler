@@ -396,9 +396,9 @@ and store reg a =
         [I_movq (Mem (Some (Num (lookup_bp_offset ent)), Rsi, None,None),Reg (Rsi, B64));
          I_movq (Reg (reg,rsize),Mem (None, Rsi, None,None)) |> transMov rsize])
   | Deref i -> 
+      let rsize = regSizeOfOperand i in
       load Rdi i @ 
-      [I_movq (Reg (reg,B64),Mem (None, Rdi, None,None))] (* TODO fix movq *)
-  (* TODO Add Temp like the `load` case *)
+      [I_movq (Reg (reg,rsize),Mem (None, Rdi, None,None)) |> transMov rsize] 
   | Temp n -> 
       let rsize = regSizeOfEntry (n, false) in
       [I_movq (Reg (reg, rsize),Mem (Some (Num (lookup_bp_offset n)),Rbp,None,None))
