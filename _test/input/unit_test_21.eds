@@ -2,22 +2,25 @@
 
 void bsort (int * x, int n)
 {
-    int i;
+    int i, t;
     bool changed;
     
-    void swap (byref int x, byref int y)
-    {
-        int t;
-
-        t = x;
-        x = y;
-        y = t;
-    }
+//    void swap (byref int x, byref int y)
+//    {
+//        int t;
+//
+//        t = x;
+//        x = y;
+//        y = t;
+//    }
 
     for (changed = true; changed;)
         for (i = 0, changed = false; i < n-1; i++)
             if (x[i] > x[i+1]) {
-                swap(x[i], x[i+1]);
+                //swap(x[i], x[i+1]);
+                t = x[i+1];
+                x[i+1] = x[i];
+                x[i] = t;     
                 changed = true;
             }
 }
@@ -39,9 +42,13 @@ void main ()
 
     int i, x[16], seed;
 
-    for (i = 0, seed = 65; i < 16; i++)
-        x[i] = seed = (seed * 137 + 221 + i) % 101;
+    for (i = 0, seed = 65; i < 13; i++) {
+        seed = (seed * 137 + 221 + i) % 101;
+        x[i] = seed;
+    }
+    writeInteger(x[3]);
     printArray("Initial array: ", x, 16);
-    bsort(x, 16);
+ //   bsort(x, 16);
     printArray("Sorted array: ", x, 16);
+      return;
 }

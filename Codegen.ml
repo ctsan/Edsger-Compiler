@@ -270,6 +270,8 @@ let regSizeOfOperand = function
   | Char _ | Bool _ -> B8L
   | Int _ -> B16
   | String _ | Address _ -> B64
+  | Deref (Var e) -> regSizeOfEntry (e, true)
+  | Deref (Temp e) -> regSizeOfEntry (e, true)
   | _ -> raise (Terminate "regSizeOfOperand strange operand")
 
 let transMov rsize = function
@@ -456,13 +458,14 @@ and ins_of_quad qd =
     let st_ins  = store Rax qd.quad_argZ in
     let type_size = qd.quad_argX |> type_of_operand |> deref_expr |>  sizeOfType   in 
     ld_ins @
-    [I_movw (Const(Imm8 type_size),Reg (Rcx,B16))] @
+    [I_movq (Const (Imm64 0), Reg (Rcx,B64));
+     I_movw (Const(Imm8 type_size),Reg (Rcx,B16))] @
     (* Offset goes to RCX *)
     [I_imul (Reg(Rax,B16), Reg (Rcx, B16)) ] @ (* TODO double check imul has the correct format *)
     (* address goes to RAX*)
     ld_addr @
     (* sum offset (RCX) and address (RAX) *)
-    [I_addq (Reg (Rcx,B16),Reg (Rax,B64))] @
+    [I_addq (Reg (Rcx,B64),Reg (Rax,B64))] @
     st_ins
   | Op_plus ->
     let ld1_ins = load Rax qd.quad_argX in
@@ -613,14 +616,9 @@ and ins_of_quad qd =
   | Op_retv ->
     let current = Stack.top_exn call_stack in
     let rsize = regSizeOfOperand qd.quad_argX in
-    let mv_ins (r1,r2) =
-      if rsize = B8L then [I_movb (r1,r2)]
-      else if rsize = B16 then [I_movw (r1,r2)]
-      else if rsize = B64 then [I_movq (r1,r2)]
-      else raise (Terminate "Strange rsize of operand retv") in
     load Rax qd.quad_argX @
     load_result_address (Reg (Rdx,B64)) @
-    mv_ins(Reg (Rax,rsize), Mem (None,Rdx,None,None)) (* TODO fix size (Size of Result Type) *)
+    [I_movq (Reg (Rax,rsize), Mem (None,Rdx,None,None)) |> transMov rsize]
   | Op_ret ->
     let current = Stack.top_exn call_stack in
     [I_jmp (label_end_of (UnitName current))]
