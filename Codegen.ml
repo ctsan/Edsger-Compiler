@@ -605,7 +605,7 @@ and ins_of_quad qd =
      M_Label endof;
      I_movq (Reg (Rbp, B64), Reg (Rsp, B64));
      I_popq (Reg (Rbp, B64));
-     (* I_movq (Const(Imm8 0), Reg (Rax, B64)); (\* to return 0 to OS, prone to error*\) *)
+     I_movq (Const(Imm8 0), Reg (Rax, B64)); (* to return 0 to OS, prone to error) *)
      I_ret
     ] @
      (* M_Label endp  TODO use endp if at&t will be used *)

@@ -1,0 +1,21 @@
+#include "stdio.h"
+void main ()
+{
+    int n, k;
+    int sum, seed, i;
+
+    writeString("Give n: ");
+    n = readInteger();
+    writeString("Give k: ");
+    k = readInteger();
+
+    for (i = 0, sum = 0, seed = 65; i < k; i++)
+        sum += (seed = (seed * 137 + 221 + i) % n);
+    
+    if (k > 0) {
+        writeString("Mean: ");
+        writeInteger(sum);
+        //writeReal(sum / 5);
+        writeString("\n");
+    }
+}
