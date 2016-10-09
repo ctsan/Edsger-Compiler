@@ -1,0 +1,20 @@
+#include "stdio.h"
+
+void printArrayElt(int *x,int k) {
+    writeInteger(x[k]);
+}
+
+void main() {
+    int i[10];
+    
+    i[0]=25;
+    i[1]=36;
+    i[2]=47;
+
+    printArrayElt(i,0);
+    writeString("\n");
+    printArrayElt(i,1);
+    writeString("\n");
+    printArrayElt(i,2);
+    writeString("\n");
+}

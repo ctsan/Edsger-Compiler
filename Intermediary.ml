@@ -58,7 +58,7 @@ let rec type_of_operand = function
   | Double _ -> TYPE_double 0
   | Address n -> addr_of_point (type_of_operand n)
   | String _ -> TYPE_char 1
-  | Deref n -> (*deref_expr*) (type_of_operand n)
+  | Deref n -> deref_expr (type_of_operand n)
   | Unit | UnitName _ -> raise (Terminate "unit{name} in size of operand")
   | Label _ -> raise (Terminate "Label in size_of_operand")
   | _ -> raise (Terminate "Size of operand of this type not implemented")
