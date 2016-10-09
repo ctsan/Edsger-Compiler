@@ -5,22 +5,22 @@ void bsort (int * x, int n)
     int i, t;
     bool changed;
     
-//    void swap (byref int x, byref int y)
-//    {
-//        int t;
-//
-//        t = x;
-//        x = y;
-//        y = t;
-//    }
+    void swap (byref int x, byref int y)
+    {
+        int t;
+
+        t = x;
+        x = y;
+        y = t;
+    }
 
     for (changed = true; changed;)
         for (i = 0, changed = false; i < n-1; i++)
             if (x[i] > x[i+1]) {
-                //swap(x[i], x[i+1]);
-                t = x[i+1];
-                x[i+1] = x[i];
-                x[i] = t;     
+                swap(x[i], x[i+1]);
+                //t = x[i+1];
+                //x[i+1] = x[i];
+                //x[i] = t;     
                 changed = true;
             }
 }
@@ -33,22 +33,36 @@ void main ()
     
         writeString(msg);
         for (i = 0; i < n; i++) {
-            if (i < 0)
+            if (i > 0)
                 writeString(", ");
             writeInteger(x[i]);
         }
         writeString("\n");
     }
 
-    int i, x[16], seed;
+    int i, x[16], seed, midseed;
 
-    for (i = 0, seed = 65; i < 13; i++) {
-        seed = (seed * 137 + 221 + i) % 101;
+    for (i = 0, seed = 65; i < 12; i++) {
+        writeString("Orig seed = ");
+        writeInteger(seed);
+        writeString(", seed * 137 + 221 + ");
+        writeInteger(i);
+        writeString(" = ");
+        midseed = seed * 137 + 221 + i;
+        writeInteger(midseed);
+        seed = midseed % 101;
+        writeString(", previous % 101 = ");
+        writeInteger(seed);
+        writeChar('\n');
         x[i] = seed;
+        writeString("x[i] = ");
+        writeInteger(x[i]);
+        writeChar('\n');
     }
-    writeInteger(x[3]);
-    printArray("Initial array: ", x, 16);
+    printArray("Initial array: ", x, 12);
  //   bsort(x, 16);
-    printArray("Sorted array: ", x, 16);
+    printArray("Sorted array: ", x, 12);
+    printArray("Gamiesai?: ", x, 12);
+    printArray("E gamiesai: ", x, 12);
       return;
 }

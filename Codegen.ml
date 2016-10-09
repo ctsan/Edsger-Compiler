@@ -382,7 +382,7 @@ and store reg a =
          |> transMov rsize]
       else
         let rsize = regSizeOfEntry (ent, false) in
-        [I_movq (Reg (Rsi, B64),Mem (Some (Num (lookup_bp_offset ent)), Rbp, None,None));
+        [I_movq (Mem (Some (Num (lookup_bp_offset ent)), Rbp, None,None), Reg (Rsi, B64));
         I_movq (Reg (reg,rsize),Mem (None, Rsi, None,None)) |> transMov rsize])
     else
      (if (not (is_par ent) || lookup_passmode ent = PASS_BY_VALUE) then

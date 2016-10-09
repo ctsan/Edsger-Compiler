@@ -17,7 +17,7 @@ void main() {
 
     writeInteger(i);
     writeInteger(j);
-
+    writeString("\n");
     swap_nums(i,j);
     
     writeInteger(i);
