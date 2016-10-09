@@ -498,7 +498,7 @@ and genquads_expr ast =
     prop
   | E_delete x ->
     let rprop = genquads_expr x in
-    let w = Temp(newTemp (TYPE_int 0)) in
+    let w = Temp(newTemp (TYPE_null)) in
     addQuad(genQuad Op_free rprop.place Empty w);
     prop.place <- w; (* The result should be the deref of this *)
     prop
@@ -509,9 +509,15 @@ and genquads_expr ast =
     prop.place <- w;
     prop
   | E_new (x, Some y) ->
-    let bytes = sizeOfType (map_to_symbol_table_type x) in
-    let w = Temp(newTemp (TYPE_int 0)) in
-    let total_bytes_prop    = genquads_expr (E_mult (E_int (string_of_int bytes),y)) in
+    let st_type = map_to_symbol_table_type x in
+    let bytes = sizeOfType (st_type) in
+    let w = Temp(newTemp (addr_of_point st_type)) in
+    let component = E_int (string_of_int bytes) in
+    let elements  = E_mult (component, y) in
+    let _ = register_n_return_expr ~expr:(component) ~result:(TYPE_int 0) in
+    let _ = register_n_return_expr ~expr:(elements ) ~result:(TYPE_int 0) in
+    let _ = lookup_type_of_expr elements in
+    let total_bytes_prop  = genquads_expr (elements) in
     addQuad(genQuad Op_malloc total_bytes_prop.place Empty w);
     prop.place <- w;
     prop
@@ -519,7 +525,7 @@ and genquads_expr ast =
   | E_ternary_op (con, tr_expr, fal_expr) ->
     let cprop = genquads_expr con |> output_condition in
     backpatch cprop.trues (nextQuad ());
-    let w = Temp(newTemp (TYPE_int 0)) in
+    let w = Temp( lookup_type_of_expr tr_expr |> newTemp) in
     let tprop = genquads_expr tr_expr in
     addQuad (genQuad Op_assign tprop.place Empty w);
     let l1    = [nextQuad ()] in

@@ -1,0 +1,18 @@
+#include "stdio.h"
+
+void main() {
+    int *i,j;
+
+    i = new int[10];
+    i[0] = 100;
+    i[5] = 105;
+    i[9] = 109;
+
+    writeInteger(i[0]);
+    writeChar('\n');
+    writeInteger(i[5]);
+    writeChar('\n');
+    writeInteger(i[9]);
+    writeChar('\n');
+
+}

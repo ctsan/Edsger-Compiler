@@ -631,6 +631,10 @@ and ins_of_quad qd =
   | Op_ret ->
     let current = Stack.top_exn call_stack in
     [I_jmp (label_end_of (UnitName current))]
+  | Op_malloc ->
+    let ld = load Rax qd.quad_argX in
+    let st = store Rax qd.quad_argZ in
+    ld @ [ I_movq (Const (Imm8 0),Reg(Rdi,B64));I_movw (Reg(Rax,B16),Reg(Rdi,B16)) ; I_call "malloc"] @ st
   | Op_call ->
     let fix_procs_offset_ins entry =
       if is_procedure entry then [I_subq ( Const (Imm8 8),Reg (Rsp,B64))]
