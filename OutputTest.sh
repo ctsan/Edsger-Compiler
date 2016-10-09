@@ -46,7 +46,8 @@ tests=`ls -d ${testcase}*.eds | wc -l`
     OS=$(uname -s)
     if [ $OS == "Darwin" ] 
     then
-        perl -pi -e 's/main/_main/' out.s
+        perl -pi -e 's/main/_main/' out.s;
+        perl -pi -e 's/malloc/_malloc/' out.s
     fi
     gcc -c out.s
     gcc -o output out.o lib.a
