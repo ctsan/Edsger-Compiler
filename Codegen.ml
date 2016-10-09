@@ -353,7 +353,7 @@ and load_addr reg a =
       (* [I_leaq(reg, )], String to memory location function or sth needed? *)
   | Var ent ->
     if is_local ent then
-     (if (not ((is_pointer (type_of_operand a)) and (is_mutable ent.entry_id)) and (not (is_par ent) || (lookup_passmode ent) = PASS_BY_VALUE)) then        
+     (if (not ((is_pointer (type_of_operand a)) && (is_mutable ent.entry_id)) && (not (is_par ent) || (lookup_passmode ent) = PASS_BY_VALUE)) then        
         [I_leaq ( (Some (Num (lookup_bp_offset ent)), Rbp, None,None) ,reg)]
       else
         [I_movq (Mem (Some (Num (lookup_bp_offset ent)), Rbp, None,None), Reg (reg, B64))])
