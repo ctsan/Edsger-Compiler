@@ -367,7 +367,7 @@ and load_addr reg a =
   (* TODO use proper `mov` later later. *)
   | Deref i -> load reg i
   | Temp n ->
-      let rsize = regSizeOfEntry (n, false) in
+      let _ = regSizeOfEntry (n, false) in
       [I_leaq ((Some (Num (lookup_bp_offset n)),Rbp,None,None), reg)] (* fix type *)
   | _ -> raise (Terminate "bad quad entry")
 

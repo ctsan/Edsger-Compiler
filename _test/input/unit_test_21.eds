@@ -18,9 +18,6 @@ void bsort (int * x, int n)
         for (i = 0, changed = false; i < n-1; i++)
             if (x[i] > x[i+1]) {
                 swap(x[i], x[i+1]);
-                //t = x[i+1];
-                //x[i+1] = x[i];
-                //x[i] = t;     
                 changed = true;
             }
 }
@@ -40,29 +37,14 @@ void main ()
         writeString("\n");
     }
 
-    int i, x[16], seed, midseed;
+    int i, x[16], seed;
 
-    for (i = 0, seed = 65; i < 12; i++) {
-        writeString("Orig seed = ");
-        writeInteger(seed);
-        writeString(", seed * 137 + 221 + ");
-        writeInteger(i);
-        writeString(" = ");
-        midseed = seed * 137 + 221 + i;
-        writeInteger(midseed);
-        seed = midseed % 101;
-        writeString(", previous % 101 = ");
-        writeInteger(seed);
-        writeChar('\n');
-        x[i] = seed;
-        writeString("x[i] = ");
-        writeInteger(x[i]);
-        writeChar('\n');
+    for (i = 0, seed = 95; i < 16; i++) {
+
+        x[i] = seed = (  seed * 137 + 221 + i) % 101 ;
     }
-    printArray("Initial array: ", x, 12);
- //   bsort(x, 16);
-    printArray("Sorted array: ", x, 12);
-    printArray("Gamiesai?: ", x, 12);
-    printArray("E gamiesai: ", x, 12);
-      return;
+    printArray("Initial array: ", x, 16);
+    bsort(x, 16);
+    printArray("Sorted array: ", x, 16);
+    return;
 }
