@@ -306,7 +306,7 @@ let rec load reg a =
         [I_movq (Mem (Some (Num (lookup_bp_offset ent)), Rbp, None,None), Reg (reg,rsize)) 
          |> transMov rsize]
       else
-        let rsize = regSizeOfEntry (ent, true) in
+        let rsize = regSizeOfEntry (ent, false) in
         [I_movq (Mem (Some (Num (lookup_bp_offset ent)), Rbp, None,None),Reg (Rsi, B64));
          I_movq (Mem (None, Rsi, None,None), Reg (reg,rsize)) |> transMov rsize]) 
     else
@@ -315,7 +315,7 @@ let rec load reg a =
         get_AR(ent) @
         [I_movq (Mem (Some (Num (lookup_bp_offset ent)), Rsi, None,None), Reg (reg,rsize)) |> transMov rsize]
       else
-        let rsize = regSizeOfEntry (ent, true) in
+        let rsize = regSizeOfEntry (ent, false) in
         get_AR(ent) @
         [I_movq (Mem (Some (Num (lookup_bp_offset ent)), Rsi, None,None),Reg (Rsi, B64));
         I_movq (Mem (None, Rsi, None,None), Reg (reg,rsize)) |> transMov rsize]) 
@@ -381,7 +381,7 @@ and store reg a =
         [I_movq (Reg (reg,rsize), Mem (Some (Num (lookup_bp_offset ent)), Rbp, None,None))
          |> transMov rsize]
       else
-        let rsize = regSizeOfEntry (ent, true) in
+        let rsize = regSizeOfEntry (ent, false) in
         [I_movq (Reg (Rsi, B64),Mem (Some (Num (lookup_bp_offset ent)), Rbp, None,None));
         I_movq (Reg (reg,rsize),Mem (None, Rsi, None,None)) |> transMov rsize])
     else
@@ -391,7 +391,7 @@ and store reg a =
         [I_movq (Reg (reg,rsize),Mem (Some (Num (lookup_bp_offset ent)), Rsi, None,None))
          |> transMov rsize]
       else
-        let rsize = regSizeOfEntry (ent, true) in
+        let rsize = regSizeOfEntry (ent, false) in
         get_AR(ent) @
         [I_movq (Mem (Some (Num (lookup_bp_offset ent)), Rsi, None,None),Reg (Rsi, B64));
          I_movq (Reg (reg,rsize),Mem (None, Rsi, None,None)) |> transMov rsize])
