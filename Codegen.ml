@@ -396,7 +396,15 @@ and store reg a =
         [I_movq (Mem (Some (Num (lookup_bp_offset ent)), Rsi, None,None),Reg (Rsi, B64));
          I_movq (Reg (reg,rsize),Mem (None, Rsi, None,None)) |> transMov rsize])
   | Deref i -> 
-      let rsize = regSizeOfOperand i in
+      (match i with 
+      | Int _ -> printf "int\n"
+      | Var _ -> printf "var\n"
+      | Temp _ -> printf "temp\n"
+      | Deref _ -> printf "deref\n"
+      | _ -> printf "something else\n"
+      );
+      let rsize = regSizeOfOperand (Deref i) in
+      printf (if rsize = B64 then "skataaa\n\n\n" else "hmm");
       load Rdi i @ 
       [I_movq (Reg (reg,rsize),Mem (None, Rdi, None,None)) |> transMov rsize] 
   | Temp n -> 
