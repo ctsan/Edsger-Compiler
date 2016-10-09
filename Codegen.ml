@@ -321,8 +321,9 @@ let rec load reg a =
         I_movq (Mem (None, Rsi, None,None), Reg (reg,rsize)) |> transMov rsize]) 
   | Address i -> load_addr reg i
   | Deref i -> 
+      let rsize = regSizeOfOperand (Deref i) in
       load Rdi i @ 
-      [I_movq (Mem (None,Rdi,None,None),Reg (reg,B64))] (* TODO fix movq *)
+      [I_movq (Mem (None,Rdi,None,None),Reg (reg,rsize)) |> transMov rsize] (* TODO fix movq *)
   (* TODO adjust `mov` size*)
   | Temp n ->
       let rsize = regSizeOfEntry (n, false) in
@@ -645,7 +646,7 @@ and ins_of_quad qd =
       else "_" ^ (id_name ent.entry_id |> String.rsplit2_exn ~on:'_' |> fst)
     in
     let par_size = match ent.entry_info with
-                    | ENTRY_function f -> size_of_params f.function_paramlist (* TODO implement *)
+                    | ENTRY_function f -> size_of_params f.function_paramlist 
                     | _ -> raise (Terminate "call with non-function")
     in
     let called_ent = (match qd.quad_argZ with
@@ -656,7 +657,7 @@ and ins_of_quad qd =
     update_AL (Stack.top_exn call_stack) called_ent @
     [
      I_call (final_tar_lab);
-     I_addq (Const (Imm8 (par_size + ptrBytes * 2)),Reg (Rsp,B64)) (* TODO size ?? *)
+     I_addq (Const (Imm8 (par_size + ptrBytes * 2)),Reg (Rsp,B64)) 
     ]
   | Op_par ->
     let xsize = size_of_operand qd.quad_argX in
