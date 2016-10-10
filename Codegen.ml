@@ -25,6 +25,7 @@ type imm =
   | Imm16 of int
   | Imm32 of int
   | Imm64 of int
+  | Hex   of string
 
 type str_or_int = Str of string | Num of int
 
@@ -45,6 +46,8 @@ type ins_86_64 =
   | D_asciz of label_id * string
   | M_Globl of label_id
   | M_Label of label_id
+
+  | I_movzxl of operand * operand
 
   | I_movb  of operand * operand
   | I_movw  of operand * operand
@@ -92,7 +95,9 @@ let string_of_imm = function
   | Imm16 i
   | Imm32 i
   | Imm64 i ->
-     sprintf "$%d" i (* NOTE: Added \n *)
+     sprintf "$%d" i
+  | Hex i ->
+     sprintf "$0x%s" i
 
 let string_of_reg r =
   match r with
@@ -159,6 +164,7 @@ let string_of_ins_86_64 = function
   | D_asciz (label, str) -> (string_of_label label) ^ sprintf "\t.asciz\t\"%s\"\n" str
   | M_Globl label        -> sprintf "%s\n" (string_of_targ_label label)
   | M_Label label        -> sprintf "%s" (string_of_label label)
+  | I_movzxl (op1,op2)   -> sprintf "\tmovzxl %s,%s\n" (string_of_operand op1) (string_of_operand op2)
   | I_movb (op1,op2)     -> sprintf "\tmovb %s,%s\n" (string_of_operand op1) (string_of_operand op2)
   | I_movw (op1,op2)     -> sprintf "\tmovw %s,%s\n" (string_of_operand op1) (string_of_operand op2)
   | I_movl (op1,op2)     -> sprintf "\tmovl %s,%s\n" (string_of_operand op1) (string_of_operand op2)
@@ -623,7 +629,7 @@ and ins_of_quad qd =
      (* M_Label endp  TODO use endp if at&t will be used *)
     make_inst_of_stk str_lab_stk
   | Op_retv ->
-    let current = Stack.top_exn call_stack in
+    let _ = Stack.top_exn call_stack in
     let rsize = regSizeOfOperand qd.quad_argX in
     load Rax qd.quad_argX @
     load_result_address (Reg (Rdx,B64)) @
@@ -689,6 +695,20 @@ and ins_of_quad qd =
           load_addr Rsi qd.quad_argX @
           [I_pushq (Reg (Rsi, B64))]
         | _ -> raise (Terminate "Bad size of par"))
+  | Op_cast ->
+    let xsize = size_of_operand qd.quad_argX in
+    let zsize = size_of_operand qd.quad_argZ in
+    (match (xsize,zsize) with
+     | (x,y) when x = charBytes && y = intBytes  ->
+       (let ld = load  Rax qd.quad_argX in
+       let st = store Rax qd.quad_argZ in
+       ld @ [I_cbtw] @ st)
+     | (x,y) when x = intBytes && y = charBytes ->
+       (let ld = load  Rax qd.quad_argX in
+       let st = store Rax qd.quad_argZ in
+       ld @ st)
+     | _ -> raise (Terminate "Unimplemented type of casting")
+    )
   (* TODO Figure out label stuff *)
   | _ -> []) @ [I_empty] (* NOTE Inneficient, reconsider *)
 

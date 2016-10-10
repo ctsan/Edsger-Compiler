@@ -3,9 +3,8 @@
 void main () {
   int* x, y;
   x = new int[10];
-  //y = delete x;
-  y = NULL;
-  if (y == x)
+  y = delete x;
+  if (y == NULL)
     writeString("Right\n");
   else 
     writeString("Wrong\n");

@@ -1,0 +1,14 @@
+#include "stdio.h"
+
+void main () {
+    int  x;
+    char y;
+    
+    y = 'a';
+
+    x = (int) y;
+    writeInteger(x);
+    writeChar((char)x);
+    writeChar('\n');
+
+}

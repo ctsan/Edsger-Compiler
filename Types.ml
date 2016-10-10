@@ -33,6 +33,7 @@ let rec sizeOfType t =
    | TYPE_int _ | TYPE_char _ | TYPE_bool _ | TYPE_double _ -> ptrBytes
 	(*-- Arrays Cost According to their size --*)
    | TYPE_array (et, sz) 	-> sz * sizeOfType et
+   | TYPE_null     -> ptrBytes
    | _						 -> 0
 
 let is_pointer = function

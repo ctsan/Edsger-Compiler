@@ -521,7 +521,12 @@ and genquads_expr ast =
     addQuad(genQuad Op_malloc total_bytes_prop.place Empty w);
     prop.place <- w;
     prop
-  (* | E_cast (x, y) -> TODO Check this again when we know more about code-generation *)
+  | E_cast (x, y) as cst ->
+    let cprop = genquads_expr y in
+    let w = Temp(lookup_type_of_expr cst  |> newTemp ) in
+    addQuad(genQuad Op_cast cprop.place Empty w);
+    prop.place <- w;
+    prop
   | E_ternary_op (con, tr_expr, fal_expr) ->
     let cprop = genquads_expr con |> output_condition in
     backpatch cprop.trues (nextQuad ());

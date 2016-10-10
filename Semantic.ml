@@ -131,8 +131,8 @@ let rec eval_expr expression =
 and check_eval_ar_op (x,y) =
   let x_eval = eval_expr x in
   let y_eval = eval_expr y in
-  if (x_eval) <> (y_eval) then
-    raise (Terminate "Addition arguments don't match")
+  if not (equalType x_eval y_eval) then
+    raise (Terminate "Arguments don't match")
   else
     x_eval
 
