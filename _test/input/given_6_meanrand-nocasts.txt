@@ -1,16 +1,13 @@
-//void writeString(char * msg);
-//int readInteger();
-//void writeReal(double n);
-
+#include "stdio.h"
 void main ()
 {
     int n, k;
     int sum, seed, i;
 
-   //writeString("Give n: ");
-    //n = readInteger();
-    //writeString("Give k: ");
-    //k = readInteger();
+    writeString("Give n: ");
+    n = readInteger();
+    writeString("Give k: ");
+    k = readInteger();
     n = 5;
     k = 8;    
 
@@ -18,8 +15,9 @@ void main ()
         sum += (seed = (seed * 137 + 221 + i));
     
     if (k > 0) {
-      //  writeString("Mean: ");
+        writeString("Mean: ");
+        writeInteger(sum);
         //writeReal(sum / 5);
-        //writeString("\n");
+        writeString("\n");
     }
 }

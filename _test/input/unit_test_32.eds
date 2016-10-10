@@ -1,0 +1,29 @@
+#include "stdio.h"
+
+int fyes (int n) {
+    return n*2;
+}
+
+int find (int n) {
+    return fyes(n);
+}
+
+void main () {
+    int i;
+    i = find(5);
+    if (i==11 && true) 
+        writeString("Wrong");
+    else if (i==9 && 3 == 5)
+        writeString("Wrong");
+    else if (i==10 && true)
+        writeString("Right\n");
+    else
+        writeString("Very Wrong");
+    if (3 > 5 || ((3 + 6 > 8) && (3 == 2 + 1)))
+      writeString("Right\n");
+    else
+      writeString("Wrong\n");
+
+    return;
+}
+
