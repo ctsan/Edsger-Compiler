@@ -339,6 +339,8 @@ let rec load reg a =
       let strlab = uniq_lab_of_str () in
       Stack.push str_lab_stk (strlab, str);
       [I_leaq ((Some (Str strlab), Rip, None, None), reg)]
+  | Null ->
+      [I_movq (Const (Imm64 0), Reg (reg, B64))]
   | _ -> raise (Terminate "bad quad entry")
 
 (* Takes operand of quad that is String str (Label int????) *)
@@ -418,6 +420,8 @@ and store reg a =
       let rsize = regSizeOfEntry (n, false) in
       [I_movq (Reg (reg, rsize),Mem (Some (Num (lookup_bp_offset n)),Rbp,None,None))
        |> transMov rsize]
+  | Null ->
+      raise (Terminate "storing to null memory pointer")
   | _ -> raise (Terminate "bad quad entry")
 
 
@@ -641,6 +645,12 @@ and ins_of_quad qd =
     let ld = load Rax qd.quad_argX in
     let st = store Rax qd.quad_argZ in
     ld @ [ I_movq (Const (Imm8 0),Reg(Rdi,B64));I_movw (Reg(Rax,B16),Reg(Rdi,B16)) ; I_call "malloc"] @ st
+  | Op_free ->
+    let ld = load Rax qd.quad_argX in
+    let st = store Rax qd.quad_argZ in
+    ld @ [ I_movq (Reg(Rax,B64),Reg(Rdi,B64)); I_call "free";
+           I_movq (Const (Imm64 0), Reg(Rax,B64))] @ st
+
   | Op_call ->
     let fix_procs_offset_ins entry =
       if is_procedure entry then [I_subq ( Const (Imm8 8),Reg (Rsp,B64))]
