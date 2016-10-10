@@ -1,0 +1,25 @@
+#include "stdio.h"
+
+void main () {
+    int x[10], w;
+    int* y, z;
+
+    x[3] = 5;
+    x[5] = 3;
+    
+    y = &x[3];
+    w = *y;
+    writeInteger(w);
+
+    writeChar('\n');
+
+    y = &x[5];
+    w = *y;
+    writeInteger(w);
+
+    writeChar('\n');
+
+    return;
+    
+
+}

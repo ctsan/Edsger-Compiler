@@ -1,0 +1,13 @@
+#include "stdio.h"
+
+void main () {
+  int x, y, z;
+  x = 5;
+  y = 3;
+  z = x > y ? 1 : 0;
+  writeInteger(z);
+  z = x <= y ? 0 : 1;
+  writeInteger(z);
+  writeChar('\n');
+  return;
+}

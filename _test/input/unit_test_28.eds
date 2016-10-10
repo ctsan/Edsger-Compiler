@@ -1,0 +1,29 @@
+#include "stdio.h"
+
+void main () {
+    int x[10], w;
+    int* y, z;
+
+    x[3] = 5;
+    x[8] = 3;
+    if (x + 3 < x + 7) 
+      writeString("Right\n");
+    else
+      writeString("False\n");
+    if (x + 8 <= x) 
+      writeString("False\n");
+    else
+      writeString("Right\n");
+    if (x <= x + 1) 
+      writeString("Right\n");
+    else
+      writeString("False\n");
+    
+    y = &x[3];
+    z = &x[5];
+    if (y < z)
+      writeString("Right\n");
+    else
+      writeString("False\n");
+    return;
+}
