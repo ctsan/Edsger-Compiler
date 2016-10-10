@@ -26,6 +26,7 @@ and operand =
   | Int of int
   | Bool of bool
   | Double of float
+  | Null
   | Label of int
   | Temp of entry
   | Address of operand (* Invariant: No Nested Address *)
@@ -121,6 +122,7 @@ let rec pprint_operand ppf op =
   | Char i           -> f ppf "%C" i
   | Bool i           -> f ppf "%B" i
   | Double i         -> f ppf "%F" i (* NOTE change this to %f or %.f possibly *)
+  | Null             -> f ppf "null"
   | Temp i           -> f ppf "%s" (id_name i.entry_id)
   | Address op       -> f ppf "{"; pprint_operand ppf op; f ppf "}"
   | Deref   op       -> f ppf "["; pprint_operand ppf op; f ppf "]"
@@ -314,7 +316,7 @@ and genquads_expr ast =
   | E_string s -> prop.place <- String s; prop
   (* TODO: Refactor the following, to delegate the implementation of this abstraction
      decision in the next-layer *)
-  | E_null     -> prop.place <- Int 0; prop 
+  | E_null     -> prop.place <- Null; prop 
   | E_plus (x,y)  ->
     let e1prop = genquads_expr x
     and e2prop = genquads_expr y
