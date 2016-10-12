@@ -41,7 +41,7 @@ tests=`ls -d ${testcase}*.eds | wc -l`
 
     # Run application, redirect in file to app, and output to out file
     #set -x
-    "./$bin" "$file_source" > /dev/null
+    "./$bin" "-d" "$file_source" > /dev/null
     #set +x
     OS=$(uname -s)
     if [ $OS == "Darwin" ] 

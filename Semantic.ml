@@ -154,7 +154,7 @@ and check tree =
       then raise (Terminate "main should return void");
       if (not (fun_is_defined (id_make "main_0")))
       then raise (Terminate "main is not implemented");
-      printSymbolTable ();
+      printSymbolTableIfDebug ();
       (* let ins_list = list_of_quads () |> Codegen.quads_to_ins  in *)
   (* )) *)
 
@@ -191,19 +191,19 @@ and check_a_declaration  =
 
     | D_var_decl (typ,defines) ->
       let sym_tbl_type = map_to_symbol_table_type typ in
-      let _ = printf "- var definition" in
+      addDebugString("- var definition");
       List.iter
         defines (* Check and Register Definitions*)
         (function
           | (id,Some expr) ->
-            printf " %s\n" id;
+            addDebugString (sprintf " %s\n" id);
             let dmy =
               newVariable (id_make id)
                 (TYPE_array (sym_tbl_type,eval_const_int expr))
                 true
             in ignore dmy; ()
           | (id,None) ->
-            printf " %s\n" id;
+            addDebugString (sprintf " %s\n" id);
             let dmy = newVariable (id_make id)
                 sym_tbl_type true
             in ignore dmy; ()
@@ -215,7 +215,7 @@ and check_a_declaration  =
 
     | D_func_decl (typ,id,params) ->
       begin
-        printf "- fun decl %s\n" id;
+        addDebugString(sprintf "- fun decl %s\n" id);
         ignore (def_func_head typ id params ~forward:true);
         closeScope ();
       end
@@ -226,7 +226,7 @@ and check_a_declaration  =
 
     | D_func_def (typ,id,params,fun_decls,fun_stmts) ->
       begin
-        printf "- fun def %s\n" id;
+        addDebugString(sprintf "- fun decl %s\n" id);
         let fun_entry = def_func_head typ id params ~forward:false in
         (match fun_decls with
          | Some declerations -> scan_funcs declerations; check_all_decls declerations
@@ -243,7 +243,7 @@ and check_a_declaration  =
             let prop = genquads_stmt ast in
             closequad prop; prop)
         in
-        printSymbolTable ();
+        printSymbolTableIfDebug ();
         closeFinalQuad lst_prop fun_entry;
         let ins_list = list_of_last_fun_quads () |> Codegen.quads_to_ins  in
         Codegen.add_list_of_ins ins_list;

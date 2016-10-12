@@ -6,6 +6,17 @@ open Types
 open Symbol
 let show_offsets = true
 
+let debug_flag = ref false
+
+let debugStrings  = ref []
+
+let addDebugString str =
+  debugStrings := str :: !debugStrings
+
+
+
+let print_debug_strings () =
+  List.rev !debugStrings |> List.iter ~f:(printf "%s\n")
 
 let rec pretty_typ ppf typ =
   let pretty_pointer n =
@@ -107,3 +118,6 @@ let printSymbolTable () =
       walk ppf scp in
   printf "%a----------------------------------------\n"
     scope !currentScope
+
+let printSymbolTableIfDebug () =
+  if !debug_flag then printSymbolTable ()

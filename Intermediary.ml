@@ -290,7 +290,6 @@ and genquads_expr ast =
   match ast with
   | E_function_call (x,l) ->
     let fun_id = id_make x in
-    Printf.printf "%d\n" (List.length (lookup_pass_styles fun_id));
     let _ =  l >>| (List.iter2_exn (lookup_pass_styles fun_id) ~f:(fun style par ->
         let pprop = genquads_expr par in
         addQuad (genQuad Op_par pprop.place (pass_of_style style)  Empty);

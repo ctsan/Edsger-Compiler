@@ -4,6 +4,7 @@ open Ast
 open Types
 open Identifier
 open Intermediary
+open NiceDebug
 
 type label_id = string
 let string_of_label l = sprintf "%s:\n" l
@@ -404,19 +405,19 @@ and store reg a =
         get_AR(ent) @
         [I_movq (Mem (Some (Num (lookup_bp_offset ent)), Rsi, None,None),Reg (Rsi, B64));
          I_movq (Reg (reg,rsize),Mem (None, Rsi, None,None)) |> transMov rsize])
-  | Deref i -> 
-      (match i with 
-      | Int _ -> printf "int\n"
-      | Var _ -> printf "var\n"
-      | Temp _ -> printf "temp\n"
-      | Deref _ -> printf "deref\n"
-      | _ -> printf "something else\n"
+  | Deref i ->
+      addDebugString(match i with
+      | Int _ -> sprintf "int\n"
+      | Var _ -> sprintf "var\n"
+      | Temp _ -> sprintf "temp\n"
+      | Deref _ -> sprintf "deref\n"
+      | _ -> sprintf "something else\n"
       );
       let rsize = regSizeOfOperand (Deref i) in
-      printf (if rsize = B64 then "skataaa\n\n\n" else "hmm");
-      load Rdi i @ 
-      [I_movq (Reg (reg,rsize),Mem (None, Rdi, None,None)) |> transMov rsize] 
-  | Temp n -> 
+      if rsize = B64 then raise (Failure "bad situation");
+      load Rdi i @
+      [I_movq (Reg (reg,rsize),Mem (None, Rdi, None,None)) |> transMov rsize]
+  | Temp n ->
       let rsize = regSizeOfEntry (n, false) in
       [I_movq (Reg (reg, rsize),Mem (Some (Num (lookup_bp_offset n)),Rbp,None,None))
        |> transMov rsize]
