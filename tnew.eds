@@ -1,7 +1,0 @@
-#include "stdio.h"
-
-void main () {
-    char t[20];
-    readString(7,t);
-    writeString(t);
-}
